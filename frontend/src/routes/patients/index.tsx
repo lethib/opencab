@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/useDebounce";
 import { logout } from "@/lib/authUtils";
+import { ExportAccountabilityModal } from "./components/ExportAccountabilityModal";
 import { ExportAppointmentsModal } from "./components/ExportAppointmentsModal";
 import { PatientsTable } from "./components/PatientsTable/PatientsTable";
 
@@ -33,6 +34,8 @@ function Patients() {
   const { t } = useTranslation();
   const [isAddPatientModalOpened, setIsAddPatientModalOpened] = useState(false);
   const [isExportAppointmentsModalOpen, setIsExportAppointmentsModalOpen] =
+    useState(false);
+  const [isAccountabilityExportModalOpen, setIsAccountabilityExportModalOpen] =
     useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 700);
@@ -55,13 +58,27 @@ function Patients() {
               <p className="text-muted-foreground">{t("patients.subtitle")}</p>
             </div>
             <div className="flex gap-4">
-              <Button
-                variant="outline"
-                onClick={() => setIsExportAppointmentsModalOpen(true)}
-              >
-                <FileDown />
-                {t("appointments.exportAppointments")}
-              </Button>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <FileDown />
+                    {t("appointments.exportAppointments")}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={() => setIsExportAppointmentsModalOpen(true)}
+                  >
+                    {t("appointments.exportMenu.appointments")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setIsAccountabilityExportModalOpen(true)}
+                  >
+                    {t("appointments.exportMenu.accountability")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button
                 onClick={() => setIsAddPatientModalOpened(true)}
                 className="flex items-center gap-2"
@@ -122,6 +139,11 @@ function Patients() {
       <ExportAppointmentsModal
         open={isExportAppointmentsModalOpen}
         onOpenChange={setIsExportAppointmentsModalOpen}
+      />
+
+      <ExportAccountabilityModal
+        open={isAccountabilityExportModalOpen}
+        onOpenChange={setIsAccountabilityExportModalOpen}
       />
     </>
   );

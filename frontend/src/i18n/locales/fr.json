@@ -323,6 +323,10 @@
         "officeRequired": "Le cabinet est requis"
       }
     },
+    "exportMenu": {
+      "appointments": "Export de rendez-vous",
+      "accountability": "Génération de Comptabilité"
+    },
     "export": {
       "title": "Exporter mes rendez-vous",
       "description": "Veuillez indiquer les dates de début et de fin pour l'export de vos rendez-vous. Vous recevrez ensuite un email accompagné d'un fichier contenant la liste de vos rendez-vous.",
@@ -336,6 +340,11 @@
       "success": {
         "title": "Export réussi !",
         "description": "Votre export des rendez-vous a été traité avec succès. Vous allez recevoir un email avec le fichier contenant la liste de vos rendez-vous pour la période sélectionnée."
+      },
+      "accountability": {
+        "title": "Générer votre comptabilité",
+        "description": "Sélectionner une année pour générer votre comptabilité. Vous obtiendrez ensuite par mail, le détail mensuel de vos rendez-vous sur l'ensemble de vos cabinets.",
+        "yearPlaceholder": "Sélectionner une année"
       }
     }
   },

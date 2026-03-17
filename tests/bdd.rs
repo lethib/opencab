@@ -3,10 +3,13 @@ mod steps;
 
 use cucumber::World;
 use migration::{Migrator, MigratorTrait};
-use opencab::models::{
-  medical_appointments::Model as AppointmentModel, my_errors::MyErrors,
-  patients::Model as PatientModel, practitioner_offices::Model as OfficeModel,
-  users::Model as UserModel,
+use opencab::{
+  models::{
+    medical_appointments::Model as AppointmentModel, my_errors::MyErrors,
+    patients::Model as PatientModel, practitioner_offices::Model as OfficeModel,
+    users::Model as UserModel,
+  },
+  services::appointments::MedicalAppointmentDetail,
 };
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection};
 
@@ -69,7 +72,7 @@ pub struct AppointmentsState {
   pub office: Option<OfficeModel>,
   pub second_office: Option<OfficeModel>,
   pub appointment: Option<AppointmentModel>,
-  pub extracted: Vec<(AppointmentModel, PatientModel, OfficeModel, f64)>,
+  pub extracted: Vec<MedicalAppointmentDetail>,
 }
 
 impl AppointmentsState {

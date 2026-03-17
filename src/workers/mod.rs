@@ -27,8 +27,11 @@ pub async fn start_worker_pool(mut rx: mpsc::Receiver<WorkerJob>, config: Arc<Co
 
         let result = match job {
           WorkerJob::Email(args) => mailer::worker::process_email(args, &config_clone).await,
-          WorkerJob::AccountingReport(args, state) => {
+          WorkerJob::AppointmentExport(args, state) => {
             appointments_export::process_appointment_extraction(args, state).await
+          }
+          WorkerJob::AccountabilityGeneration(args, state) => {
+            appointments_export::process_accountability_generation(args, state).await
           }
         };
 

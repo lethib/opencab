@@ -11,7 +11,7 @@ import {
 
 type Option = {
   value: string | number;
-  label: string;
+  label: string | number;
 };
 
 interface Props {
@@ -28,7 +28,7 @@ export const FormSelect = ({ name, placeholder, options }: Props) => {
       name={name}
       control={form.control}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="flex-1">
           <Select
             key={field.value || "empty"}
             onValueChange={field.onChange}

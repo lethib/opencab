@@ -31,6 +31,10 @@ export const userSchema = {
     type: "POST",
     path: "/user/_extract_medical_appointments",
   }),
+  generateAccountability: mutationEndpoint<{ year: number }, null>({
+    type: "POST",
+    path: "/user/_generate_accountability",
+  }),
   signature: {
     getURL: mutationEndpoint<null, string>({
       type: "POST",

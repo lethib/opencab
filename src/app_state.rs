@@ -27,5 +27,12 @@ impl AppState {
 #[derive(Debug, Clone)]
 pub enum WorkerJob {
   Email(crate::workers::mailer::args::EmailArgs),
-  AccountingReport(crate::workers::appointments_export::Args, AppState),
+  AppointmentExport(
+    crate::workers::appointments_export::AppointmentExtractorArgs,
+    AppState,
+  ),
+  AccountabilityGeneration(
+    crate::workers::appointments_export::AccountabilityGenerationArgs,
+    AppState,
+  ),
 }
