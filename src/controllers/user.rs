@@ -16,7 +16,7 @@ use axum::{
   http::status,
   Json,
 };
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate, Utc};
 use image::{imageops::FilterType, ImageFormat};
 use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel, ModelTrait};
 use serde::Deserialize;
@@ -25,6 +25,11 @@ use serde::Deserialize;
 pub struct ExtractMedicalAppointmentsParams {
   start_date: String,
   end_date: String,
+}
+
+#[derive(Deserialize)]
+pub struct GenerateAccountabilityParams {
+  year: u16,
 }
 
 #[debug_handler]
@@ -54,6 +59,30 @@ pub async fn my_offices(
 }
 
 #[debug_handler]
+pub async fn generate_accountability(
+  State(state): State<AppState>,
+  AuthenticatedUser(current_user, _): AuthenticatedUser,
+  Json(params): Json<GenerateAccountabilityParams>,
+) -> Result<status::StatusCode, MyErrors> {
+  let current_year = Utc::now().year() as u16;
+  if params.year < 2025 || params.year > current_year {
+    return Err(ApplicationError::BadRequest.into());
+  }
+
+  let args = appointments_export::AccountabilityGenerationArgs {
+    user: current_user,
+    year: params.year,
+  };
+
+  state
+    .worker_transmitter
+    .send(WorkerJob::AccountabilityGeneration(args, state.clone()))
+    .await?;
+
+  Ok(status::StatusCode::NO_CONTENT)
+}
+
+#[debug_handler]
 pub async fn extract_medical_appointments(
   State(state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
@@ -66,7 +95,7 @@ pub async fn extract_medical_appointments(
     return Err(ApplicationError::new("start_date_before_end_date").into());
   }
 
-  let args = appointments_export::Args {
+  let args = appointments_export::AppointmentExtractorArgs {
     user: current_user,
     start_date,
     end_date,
@@ -74,7 +103,7 @@ pub async fn extract_medical_appointments(
 
   state
     .worker_transmitter
-    .send(WorkerJob::AccountingReport(args, state.clone()))
+    .send(WorkerJob::AppointmentExport(args, state.clone()))
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)

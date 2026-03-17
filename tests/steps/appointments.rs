@@ -201,20 +201,20 @@ fn appointments_count(world: &mut AppWorld, count: usize) {
 
 #[then(expr = "the first extracted appointment has a revenue share of {float}")]
 fn first_appointment_revenue_share(world: &mut AppWorld, expected: f64) {
-  let (_, _, _, revenue_share) = &world.appointments.extracted[0];
-  assert_eq!(*revenue_share, expected);
+  let appointment_details = &world.appointments.extracted[0];
+  assert_eq!(appointment_details.revenue_share_percentage, expected);
 }
 
 #[then(expr = "the extracted appointment for office {string} has a revenue share of {float}")]
 fn appointment_revenue_share_for_office(world: &mut AppWorld, office_name: String, expected: f64) {
-  let (_, _, office, revenue_share) = world
+  let appointment_details = world
     .appointments
     .extracted
     .iter()
-    .find(|(_, _, o, _)| o.name == office_name)
+    .find(|a_d| a_d.office.name == office_name)
     .unwrap_or_else(|| panic!("no extracted appointment for office '{}'", office_name));
-  assert_eq!(office.name, office_name);
-  assert_eq!(*revenue_share, expected);
+  assert_eq!(appointment_details.office.name, office_name);
+  assert_eq!(appointment_details.revenue_share_percentage, expected);
 }
 
 fn parse_payment_method(s: &str) -> PaymentMethod {

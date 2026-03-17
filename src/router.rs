@@ -66,6 +66,10 @@ pub fn create_router(state: AppState) -> Router {
       "/api/user/_extract_medical_appointments",
       post(controllers::user::extract_medical_appointments),
     )
+    .route(
+      "/api/user/_generate_accountability",
+      post(controllers::user::generate_accountability),
+    )
     .route("/api/user/my_offices", get(controllers::user::my_offices))
     .route(
       "/api/user/signature/_get_url",
