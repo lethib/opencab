@@ -75,18 +75,21 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
         .push(detail);
     }
 
-    // First pass: compute annual totals
-    let mut annual_revenue: f64 = 0.0;
-    let mut annual_user_revenue: f64 = 0.0;
-    let mut annual_hand_back: f64 = 0.0;
+    // First pass: compute annual totals (accumulate in cents to avoid f64 drift)
+    let mut annual_revenue_cents: i64 = 0;
+    let mut annual_hand_back_cents: i64 = 0;
 
     for detail in self {
-      let price = detail.appointment.price_in_cents as f64 / 100.0;
-      let hand_back = price * detail.revenue_share_percentage / 100.0;
-      annual_revenue += price;
-      annual_user_revenue += price - hand_back;
-      annual_hand_back += hand_back;
+      let price_cents = detail.appointment.price_in_cents as i64;
+      let hand_back_cents =
+        (price_cents as f64 * detail.revenue_share_percentage / 100.0).round() as i64;
+      annual_revenue_cents += price_cents;
+      annual_hand_back_cents += hand_back_cents;
     }
+
+    let annual_revenue = annual_revenue_cents as f64 / 100.0;
+    let annual_hand_back = annual_hand_back_cents as f64 / 100.0;
+    let annual_user_revenue = (annual_revenue_cents - annual_hand_back_cents) as f64 / 100.0;
 
     let mut workbook = Workbook::new();
     let revenue_format = Format::new().set_num_format("0.00");

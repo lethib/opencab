@@ -344,7 +344,10 @@
       "accountability": {
         "title": "Générer votre comptabilité",
         "description": "Sélectionner une année pour générer votre comptabilité. Vous obtiendrez ensuite par mail, le détail mensuel de vos rendez-vous sur l'ensemble de vos cabinets.",
-        "yearPlaceholder": "Sélectionner une année"
+        "yearPlaceholder": "Sélectionner une année",
+        "success": {
+          "description": "Votre comptabilité a été générée avec succès. Vous allez recevoir un email avec le fichier contenant le détail mensuel de vos rendez-vous pour l'année sélectionnée."
+        }
       }
     }
   },

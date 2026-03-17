@@ -20,20 +20,27 @@ interface Props {
 	onOpenChange: (open: boolean) => void;
 }
 
+const currentYear = new Date().getFullYear();
+
+const exportAccountabilitySchema = z.object({
+	year: z.coerce.number<number>().min(2025).max(currentYear),
+});
+
+const yearOptions = Array.from(
+	{ length: currentYear - 2024 },
+	(_, i) => 2025 + i,
+).map((year) => ({ label: year, value: year }));
+
 export const ExportAccountabilityModal = ({ open, onOpenChange }: Props) => {
 	const { t } = useTranslation();
 	const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 	const generateAccountabilityMutation =
 		APIHooks.user.generateAccountability.useMutation();
 
-	const exportAccountabilitySchema = z.object({
-		year: z.coerce.number<number>().min(2025).max(2026),
-	});
-
 	const accountabilityExportForm = useForm({
 		resolver: zodResolver(exportAccountabilitySchema),
 		defaultValues: {
-			year: 2026,
+			year: currentYear,
 		},
 	});
 
@@ -69,10 +76,7 @@ export const ExportAccountabilityModal = ({ open, onOpenChange }: Props) => {
 								placeholder={t(
 									"appointments.export.accountability.yearPlaceholder",
 								)}
-								options={[2025, 2026].map((year) => ({
-									label: year,
-									value: year,
-								}))}
+								options={yearOptions}
 							/>
 						</div>
 
@@ -92,7 +96,7 @@ export const ExportAccountabilityModal = ({ open, onOpenChange }: Props) => {
 					<DialogHeader>
 						<DialogTitle>{t("appointments.export.success.title")}</DialogTitle>
 						<DialogDescription>
-							{t("appointments.export.success.description")}
+							{t("appointments.export.accountability.success.description")}
 						</DialogDescription>
 					</DialogHeader>
 

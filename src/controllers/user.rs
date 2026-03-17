@@ -16,7 +16,7 @@ use axum::{
   http::status,
   Json,
 };
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate, Utc};
 use image::{imageops::FilterType, ImageFormat};
 use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel, ModelTrait};
 use serde::Deserialize;
@@ -64,6 +64,11 @@ pub async fn generate_accountability(
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Json(params): Json<GenerateAccountabilityParams>,
 ) -> Result<status::StatusCode, MyErrors> {
+  let current_year = Utc::now().year() as u16;
+  if params.year < 2025 || params.year > current_year {
+    return Err(ApplicationError::BadRequest.into());
+  }
+
   let args = appointments_export::AccountabilityGenerationArgs {
     user: current_user,
     year: params.year,
