@@ -24,7 +24,7 @@ impl PatientResponse {
       pid: patient.pid,
       first_name: patient.first_name.clone(),
       last_name: patient.last_name.clone(),
-      email: (patient.email != patients::DEFAULT_EMAIL).then(|| patient.email.clone()),
+      email: patient.email.clone(),
       ssn: patient
         .decrypt_ssn()
         .unwrap_or_else(|_| "Unable to decrypt".to_string()),
@@ -42,7 +42,7 @@ impl PatientResponse {
       pid: patient.pid,
       first_name: patient.first_name.clone(),
       last_name: patient.last_name.clone(),
-      email: (patient.email != patients::DEFAULT_EMAIL).then(|| patient.email.clone()),
+      email: patient.email.clone(),
       ssn: patient
         .decrypt_ssn()
         .unwrap_or_else(|_| "Unable to decrypt".to_string()),

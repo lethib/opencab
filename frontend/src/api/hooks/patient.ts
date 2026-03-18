@@ -12,7 +12,7 @@ export type SavePatientParams = {
   pid?: string;
   first_name: string;
   last_name: string;
-  email: string;
+  email?: string;
   ssn: string;
   address_line_1: string;
   address_zip_code: string;

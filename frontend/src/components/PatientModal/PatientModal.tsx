@@ -59,7 +59,7 @@ export const PatientModal = ({
       .string()
       .trim()
       .min(1, t("patients.form.validation.lastNameRequired")),
-    email: z.email(t("patients.form.validation.emailRequired")),
+    email: z.email(t("patients.form.validation.emailRequired")).optional(),
     ssn: z
       .string()
       .length(15)

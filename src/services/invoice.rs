@@ -98,6 +98,10 @@ pub async fn generate_patient_invoice(
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
+  if patient.email.is_none() {
+    return Err(ApplicationError::UnprocessableEntity.into());
+  }
+
   let invoice_date = chrono::NaiveDate::parse_from_str(&params.invoice_date, "%Y-%m-%d")?;
 
   let filename = format!(
@@ -140,7 +144,7 @@ pub async fn generate_patient_invoice(
   Ok(GenerateInvoiceResponse {
     pdf_data,
     filename,
-    patient_email: patient.email,
+    patient_email: patient.email.expect("checked ahead"),
     invoice_date,
   })
 }

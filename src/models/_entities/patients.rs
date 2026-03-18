@@ -20,7 +20,7 @@ pub struct Model {
   pub address_zip_code: String,
   pub address_city: String,
   pub address_country: String,
-  pub email: String,
+  pub email: Option<String>,
   pub user_id: i32,
 }
 

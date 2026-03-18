@@ -29,6 +29,7 @@ mod m20260113_223518_add_pricing_to_medical_appointments;
 mod m20260304_201910_add_payment_method_to_medical_appointment;
 mod m20260308_000001_fix_schema_drift;
 mod m20260310_175025_add_revenue_share_percentage_to_user_practitioner_office;
+mod m20260317_220127_make_patient_email_nullable;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -64,6 +65,7 @@ impl MigratorTrait for Migrator {
       Box::new(
         m20260310_175025_add_revenue_share_percentage_to_user_practitioner_office::Migration,
       ),
+      Box::new(m20260317_220127_make_patient_email_nullable::Migration),
     ]
   }
 }
