@@ -23,14 +23,17 @@ impl MigrationTrait for Migration {
 
     manager
       .get_connection()
-      .execute_unprepared(
-        "UPDATE patients SET email = NULL WHERE email = 'default@mail.com'",
-      )
+      .execute_unprepared("UPDATE patients SET email = NULL WHERE email = 'default@mail.com'")
       .await
       .map(|_| ())
   }
 
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    manager
+      .get_connection()
+      .execute_unprepared("UPDATE patients SET email = 'default@mail.com' WHERE email IS NULL")
+      .await?;
+
     manager
       .alter_table(
         Table::alter()
