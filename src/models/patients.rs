@@ -24,8 +24,6 @@ pub struct CreatePatientParams {
   pub email: Option<String>,
 }
 
-pub const DEFAULT_EMAIL: &str = "default@mail.com";
-
 // Encryption utilities for SSN
 // implement your read-oriented logic here
 impl Model {

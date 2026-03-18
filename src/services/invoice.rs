@@ -41,10 +41,6 @@ pub async fn send_invoice(
   current_user: &users::Model,
   user_business_informations: &user_business_informations::Model,
 ) -> Result<(), MyErrors> {
-  if generated_invoice.patient_email == PatientModel::DEFAULT_EMAIL {
-    return Err(ApplicationError::UnprocessableEntity.into());
-  }
-
   let attachment = EmailAttachment::from_bytes(
     generated_invoice.filename.to_string(),
     "application/pdf".to_string(),
