@@ -59,7 +59,7 @@ export const PatientModal = ({
       .string()
       .trim()
       .min(1, t("patients.form.validation.lastNameRequired")),
-    email: z.email(t("patients.form.validation.emailRequired")),
+    email: z.email(t("patients.form.validation.emailRequired")).optional(),
     ssn: z
       .string()
       .length(15)
@@ -112,7 +112,7 @@ export const PatientModal = ({
       first_name: "",
       last_name: "",
       ssn: "",
-      email: "",
+      email: undefined,
       address_line_1: "",
       address_zip_code: "",
       address_city: "",
@@ -125,7 +125,7 @@ export const PatientModal = ({
         first_name: currentPatient.first_name || "",
         last_name: currentPatient.last_name || "",
         ssn: currentPatient.ssn || "",
-        email: currentPatient.email || "",
+        email: currentPatient.email || undefined,
         address_line_1: currentPatient.address_line_1 || "",
         address_zip_code: currentPatient.address_zip_code || "",
         address_city: currentPatient.address_city || "",

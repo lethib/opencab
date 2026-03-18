@@ -50,7 +50,7 @@ impl PatientFactory {
       address_line_1: self.address_line_1,
       address_zip_code: self.address_zip_code,
       address_city: self.address_city,
-      email: self.email,
+      email: Some(self.email),
       pid: None,
     };
 

@@ -8,7 +8,6 @@ use crate::{
     },
     medical_appointments::{ActiveModel as MedicalAppointments, CreateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
-    patients as PatientModel,
   },
   workers::{
     self,
@@ -31,7 +30,7 @@ pub struct GenerateInvoiceParams {
 pub struct GenerateInvoiceResponse {
   pub pdf_data: Vec<u8>,
   pub filename: String,
-  patient_email: String,
+  patient_email: Option<String>,
   invoice_date: chrono::NaiveDate,
 }
 
@@ -41,7 +40,7 @@ pub async fn send_invoice(
   current_user: &users::Model,
   user_business_informations: &user_business_informations::Model,
 ) -> Result<(), MyErrors> {
-  if generated_invoice.patient_email == PatientModel::DEFAULT_EMAIL {
+  if generated_invoice.patient_email.is_none() {
     return Err(ApplicationError::UnprocessableEntity.into());
   }
 
@@ -57,7 +56,10 @@ pub async fn send_invoice(
     .to_string();
 
   let args = EmailArgs::new_text(
-    generated_invoice.patient_email.clone(),
+    generated_invoice
+      .patient_email
+      .clone()
+      .expect("checked ahead"),
     format!("Note d'honoraires {}", invoice_date),
     format!(
       "Vous trouverez ci-joint votre facture pour la consultation du {}\n\n{} {}\n{}\n{}",

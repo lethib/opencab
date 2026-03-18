@@ -21,10 +21,8 @@ pub struct CreatePatientParams {
   pub address_line_1: String,
   pub address_zip_code: String,
   pub address_city: String,
-  pub email: String,
+  pub email: Option<String>,
 }
-
-pub const DEFAULT_EMAIL: &str = "default@mail.com";
 
 // Encryption utilities for SSN
 // implement your read-oriented logic here
@@ -134,7 +132,7 @@ impl ActiveModel {
 
     patient.first_name = ActiveValue::Set(params.first_name.trim().to_string());
     patient.last_name = ActiveValue::Set(params.last_name.trim().to_string());
-    patient.email = ActiveValue::Set(params.email.trim().to_string());
+    patient.email = ActiveValue::Set(params.email.as_ref().map(|e| e.trim().to_string()));
     patient.address_line_1 = ActiveValue::Set(params.address_line_1.trim().to_string());
     patient.address_zip_code = ActiveValue::Set(params.address_zip_code.trim().to_string());
     patient.address_city = ActiveValue::Set(params.address_city.trim().to_string());
