@@ -85,9 +85,7 @@ fn setup_logging(level: &str, format: &str) {
       .with(tracing_subscriber::fmt::layer().json())
       .init();
   } else {
-    registry
-      .with(tracing_subscriber::fmt::layer())
-      .init();
+    registry.with(tracing_subscriber::fmt::layer()).init();
   }
 }
 
