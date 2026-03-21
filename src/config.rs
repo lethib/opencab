@@ -41,6 +41,8 @@ pub struct JwtConfig {
 pub struct LoggerConfig {
   #[serde(default = "default_log_level")]
   pub level: String,
+  #[serde(default = "default_log_format")]
+  pub format: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -68,6 +70,10 @@ fn default_jwt_expiration() -> u64 {
 
 fn default_log_level() -> String {
   "info".to_string()
+}
+
+fn default_log_format() -> String {
+  "compact".to_string()
 }
 
 fn default_cors_allow_headers() -> Vec<String> {
