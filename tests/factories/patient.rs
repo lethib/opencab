@@ -51,7 +51,6 @@ impl PatientFactory {
       address_zip_code: self.address_zip_code,
       address_city: self.address_city,
       email: Some(self.email),
-      pid: None,
     };
 
     PatientActiveModel::create(db, &params, user_id)

@@ -38,10 +38,6 @@ pub fn create_router(state: AppState) -> Router {
       "/api/patient/{patient_id}",
       delete(controllers::patient::delete),
     )
-    .route(
-      "/api/patient/_search_by_ssn",
-      get(controllers::patient::search_by_ssn),
-    )
     .route("/api/patient/_search", get(controllers::patient::search))
     .route(
       "/api/patient/{patient_id}/_generate_invoice",

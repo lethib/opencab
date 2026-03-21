@@ -9,11 +9,6 @@ use sea_orm::{ColumnTrait, EntityTrait, ModelTrait, QueryFilter, QueryOrder};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-pub struct SearchBySSNParams {
-  pub ssn: String,
-}
-
-#[derive(Deserialize)]
 pub struct SearchParams {
   pub q: String,
   pub page: Option<u64>,
@@ -26,7 +21,7 @@ use crate::{
   models::{
     _entities::{medical_appointments, patients, practitioner_offices},
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
-    patients::{CreatePatientParams, Model},
+    patients::CreatePatientParams,
   },
   services::{self, invoice::GenerateInvoiceParams},
   views::{medical_appointments::MedicalAppointmentResponse, patient::PatientResponse},
@@ -103,19 +98,6 @@ pub async fn delete(
   patient.delete(&state.db).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
-}
-
-#[debug_handler]
-pub async fn search_by_ssn(
-  State(state): State<AppState>,
-  Query(params): Query<SearchBySSNParams>,
-) -> Result<Json<Vec<PatientResponse>>, MyErrors> {
-  let found_patients = Model::search_by_ssn(&state.db, &params.ssn).await?;
-
-  let serialized_patients: Vec<PatientResponse> =
-    found_patients.iter().map(PatientResponse::new).collect();
-
-  Ok(Json(serialized_patients))
 }
 
 #[debug_handler]

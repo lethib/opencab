@@ -9,7 +9,6 @@ import {
 import type { PractitionerOffice } from "./practitioner_office";
 
 export type SavePatientParams = {
-  pid?: string;
   first_name: string;
   last_name: string;
   email?: string;
@@ -17,19 +16,6 @@ export type SavePatientParams = {
   address_line_1: string;
   address_zip_code: string;
   address_city: string;
-};
-
-export type SearchBySSNPatientResponse = {
-  id: number;
-  pid: UUID;
-  first_name: string;
-  last_name: string;
-  email: string;
-  ssn: string;
-  address_line_1: string;
-  address_zip_code: string;
-  address_city: string;
-  address_country: string;
 };
 
 interface SearchPatientParams {
@@ -105,10 +91,6 @@ export const patientSchema = {
   deletePatient: mutationEndpoint<null, null>({
     type: "DELETE",
     path: "/patient/{patient_id}",
-  }),
-  searchBySSN: queryEndpoint<{ ssn: string }, SearchBySSNPatientResponse[]>({
-    type: "GET",
-    path: "/patient/_search_by_ssn",
   }),
   search: queryEndpoint<SearchPatientParams, Paginated<SearchPatientResponse>>({
     type: "GET",

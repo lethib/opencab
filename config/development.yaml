@@ -25,7 +25,7 @@ database:
 # JWT authentication configuration
 jwt:
   secret: vbI8tJIb6vuStrJty8gS
-  expiration: 604800  # 7 days in seconds
+  expiration: 604800 # 7 days in seconds
 
 # CORS configuration (development allows all origins)
 cors:

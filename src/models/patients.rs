@@ -14,7 +14,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CreatePatientParams {
-  pub pid: Option<String>,
   pub first_name: String,
   pub last_name: String,
   pub ssn: String,
@@ -39,30 +38,6 @@ impl Model {
 
   pub fn decrypt_ssn(&self) -> Result<String, MyErrors> {
     Crypto::decrypt(&self.ssn)
-  }
-
-  pub async fn search_by_ssn<C: ConnectionTrait>(db: &C, ssn: &str) -> Result<Vec<Self>, MyErrors> {
-    let hashed_ssn = Self::hash_ssn(ssn)?;
-
-    let patients = Entity::find()
-      .filter(patients::Column::HashedSsn.eq(hashed_ssn))
-      .all(db)
-      .await
-      .map_err(MyErrors::from)?;
-
-    Ok(patients)
-  }
-
-  pub async fn search_by_pid<C: ConnectionTrait>(
-    db: &C,
-    pid: Uuid,
-  ) -> Result<Option<Self>, MyErrors> {
-    let patient = Entity::find()
-      .filter(patients::Column::Pid.eq(pid))
-      .one(db)
-      .await?;
-
-    Ok(patient)
   }
 }
 
