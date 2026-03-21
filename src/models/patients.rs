@@ -39,7 +39,6 @@ impl Model {
   pub fn decrypt_ssn(&self) -> Result<String, MyErrors> {
     Crypto::decrypt(&self.ssn)
   }
-
 }
 
 #[async_trait::async_trait]
