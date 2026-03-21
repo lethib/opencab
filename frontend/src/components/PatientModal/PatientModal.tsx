@@ -1,11 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { MutationFunction } from "@tanstack/react-query";
-import { type ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import z from "zod";
 import { queryClient } from "@/api/api";
-import { APIHooks } from "@/api/hooks";
 import type {
   SavePatientParams,
   SearchPatientResponse,
@@ -19,9 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui";
-import { CenteredSpineer } from "@/components/ui/spinner";
 import { PatientFormFields } from "./components/PatientFormFields";
-import { PatientSelector } from "./components/PatientSelector";
 import { SSNField } from "./components/SSNField";
 
 interface Props {
@@ -42,13 +39,9 @@ export const PatientModal = ({
   selectedPatient,
 }: Props) => {
   const { t } = useTranslation();
-  const [isNewPatientFlowStarted, setIsNewPatientFlowStarted] = useState(false);
-  const [linkedPatient, setLinkedPatient] =
-    useState<SearchPatientResponse | null>(null);
 
-  // Unified patient reference: either editing existing (selectedPatient) or linking to existing (linkedPatient)
   const isEditMode = !!selectedPatient;
-  const currentPatient = selectedPatient || linkedPatient;
+  const currentPatient = selectedPatient;
 
   const addPatientFormSchema = z.object({
     first_name: z
@@ -95,19 +88,8 @@ export const PatientModal = ({
     },
   });
 
-  const canSearchPatient = addPatientForm.getValues("ssn").length === 15;
-
-  const findPatientsBySSNQuery = APIHooks.patient.searchBySSN.useQuery(
-    { ssn: addPatientForm.getValues("ssn") },
-    { enabled: canSearchPatient && !selectedPatient },
-  );
-
-  const canDisplayFields = !!currentPatient || isNewPatientFlowStarted;
-
   const handleOnClose = () => {
     onOpenChange(false);
-    setLinkedPatient(null);
-    setIsNewPatientFlowStarted(false);
     addPatientForm.reset({
       first_name: "",
       last_name: "",
@@ -131,12 +113,11 @@ export const PatientModal = ({
         address_city: currentPatient.address_city || "",
       });
     }
-  }, [open, currentPatient, isNewPatientFlowStarted]);
+  }, [open, currentPatient]);
 
   const onSubmit = addPatientForm.handleSubmit(async (values) => {
     asyncMutation({
       ...values,
-      pid: linkedPatient?.pid,
     })
       .then(() => {
         queryClient.invalidateQueries({ queryKey: ["/patient/_search"] });
@@ -151,12 +132,6 @@ export const PatientModal = ({
   const handleSSNChange = (e: ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/\D/g, "");
     if (rawValue.length <= 15) {
-      if (rawValue.length !== 15 && linkedPatient) {
-        setLinkedPatient(null);
-        setIsNewPatientFlowStarted(false);
-        addPatientForm.reset();
-      }
-
       addPatientForm.setValue("ssn", rawValue);
     }
   };
@@ -180,23 +155,9 @@ export const PatientModal = ({
         >
           <SSNField onChange={handleSSNChange} disabled={!!selectedPatient} />
 
-          {findPatientsBySSNQuery.isFetching ? (
-            <CenteredSpineer className="text-secondary" />
-          ) : (
-            !canDisplayFields &&
-            canSearchPatient &&
-            findPatientsBySSNQuery.data && (
-              <PatientSelector
-                patients={findPatientsBySSNQuery.data}
-                onSelectExistingPatient={setLinkedPatient}
-                onCreateNewPatient={() => setIsNewPatientFlowStarted(true)}
-              />
-            )
-          )}
+          <PatientFormFields />
 
-          {canDisplayFields && <PatientFormFields />}
-
-          <Button type="submit" className="w-full" disabled={!canDisplayFields}>
+          <Button type="submit" className="w-full">
             {t(`patients.form.submit.${isEditMode ? "update" : "create"}`)}
           </Button>
         </FormProvider>

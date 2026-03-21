@@ -1,7 +1,5 @@
 use crate::initializers::get_services;
 use crate::models::_entities::patients;
-use crate::models::my_errors::application_error::ApplicationError;
-use crate::models::my_errors::unexpected_error::UnexpectedError;
 use crate::models::{
   my_errors::MyErrors,
   patients::{CreatePatientParams, Model as PatientModel},
@@ -9,7 +7,6 @@ use crate::models::{
 };
 use sea_orm::{ColumnTrait, Condition, QueryFilter};
 use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
-use uuid::Uuid;
 
 pub async fn create(
   patient_params: &CreatePatientParams,
@@ -17,15 +14,8 @@ pub async fn create(
 ) -> Result<PatientModel, MyErrors> {
   let services = get_services();
 
-  let created_patient = match &patient_params.pid {
-    Some(pid) => {
-      let pid = Uuid::parse_str(pid).map_err(|err| UnexpectedError::new(err.to_string()))?;
-      PatientModel::search_by_pid(&services.db, pid)
-        .await?
-        .ok_or(ApplicationError::NotFound)?
-    }
-    None => patients::ActiveModel::create(&services.db, patient_params, linked_to_user.id).await?,
-  };
+  let created_patient =
+    patients::ActiveModel::create(&services.db, patient_params, linked_to_user.id).await?;
 
   Ok(created_patient)
 }
