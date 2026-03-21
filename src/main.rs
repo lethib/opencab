@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   let environment = std::env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string());
   let config = Config::load(&environment).expect("Failed to load configuration");
 
-  setup_logging(&config.logger.level);
+  setup_logging(&config.logger.level, &config.logger.format);
 
   tracing::info!(
     "Starting opencab application (environment: {})",
@@ -74,14 +74,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   Ok(())
 }
 
-fn setup_logging(level: &str) {
-  tracing_subscriber::registry()
-    .with(
-      tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| format!("opencab={},tower_http={},sqlx=info", level, level).into()),
-    )
-    .with(tracing_subscriber::fmt::layer())
-    .init();
+fn setup_logging(level: &str, format: &str) {
+  let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
+    .unwrap_or_else(|_| format!("opencab={},tower_http={},sqlx=info", level, level).into());
+
+  let registry = tracing_subscriber::registry().with(env_filter);
+
+  if format == "json" {
+    registry
+      .with(tracing_subscriber::fmt::layer().json())
+      .init();
+  } else {
+    registry.with(tracing_subscriber::fmt::layer()).init();
+  }
 }
 
 async fn shutdown_signal() {
