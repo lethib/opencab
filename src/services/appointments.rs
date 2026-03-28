@@ -154,7 +154,7 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
       let mut by_office: HashMap<String, Vec<&MedicalAppointmentDetail>> = HashMap::new();
       for detail in monthly_appointments.iter() {
         by_office
-          .entry((*detail).office.name.clone())
+          .entry(detail.office.name.clone())
           .or_default()
           .push(*detail);
       }
