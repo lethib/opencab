@@ -157,8 +157,8 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
           detail
             .appointment
             .payment_method
-            .clone()
-            .map(|p| p.to_value()),
+            .as_ref()
+            .map(|p| p.to_french()),
         )?;
         worksheet.write(row, 4, detail.office.name.clone())?;
         worksheet.write(row, 5, price)?;
