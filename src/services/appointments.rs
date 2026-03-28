@@ -98,6 +98,20 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
       .set_background_color(Color::Green)
       .set_font_color(Color::White);
     let date_format = Format::new().set_num_format("dd/mm/yyyy");
+    let section_label_format = Format::new()
+      .set_bold()
+      .set_background_color(Color::RGB(0xBDD7EE));
+    let subtotal_label_format = Format::new()
+      .set_italic()
+      .set_background_color(Color::RGB(0xDDEBF7));
+    let subtotal_value_format = Format::new()
+      .set_italic()
+      .set_background_color(Color::RGB(0xDDEBF7))
+      .set_num_format("0.00");
+    let total_format = Format::new()
+      .set_bold()
+      .set_background_color(Color::Gray)
+      .set_font_size(12);
 
     // Dashboard sheet (first)
     let dashboard = workbook.add_worksheet().set_name("Récapitulatif")?;
@@ -134,49 +148,97 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
         &header_format,
       )?;
 
+      worksheet.set_freeze_panes(1, 0)?;
+
+      // Group appointments by office
+      let mut by_office: HashMap<String, Vec<&MedicalAppointmentDetail>> = HashMap::new();
+      for detail in monthly_appointments.iter() {
+        by_office
+          .entry((*detail).office.name.clone())
+          .or_default()
+          .push(*detail);
+      }
+
+      let mut sorted_offices: Vec<_> = by_office.iter().collect();
+      sorted_offices.sort_by_key(|(name, _)| name.as_str());
+
       let mut monthly_revenue: f64 = 0.0;
       let mut monthly_user_revenue: f64 = 0.0;
       let mut monthly_hand_back: f64 = 0.0;
+      let mut current_row: u32 = 1;
 
-      for (i, detail) in monthly_appointments.iter().enumerate() {
-        let row = i as u32 + 1;
-        let excel_date = ExcelDateTime::parse_from_str(&detail.appointment.date.to_string())?;
-        let price = detail.appointment.price_in_cents as f64 / 100.0;
-        let hand_back = price * detail.revenue_share_percentage / 100.0;
-
-        monthly_revenue += price;
-        monthly_user_revenue += price - hand_back;
-        monthly_hand_back += hand_back;
-
-        worksheet.write_with_format(row, 0, &excel_date, &date_format)?;
-        worksheet.write(row, 1, &detail.patient.last_name)?;
-        worksheet.write(row, 2, &detail.patient.first_name)?;
-        worksheet.write(
-          row,
-          3,
-          detail
-            .appointment
-            .payment_method
-            .clone()
-            .map(|p| p.to_value()),
+      for (office_name, office_appointments) in sorted_offices {
+        // Section header row for the cabinet
+        worksheet.merge_range(
+          current_row,
+          0,
+          current_row,
+          7,
+          office_name.as_str(),
+          &section_label_format,
         )?;
-        worksheet.write(row, 4, detail.office.name.clone())?;
-        worksheet.write(row, 5, price)?;
-        worksheet.write_with_format(row, 6, price - hand_back, &revenue_format)?;
-        worksheet.write_with_format(row, 7, hand_back, &revenue_format)?;
+        current_row += 1;
+
+        let mut office_revenue: f64 = 0.0;
+        let mut office_user_revenue: f64 = 0.0;
+        let mut office_hand_back: f64 = 0.0;
+
+        // Sort by date within the office group
+        let mut sorted_appointments = office_appointments.clone();
+        sorted_appointments.sort_by_key(|d| d.appointment.date);
+
+        for detail in sorted_appointments {
+          let excel_date = ExcelDateTime::parse_from_str(&detail.appointment.date.to_string())?;
+          let price = detail.appointment.price_in_cents as f64 / 100.0;
+          let hand_back = price * detail.revenue_share_percentage / 100.0;
+
+          office_revenue += price;
+          office_user_revenue += price - hand_back;
+          office_hand_back += hand_back;
+
+          worksheet.write_with_format(current_row, 0, &excel_date, &date_format)?;
+          worksheet.write(current_row, 1, &detail.patient.last_name)?;
+          worksheet.write(current_row, 2, &detail.patient.first_name)?;
+          worksheet.write(
+            current_row,
+            3,
+            detail
+              .appointment
+              .payment_method
+              .clone()
+              .map(|p| p.to_value()),
+          )?;
+          worksheet.write(current_row, 4, detail.office.name.clone())?;
+          worksheet.write_with_format(current_row, 5, price, &revenue_format)?;
+          worksheet.write_with_format(current_row, 6, price - hand_back, &revenue_format)?;
+          worksheet.write_with_format(current_row, 7, hand_back, &revenue_format)?;
+          current_row += 1;
+        }
+
+        // Subtotal row for the cabinet
+        worksheet.merge_range(
+          current_row,
+          0,
+          current_row,
+          4,
+          format!("Sous-total {}", office_name).as_str(),
+          &subtotal_label_format,
+        )?;
+        worksheet.write_with_format(current_row, 5, office_revenue, &subtotal_value_format)?;
+        worksheet.write_with_format(current_row, 6, office_user_revenue, &subtotal_value_format)?;
+        worksheet.write_with_format(current_row, 7, office_hand_back, &subtotal_value_format)?;
+        current_row += 1;
+
+        monthly_revenue += office_revenue;
+        monthly_user_revenue += office_user_revenue;
+        monthly_hand_back += office_hand_back;
       }
 
-      let total_format = Format::new()
-        .set_background_color(Color::Gray)
-        .set_align(FormatAlign::VerticalCenter)
-        .set_font_size(12)
-        .set_bold();
-      let total_row = monthly_appointments.len() as u32 + 1;
-
-      worksheet.merge_range(total_row, 0, total_row, 4, "TOTAL", &total_format)?;
-      worksheet.write_with_format(total_row, 5, monthly_revenue, &revenue_format)?;
-      worksheet.write_with_format(total_row, 6, monthly_user_revenue, &revenue_format)?;
-      worksheet.write_with_format(total_row, 7, monthly_hand_back, &revenue_format)?;
+      // Monthly total row
+      worksheet.merge_range(current_row, 0, current_row, 4, "TOTAL", &total_format)?;
+      worksheet.write_with_format(current_row, 5, monthly_revenue, &revenue_format)?;
+      worksheet.write_with_format(current_row, 6, monthly_user_revenue, &revenue_format)?;
+      worksheet.write_with_format(current_row, 7, monthly_hand_back, &revenue_format)?;
     }
 
     Ok(workbook)
