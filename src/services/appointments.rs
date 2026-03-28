@@ -1,6 +1,6 @@
 use chrono::{Datelike, NaiveDate};
 use rust_xlsxwriter::*;
-use sea_orm::{ActiveEnum, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder};
 use std::collections::HashMap;
 
 use crate::models::{
@@ -299,8 +299,8 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
           detail
             .appointment
             .payment_method
-            .clone()
-            .map(|p| p.to_value()),
+            .as_ref()
+            .map(|p| p.to_french()),
         )?;
         worksheet.write(row, 4, price)?;
         worksheet.write_with_format(row, 5, price - hand_back, &revenue_format)?;
