@@ -37,7 +37,7 @@ export const AppointmentsList = ({
     <TableBody>
       {medicalAppointmentsQuery.data?.map((appointment, index) => (
         <AppointmentRow
-          key={index}
+          key={appointment.id}
           appointment={appointment}
           index={index}
           onClickEdit={onClickEditAppointment}
