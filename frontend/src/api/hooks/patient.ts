@@ -84,6 +84,13 @@ export const patientSchema = {
       type: "DELETE",
       path: `/patient/${patientId}/medical_appointments/${appointmentId}`,
     }),
+  medicalAppointment: (patientId: number) => ({
+    generateAppointment: (appointmentId: number) =>
+      mutationEndpoint<null, null>({
+        type: "POST",
+        path: `/patient/${patientId}/medical_appointments/${appointmentId}/_generate_invoice`,
+      }),
+  }),
   updatePatient: mutationEndpoint<SavePatientParams, { success: boolean }>({
     type: "PUT",
     path: "/patient/{patient_id}",
@@ -118,10 +125,12 @@ export const patientSchema = {
             pdf_data: string;
             filename: string;
           }>(`/patient/${patientId}/_generate_invoice`, {
-            amount,
-            invoice_date,
+            invoice_params: {
+              amount,
+              date: invoice_date,
+              office_id: practitioner_office_id,
+            },
             should_be_sent_by_email,
-            practitioner_office_id,
             payment_method,
           });
 

@@ -27,6 +27,11 @@ export const AppointmentsTable = ({ patientId }: Props) => {
     .deleteMedicalAppointment(patientId, selectedAppointment?.id ?? 0)
     .useMutation();
 
+  const generateInvoiceMutation = APIHooks.patient
+    .medicalAppointment(patientId)
+    .generateAppointment(selectedAppointment?.id ?? 0)
+    .useMutation();
+
   const handleOnClickEdit = (appointment: MedicalAppointment) => {
     setSelectedAppointment(appointment);
     setIsAppointmentModalOpen(true);
@@ -39,6 +44,11 @@ export const AppointmentsTable = ({ patientId }: Props) => {
         queryKey: [`/patient/${patientId}/medical_appointments`, null],
       });
     });
+  };
+
+  const handleOnClickGenerateInvoice = (appointment: MedicalAppointment) => {
+    setSelectedAppointment(appointment);
+    return generateInvoiceMutation.mutateAsync(null);
   };
 
   return (
@@ -79,6 +89,7 @@ export const AppointmentsTable = ({ patientId }: Props) => {
             patientId={patientId}
             onClickEditAppointment={handleOnClickEdit}
             onClickDeleteAppointment={handleOnClickDelete}
+            onClickGenerateInvoice={handleOnClickGenerateInvoice}
           />
         </Table>
       </div>
