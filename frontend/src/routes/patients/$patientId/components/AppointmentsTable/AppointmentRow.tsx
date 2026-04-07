@@ -55,14 +55,12 @@ export const AppointmentRow = ({
           onClick={(e) => {
             e.stopPropagation();
             toast.promise(onClickGenerateInvoice(appointment), {
-              loading: "Envoie de la facture...",
-              success: "La facture a bien été envoyé",
-              error: "Oops ! Une erreur est survenue...",
-              position: "top-right",
+              loading: t("invoice.modal.sendingInvoice"),
+              success: t("invoice.modal.invoiceSent"),
             });
           }}
           className="h-8 w-8 p-0"
-          title="Generate Invoice"
+          title={t("invoice.modal.generate")}
         >
           <FileText className="h-4 w-4" />
         </Button>

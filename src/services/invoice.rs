@@ -27,7 +27,7 @@ pub struct GenerateInvoiceParams {
 pub struct GenerateInvoiceResponse {
   pub pdf_data: Vec<u8>,
   pub filename: String,
-  patient_email: Option<String>,
+  pub patient_email: Option<String>,
   invoice_date: chrono::NaiveDate,
 }
 

@@ -215,6 +215,8 @@
       "completeInformation": "Compléter mes informations",
       "sendInvoiceByEmail": "Envoi de la facture par email",
       "emailSentConfirmation": "La facture a été envoyée par email avec succès",
+      "sendingInvoice": "Envoi de la facture...",
+      "invoiceSent": "La facture a bien été envoyée",
       "missingInformationAlert": "Vous devez compléter vos informations professionnelles avant de pouvoir générer une facture",
       "missingPatientAddressMail": "Le patient n'a pas d'adresse mail. Veuillez mettre à jour les informations du patient pour pouvoir envoyer la facture par mail.",
       "paymentMethodHint": "Le mode de paiement n'apparaîtra pas sur la facture"
@@ -377,6 +379,7 @@
     }
   },
   "errors": {
+    "global": "Oops ! Une erreur est survenue...",
     "generic": "Une erreur s'est produite",
     "network": "Erreur de réseau",
     "unauthorized": "Non autorisé",

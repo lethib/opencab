@@ -163,7 +163,7 @@ pub async fn generate_invoice(
 
   let medical_appointment_params = CreateMedicalAppointmentParams {
     user_id: current_user.id,
-    patient_id: patient_id,
+    patient_id,
     practitioner_office_id: params.invoice_params.office_id,
     payment_method: params.payment_method.clone(),
     date: NaiveDate::parse_from_str(&params.invoice_params.date, "%Y-%m-%d")?,

@@ -6,6 +6,8 @@ import axios, {
 } from "axios";
 import { logout } from "@/lib/authUtils";
 import { APIHooks } from "./hooks";
+import { toast } from "sonner";
+import { t } from "i18next";
 
 export type APIError = {
   code: number;
@@ -37,8 +39,11 @@ class MyPatientsAPI {
         if (error.response?.status === 401) {
           if (error.response.data.msg !== "invalid_credentials") {
             logout();
+            return;
           }
         }
+
+        toast.error(t('errors.global'), { description: error.response?.data.msg });
 
         throw error;
       },

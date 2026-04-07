@@ -85,6 +85,10 @@ pub async fn generate_invoice(
   )
   .await?;
 
+  if generated_invoice.patient_email.is_none() {
+    return Err(ApplicationError::new("no_email_set_on_patient").into());
+  }
+
   services::invoice::send_invoice(&state, &generated_invoice, &current_user, &business_info)
     .await?;
 

@@ -29,7 +29,7 @@ export const AppointmentsTable = ({ patientId }: Props) => {
 
   const generateInvoiceMutation = APIHooks.patient
     .medicalAppointment(patientId)
-    .generateAppointment(selectedAppointment?.id ?? 0)
+    .generateInvoice(selectedAppointment?.id ?? 0)
     .useMutation();
 
   const handleOnClickEdit = (appointment: MedicalAppointment) => {

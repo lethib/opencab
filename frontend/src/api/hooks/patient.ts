@@ -85,7 +85,7 @@ export const patientSchema = {
       path: `/patient/${patientId}/medical_appointments/${appointmentId}`,
     }),
   medicalAppointment: (patientId: number) => ({
-    generateAppointment: (appointmentId: number) =>
+    generateInvoice: (appointmentId: number) =>
       mutationEndpoint<null, null>({
         type: "POST",
         path: `/patient/${patientId}/medical_appointments/${appointmentId}/_generate_invoice`,
