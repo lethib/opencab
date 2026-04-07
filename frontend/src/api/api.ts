@@ -4,10 +4,10 @@ import axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
 } from "axios";
+import { t } from "i18next";
+import { toast } from "sonner";
 import { logout } from "@/lib/authUtils";
 import { APIHooks } from "./hooks";
-import { toast } from "sonner";
-import { t } from "i18next";
 
 export type APIError = {
   code: number;
@@ -43,7 +43,9 @@ class MyPatientsAPI {
           }
         }
 
-        toast.error(t('errors.global'), { description: error.response?.data.msg });
+        toast.error(t("errors.global"), {
+          description: error.response?.data.msg,
+        });
 
         throw error;
       },
