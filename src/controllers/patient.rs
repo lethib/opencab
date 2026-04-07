@@ -5,6 +5,7 @@ use axum::{
   Json,
 };
 use base64::Engine;
+use chrono::NaiveDate;
 use sea_orm::{ColumnTrait, EntityTrait, ModelTrait, QueryFilter, QueryOrder};
 use serde::Deserialize;
 
@@ -19,7 +20,10 @@ use crate::{
   auth::statement::AuthStatement,
   middleware::auth::AuthenticatedUser,
   models::{
-    _entities::{medical_appointments, patients, practitioner_offices},
+    _entities::{
+      medical_appointments, patients, practitioner_offices, sea_orm_active_enums::PaymentMethod,
+    },
+    medical_appointments::{ActiveModel as MedicalAppointments, CreateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
     patients::CreatePatientParams,
   },
@@ -131,23 +135,42 @@ pub async fn search(
   })))
 }
 
+#[derive(Debug, Deserialize)]
+pub struct InvoiceGenerationParams {
+  should_be_sent_by_email: bool,
+  payment_method: Option<PaymentMethod>,
+  invoice_params: GenerateInvoiceParams,
+}
+
 #[debug_handler]
 pub async fn generate_invoice(
   State(state): State<AppState>,
   AuthenticatedUser(current_user, user_bi): AuthenticatedUser,
   Path(patient_id): Path<i32>,
-  Json(params): Json<GenerateInvoiceParams>,
+  Json(params): Json<InvoiceGenerationParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
-  if params.amount <= 0.0 {
+  if params.invoice_params.amount <= 0.0 {
     return Err(ApplicationError::UnprocessableEntity.into());
   }
 
-  if params.amount > (i32::MAX as f32 / 100.0) {
+  if params.invoice_params.amount > (i32::MAX as f32 / 100.0) {
     return Err(ApplicationError::UnprocessableEntity.into());
   }
 
   let invoice_generated =
-    services::invoice::generate_patient_invoice(&patient_id, &params, &current_user).await?;
+    services::invoice::generate_patient_invoice(&patient_id, &params.invoice_params, &current_user)
+      .await?;
+
+  let medical_appointment_params = CreateMedicalAppointmentParams {
+    user_id: current_user.id,
+    patient_id,
+    practitioner_office_id: params.invoice_params.office_id,
+    payment_method: params.payment_method.clone(),
+    date: NaiveDate::parse_from_str(&params.invoice_params.date, "%Y-%m-%d")?,
+    price_in_cents: (params.invoice_params.amount * 100.0).round() as i32,
+  };
+
+  MedicalAppointments::create(&state.db, &medical_appointment_params).await?;
 
   if params.should_be_sent_by_email {
     match &user_bi {

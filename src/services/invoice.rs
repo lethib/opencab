@@ -3,10 +3,9 @@ use crate::{
   initializers::get_services,
   models::{
     _entities::{
-      patients, practitioner_offices::Entity as PractitionerOffices,
-      sea_orm_active_enums::PaymentMethod, user_business_informations, users,
+      patients, practitioner_offices::Entity as PractitionerOffices, user_business_informations,
+      users,
     },
-    medical_appointments::{ActiveModel as MedicalAppointments, CreateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
   },
   workers::{
@@ -16,21 +15,19 @@ use crate::{
   },
 };
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct GenerateInvoiceParams {
   pub amount: f32,
-  pub invoice_date: String,
-  pub should_be_sent_by_email: bool,
-  pub practitioner_office_id: i32,
-  pub payment_method: Option<PaymentMethod>,
+  pub date: String,
+  pub office_id: i32,
 }
 
 pub struct GenerateInvoiceResponse {
   pub pdf_data: Vec<u8>,
   pub filename: String,
-  patient_email: Option<String>,
+  pub patient_email: Option<String>,
   invoice_date: chrono::NaiveDate,
 }
 
@@ -100,7 +97,7 @@ pub async fn generate_patient_invoice(
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
-  let invoice_date = chrono::NaiveDate::parse_from_str(&params.invoice_date, "%Y-%m-%d")?;
+  let invoice_date = chrono::NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
   let filename = format!(
     "{} {} Note d'honoraires - {} {} {}.pdf",
@@ -111,23 +108,10 @@ pub async fn generate_patient_invoice(
     invoice_date.format("%d_%m_%Y")
   );
 
-  let medical_appointment_params = CreateMedicalAppointmentParams {
-    user_id: current_user.id,
-    patient_id: *patient_id,
-    practitioner_office_id: params.practitioner_office_id,
-    payment_method: params.payment_method.clone(),
-    date: invoice_date,
-    price_in_cents: (params.amount * 100.0).round() as i32,
-  };
-
-  let created_medical_appointment =
-    MedicalAppointments::create(&services.db, &medical_appointment_params).await?;
-
-  let practitioner_office =
-    PractitionerOffices::find_by_id(created_medical_appointment.practitioner_office_id)
-      .one(&services.db)
-      .await?
-      .ok_or(UnexpectedError::ShouldNotHappen)?;
+  let practitioner_office = PractitionerOffices::find_by_id(params.office_id)
+    .one(&services.db)
+    .await?
+    .ok_or(UnexpectedError::ShouldNotHappen)?;
 
   let args = InvoiceGeneratorArgs {
     patient: patient.clone(),
