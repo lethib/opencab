@@ -158,7 +158,7 @@ pub async fn generate_invoice(
   }
 
   let invoice_generated =
-    services::invoice::generate_patient_invoice(&patient_id, &params.invoice_params, &current_user)
+    services::invoice::generate_patient_invoice(&patient_id, &params.invoice_params, &current_user, false)
       .await?;
 
   let medical_appointment_params = CreateMedicalAppointmentParams {

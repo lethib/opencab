@@ -82,6 +82,7 @@ pub async fn generate_invoice(
     &patient_id,
     &invoice_generation_params,
     &current_user,
+    true,
   )
   .await?;
 

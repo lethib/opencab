@@ -27,6 +27,7 @@ pub struct InvoiceGeneratorArgs {
   pub amount: f32,
   pub invoice_date: Date,
   pub practitioner_office: practitioner_offices::Model,
+  pub is_duplicate: bool,
 }
 
 /// Generate an invoice PDF based on the French invoice template
@@ -96,6 +97,7 @@ pub async fn generate_invoice_pdf(
     &args.invoice_date,
     &args.practitioner_office,
     signature_data.as_deref(),
+    args.is_duplicate,
   )
   .map_err(|e| MyErrors {
     code: StatusCode::INTERNAL_SERVER_ERROR,
@@ -212,6 +214,7 @@ fn create_modern_invoice_pdf(
   invoice_date: &Date,
   practitioner_office: &practitioner_offices::Model,
   signature_data: Option<&[u8]>,
+  is_duplicate: bool,
 ) -> std::result::Result<Vec<u8>, String> {
   // Create PDF document
   let mut doc = Document::new();
@@ -224,6 +227,22 @@ fn create_modern_invoice_pdf(
   let page_height = mm(297.0);
   let margin = mm(25.0);
   let mut y_position = page_height - margin - mm(10.0);
+
+  // === DUPLICATA WATERMARK ===
+  if is_duplicate {
+    page
+      .text()
+      .set_font(Font::HelveticaBold, 70.0)
+      .set_fill_color(Color::gray(0.82))
+      .set_character_spacing(mm(2.5))
+      .at(mm(22.0), mm(148.5))
+      .write("DUPLICATA")
+      .map_err(|e| format!("Failed to write watermark: {}", e))?;
+    page
+      .text()
+      .set_fill_color(Color::black())
+      .set_character_spacing(0.0);
+  }
 
   // === HEADER SECTION ===
   // Practitioner name with title on same line, separated by dash
