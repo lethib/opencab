@@ -88,6 +88,7 @@ pub async fn generate_patient_invoice(
   patient_id: &i32,
   params: &GenerateInvoiceParams,
   current_user: &users::Model,
+  is_duplicate: bool,
 ) -> Result<GenerateInvoiceResponse, MyErrors> {
   let services = get_services();
 
@@ -119,6 +120,7 @@ pub async fn generate_patient_invoice(
     amount: params.amount,
     invoice_date,
     practitioner_office,
+    is_duplicate,
   };
 
   let pdf_data = workers::invoice_generator::generate_invoice_pdf(&services.db, &args).await?;
