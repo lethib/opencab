@@ -1,4 +1,3 @@
-pub mod app_state;
 pub mod auth;
 pub mod config;
 pub mod controllers;
@@ -9,4 +8,5 @@ pub mod router;
 pub mod services;
 pub mod validators;
 pub mod views;
+pub mod worker_transmitter;
 pub mod workers;

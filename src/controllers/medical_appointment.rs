@@ -1,6 +1,6 @@
 use axum::{
   debug_handler,
-  extract::{Path, State},
+  extract::Path,
   http::status,
   Json,
 };
@@ -10,7 +10,6 @@ use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter
 use serde::Deserialize;
 
 use crate::{
-  app_state::AppState,
   auth::statement::AuthStatement,
   db::DB,
   middleware::auth::AuthenticatedUser,
@@ -31,7 +30,6 @@ pub struct MedicalAppointmentPayload {
 }
 
 pub async fn delete(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
 ) -> Result<status::StatusCode, MyErrors> {
@@ -53,7 +51,6 @@ pub async fn delete(
 
 #[debug_handler]
 pub async fn generate_invoice(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   AuthenticatedUser(current_user, user_business_info): AuthenticatedUser,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
@@ -91,15 +88,13 @@ pub async fn generate_invoice(
     return Err(ApplicationError::new("no_email_set_on_patient").into());
   }
 
-  services::invoice::send_invoice(&state, &generated_invoice, &current_user, &business_info)
-    .await?;
+  services::invoice::send_invoice(&generated_invoice, &current_user, &business_info).await?;
 
   Ok(StatusCode::NO_CONTENT)
 }
 
 #[debug_handler]
 pub async fn update(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
   Json(params): Json<MedicalAppointmentPayload>,
@@ -135,7 +130,6 @@ pub async fn update(
 
 #[debug_handler]
 pub async fn create(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Path(patient_id): Path<i32>,

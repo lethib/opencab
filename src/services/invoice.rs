@@ -1,5 +1,4 @@
 use crate::{
-  app_state::{AppState, WorkerJob},
   db::DB,
   models::{
     _entities::{
@@ -8,6 +7,7 @@ use crate::{
     },
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
   },
+  worker_transmitter::{WorkerJob, WorkerTransmitter},
   workers::{
     self,
     invoice_generator::InvoiceGeneratorArgs,
@@ -32,7 +32,6 @@ pub struct GenerateInvoiceResponse {
 }
 
 pub async fn send_invoice(
-  state: &AppState,
   generated_invoice: &GenerateInvoiceResponse,
   current_user: &users::Model,
   user_business_informations: &user_business_informations::Model,
@@ -75,8 +74,7 @@ pub async fn send_invoice(
   .with_reply_to(current_user.email.to_string());
 
   // Enqueue email job via worker channel
-  state
-    .worker_transmitter
+  WorkerTransmitter::get()
     .send(WorkerJob::Email(args))
     .await
     .map_err(|_| UnexpectedError::ShouldNotHappen)?;

@@ -1,5 +1,4 @@
 use crate::{
-  app_state::{AppState, WorkerJob},
   auth::{
     jwt::{JwtService, TOKEN_TYPE_AUTH, TOKEN_TYPE_PASSWORD_RESET},
     statement::AuthStatement,
@@ -17,11 +16,11 @@ use crate::{
   },
   services::{self},
   views::auth::{CurrentResponse, LoginResponse},
+  worker_transmitter::{WorkerJob, WorkerTransmitter},
   workers::mailer::args::EmailArgs,
 };
 use axum::{
   debug_handler,
-  extract::State,
   http::{self, StatusCode},
   Json,
 };
@@ -41,7 +40,6 @@ pub struct ResetParams {
 
 #[debug_handler]
 pub async fn register(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<RegisterParams>,
 ) -> Result<Json<()>, MyErrors> {
@@ -54,7 +52,6 @@ pub async fn register(
 
 #[debug_handler]
 pub async fn forgot(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<ForgotParams>,
 ) -> Result<http::StatusCode, MyErrors> {
@@ -84,8 +81,7 @@ pub async fn forgot(
     ),
   );
 
-  state
-    .worker_transmitter
+  WorkerTransmitter::get()
     .send(WorkerJob::Email(email_args))
     .await?;
 
@@ -94,7 +90,6 @@ pub async fn forgot(
 
 #[debug_handler]
 pub async fn reset(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<ResetParams>,
 ) -> Result<Json<()>, MyErrors> {
@@ -125,7 +120,6 @@ pub async fn reset(
 /// Creates a user login and returns a token
 #[debug_handler]
 pub async fn login(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<LoginParams>,
 ) -> Result<Json<LoginResponse>, MyErrors> {
@@ -166,7 +160,6 @@ pub async fn login(
 /// Get current authenticated user
 #[debug_handler]
 pub async fn me(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, business_info): AuthenticatedUser,
 ) -> Result<Json<CurrentResponse>, MyErrors> {
   Ok(Json(CurrentResponse::new(&(current_user, business_info))))
@@ -180,7 +173,6 @@ pub struct CheckAccessKeyParams {
 
 #[debug_handler]
 pub async fn check_access_key(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<CheckAccessKeyParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {

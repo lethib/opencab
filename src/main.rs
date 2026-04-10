@@ -2,7 +2,6 @@ use opencab::db;
 use tokio::signal;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-mod app_state;
 mod auth;
 mod config;
 mod controllers;
@@ -12,9 +11,9 @@ mod router;
 mod services;
 mod validators;
 mod views;
+mod worker_transmitter;
 mod workers;
 
-use app_state::AppState;
 use config::Config;
 
 #[tokio::main]
@@ -43,7 +42,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   db::LOCK.set(db).expect("Failed to load DB");
 
   let (worker_transmitter, worker_receiver) = workers::create_worker_channel();
-  let state = AppState::new(worker_transmitter);
+  worker_transmitter::LOCK
+    .set(worker_transmitter)
+    .expect("Failed to set WorkerTransmitter");
 
   tokio::spawn(async move {
     workers::start_worker_pool(worker_receiver).await;
@@ -51,7 +52,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   tracing::info!("Worker pool started");
 
-  let app = router::create_router(state.clone());
+  let app = router::create_router();
 
   let addr = format!(
     "{}:{}",

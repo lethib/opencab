@@ -1,6 +1,6 @@
 use axum::{
   debug_handler,
-  extract::{Path, Query, State},
+  extract::{Path, Query},
   http::status,
   Json,
 };
@@ -16,7 +16,6 @@ pub struct SearchParams {
 }
 
 use crate::{
-  app_state::AppState,
   auth::statement::AuthStatement,
   db::DB,
   middleware::auth::AuthenticatedUser,
@@ -34,7 +33,6 @@ use crate::{
 
 #[debug_handler]
 pub async fn get(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Path(patient_id): Path<i32>,
 ) -> Result<Json<PatientResponse>, MyErrors> {
@@ -53,7 +51,6 @@ pub async fn get(
 
 #[debug_handler]
 pub async fn create(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Json(create_patient_params): Json<CreatePatientParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
@@ -64,7 +61,6 @@ pub async fn create(
 
 #[debug_handler]
 pub async fn update(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Path(patient_id): Path<i32>,
   Json(patient_params): Json<CreatePatientParams>,
@@ -86,7 +82,6 @@ pub async fn update(
 
 #[debug_handler]
 pub async fn delete(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Path(patient_id): Path<i32>,
 ) -> Result<status::StatusCode, MyErrors> {
@@ -107,7 +102,6 @@ pub async fn delete(
 
 #[debug_handler]
 pub async fn search(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Query(params): Query<SearchParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
@@ -145,7 +139,6 @@ pub struct InvoiceGenerationParams {
 
 #[debug_handler]
 pub async fn generate_invoice(
-  State(state): State<AppState>,
   AuthenticatedUser(current_user, user_bi): AuthenticatedUser,
   Path(patient_id): Path<i32>,
   Json(params): Json<InvoiceGenerationParams>,
@@ -181,7 +174,6 @@ pub async fn generate_invoice(
     match &user_bi {
       Some(business_information) => {
         services::invoice::send_invoice(
-          &state,
           &invoice_generated,
           &current_user,
           business_information,
@@ -200,7 +192,6 @@ pub async fn generate_invoice(
 
 #[debug_handler]
 pub async fn get_medical_appointments(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Path(patient_id): Path<i32>,
 ) -> Result<Json<Vec<MedicalAppointmentResponse>>, MyErrors> {

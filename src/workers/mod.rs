@@ -1,4 +1,4 @@
-use crate::app_state::WorkerJob;
+use crate::worker_transmitter::WorkerJob;
 use tokio::sync::mpsc;
 
 pub mod appointments_export;
@@ -24,11 +24,11 @@ pub async fn start_worker_pool(mut rx: mpsc::Receiver<WorkerJob>) {
 
         let result = match job {
           WorkerJob::Email(args) => mailer::worker::process_email(args).await,
-          WorkerJob::AppointmentExport(args, state) => {
-            appointments_export::process_appointment_extraction(args, state).await
+          WorkerJob::AppointmentExport(args) => {
+            appointments_export::process_appointment_extraction(args).await
           }
-          WorkerJob::AccountabilityGeneration(args, state) => {
-            appointments_export::process_accountability_generation(args, state).await
+          WorkerJob::AccountabilityGeneration(args) => {
+            appointments_export::process_accountability_generation(args).await
           }
         };
 

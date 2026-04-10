@@ -1,13 +1,12 @@
 use axum::{
   debug_handler,
-  extract::{Path, State},
+  extract::Path,
   Json,
 };
 use sea_orm::{prelude::Decimal, EntityTrait, IntoActiveModel, ModelTrait};
 use serde::Deserialize;
 
 use crate::{
-  app_state::AppState,
   auth::statement::AuthStatement,
   db::DB,
   middleware::auth::AuthenticatedUser,
@@ -27,7 +26,6 @@ pub struct OfficeParams {
 
 #[debug_handler]
 pub async fn create(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Json(params): Json<OfficeParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
@@ -49,7 +47,6 @@ pub async fn create(
 
 #[debug_handler]
 pub async fn update(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Path(office_id): Path<i32>,
@@ -84,7 +81,6 @@ pub async fn update(
 
 #[debug_handler]
 pub async fn destroy(
-  State(_state): State<AppState>,
   authorize: AuthStatement,
   Path(office_id): Path<i32>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
