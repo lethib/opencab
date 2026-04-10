@@ -6,7 +6,6 @@ use axum::{
 };
 
 use crate::{
-  app_state::AppState,
   auth::{context::AuthContext, statement::AuthStatement},
   models::{
     _entities::user_business_informations,
@@ -32,35 +31,35 @@ pub async fn authenticated_request(
   Ok(next.run(request).await)
 }
 
-impl FromRequestParts<AppState> for AuthStatement {
+impl<S> FromRequestParts<S> for AuthStatement
+where
+  S: Send + Sync,
+{
   type Rejection = MyErrors;
 
-  async fn from_request_parts(
-    parts: &mut Parts,
-    state: &AppState,
-  ) -> Result<Self, Self::Rejection> {
+  async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
     let auth_header = parts
       .headers
       .get("Authorization")
       .and_then(|h| h.to_str().ok());
 
-    Ok(AuthContext::new(auth_header, state).await.authorize())
+    Ok(AuthContext::new(auth_header).await.authorize())
   }
 }
 
-impl FromRequestParts<AppState> for AuthenticatedUser {
+impl<S> FromRequestParts<S> for AuthenticatedUser
+where
+  S: Send + Sync,
+{
   type Rejection = MyErrors;
 
-  async fn from_request_parts(
-    parts: &mut Parts,
-    state: &AppState,
-  ) -> Result<Self, Self::Rejection> {
+  async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
     let auth_headers = parts
       .headers
       .get("Authorization")
       .and_then(|h| h.to_str().ok());
 
-    let auth_context = AuthContext::new(auth_headers, state).await;
+    let auth_context = AuthContext::new(auth_headers).await;
 
     match auth_context.current_user {
       Some(user) => Ok(AuthenticatedUser(user.0, user.1)),

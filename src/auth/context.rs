@@ -1,10 +1,10 @@
 use crate::{
-  app_state::AppState,
-  db::DB,
   auth::{
     jwt::{JwtService, TOKEN_TYPE_AUTH},
     statement::AuthStatement,
   },
+  config::Config,
+  db::DB,
   models::{
     _entities::user_business_informations,
     my_errors::{
@@ -22,9 +22,9 @@ pub struct AuthContext {
 }
 
 impl AuthContext {
-  pub async fn new(auth_header: Option<&str>, state: &AppState) -> Self {
+  pub async fn new(auth_header: Option<&str>) -> Self {
     let (current_user, error) = match auth_header {
-      Some(header) => Self::validate_auth_header(header, state).await,
+      Some(header) => Self::validate_auth_header(header).await,
       None => (None, None),
     };
 
@@ -73,7 +73,6 @@ impl AuthContext {
 
   pub(super) async fn validate_auth_header(
     auth_header: &str,
-    state: &AppState,
   ) -> (
     Option<(users::Model, Option<user_business_informations::Model>)>,
     Option<AuthenticationError>,
@@ -83,7 +82,7 @@ impl AuthContext {
       None => return (None, Some(AuthenticationError::MissingToken)),
     };
 
-    let jwt_service = JwtService::new(&state.config.jwt.secret);
+    let jwt_service = JwtService::new(&Config::get().jwt.secret);
     let claims = match jwt_service.validate_token(token) {
       Ok(data) => data,
       Err(_) => return (None, Some(AuthenticationError::InvalidToken)),

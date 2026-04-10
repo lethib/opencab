@@ -40,7 +40,7 @@ async fn main() -> Result<(), MyErrors> {
 
       println!("Sending email...");
 
-      mailer::worker::process_email(email_args, &config).await?;
+      mailer::worker::process_email(email_args).await?;
 
       println!("Email sent successfully !")
     }

@@ -1,18 +1,11 @@
-use crate::config::Config;
-use std::sync::Arc;
-
 #[derive(Clone, Debug)]
 pub struct AppState {
-  pub config: Arc<Config>,
   pub worker_transmitter: tokio::sync::mpsc::Sender<WorkerJob>,
 }
 
 impl AppState {
-  pub fn new(config: Config, worker_transmitter: tokio::sync::mpsc::Sender<WorkerJob>) -> Self {
-    Self {
-      config: Arc::new(config),
-      worker_transmitter,
-    }
+  pub fn new(worker_transmitter: tokio::sync::mpsc::Sender<WorkerJob>) -> Self {
+    Self { worker_transmitter }
   }
 }
 

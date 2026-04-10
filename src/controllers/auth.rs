@@ -4,6 +4,7 @@ use crate::{
     jwt::{JwtService, TOKEN_TYPE_AUTH, TOKEN_TYPE_PASSWORD_RESET},
     statement::AuthStatement,
   },
+  config::Config,
   db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
@@ -63,14 +64,15 @@ pub async fn forgot(
     return Ok(http::StatusCode::NO_CONTENT);
   };
 
-  let jwt_service = JwtService::new(&state.config.jwt.secret);
+  let jwt_service = JwtService::new(&Config::get().jwt.secret);
   let secured_token = jwt_service
     .generate_token(&user.pid.to_string(), TOKEN_TYPE_PASSWORD_RESET, 900)
     .map_err(|_| UnexpectedError::ShouldNotHappen)?;
 
   let secured_url = format!(
     "{}/reset_password?access_token={}",
-    state.config.app.base_url, secured_token
+    Config::get().app.base_url,
+    secured_token
   );
 
   let email_args = EmailArgs::new_text(
@@ -92,13 +94,13 @@ pub async fn forgot(
 
 #[debug_handler]
 pub async fn reset(
-  State(state): State<AppState>,
+  State(_state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<ResetParams>,
 ) -> Result<Json<()>, MyErrors> {
   authorize.non_authenticated_user().run_complete()?;
 
-  let jwt_service = JwtService::new(&state.config.jwt.secret);
+  let jwt_service = JwtService::new(&Config::get().jwt.secret);
   let claims = jwt_service
     .validate_token(&params.token)
     .map_err(|_| AuthenticationError::InvalidToken)?;
@@ -123,7 +125,7 @@ pub async fn reset(
 /// Creates a user login and returns a token
 #[debug_handler]
 pub async fn login(
-  State(state): State<AppState>,
+  State(_state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<LoginParams>,
 ) -> Result<Json<LoginResponse>, MyErrors> {
@@ -146,12 +148,12 @@ pub async fn login(
     });
   }
 
-  let jwt_service = JwtService::new(&state.config.jwt.secret);
+  let jwt_service = JwtService::new(&Config::get().jwt.secret);
   let token = jwt_service
     .generate_token(
       &user.pid.to_string(),
       TOKEN_TYPE_AUTH,
-      state.config.jwt.expiration,
+      Config::get().jwt.expiration,
     )
     .map_err(|_| MyErrors {
       code: StatusCode::UNAUTHORIZED,
@@ -178,7 +180,7 @@ pub struct CheckAccessKeyParams {
 
 #[debug_handler]
 pub async fn check_access_key(
-  State(state): State<AppState>,
+  State(_state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<CheckAccessKeyParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
@@ -191,12 +193,12 @@ pub async fn check_access_key(
   if services::user::check_access_key(&user, params.access_key) {
     users::ActiveModel::enable_access(&mut user.clone().into_active_model(), DB::get()).await?;
 
-    let jwt_service = JwtService::new(&state.config.jwt.secret);
+    let jwt_service = JwtService::new(&Config::get().jwt.secret);
     let token = jwt_service
       .generate_token(
         &user.pid.to_string(),
         TOKEN_TYPE_AUTH,
-        state.config.jwt.expiration,
+        Config::get().jwt.expiration,
       )
       .map_err(|error| UnexpectedError::new(error.to_string()))?;
 

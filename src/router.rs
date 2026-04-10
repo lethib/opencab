@@ -1,4 +1,6 @@
-use crate::{app_state::AppState, controllers, middleware::auth::authenticated_request};
+use crate::{
+  app_state::AppState, config::Config, controllers, middleware::auth::authenticated_request,
+};
 use axum::{
   http::{HeaderName, Method},
   middleware,
@@ -99,7 +101,7 @@ pub fn create_router(state: AppState) -> Router {
     ));
 
   // Build CORS layer from configuration
-  let cors_config = &state.config.cors;
+  let cors_config = &Config::get().cors;
   let mut cors_layer = CorsLayer::new();
 
   if cors_config.allow_origins.contains(&"*".to_string()) {

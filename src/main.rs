@@ -23,16 +23,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   let environment = std::env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string());
   let config = Config::load(&environment).expect("Failed to load configuration");
+  config::LOCK.set(config).expect("Failed to set config");
 
-  setup_logging(&config.logger.level, &config.logger.format);
+  setup_logging(&Config::get().logger.level, &Config::get().logger.format);
 
   tracing::info!(
     "Starting opencab application (environment: {})",
     environment
   );
 
-  let mut db_options = sea_orm::ConnectOptions::new(&config.database.url);
-  db_options.sqlx_logging(config.database.enable_logging);
+  let mut db_options = sea_orm::ConnectOptions::new(&Config::get().database.url);
+  db_options.sqlx_logging(Config::get().database.enable_logging);
 
   let db = sea_orm::Database::connect(db_options)
     .await
@@ -42,26 +43,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   db::LOCK.set(db).expect("Failed to load DB");
 
   let (worker_transmitter, worker_receiver) = workers::create_worker_channel();
-  let state = AppState::new(config.clone(), worker_transmitter);
+  let state = AppState::new(worker_transmitter);
 
-  let worker_config = state.config.clone();
   tokio::spawn(async move {
-    workers::start_worker_pool(worker_receiver, worker_config).await;
+    workers::start_worker_pool(worker_receiver).await;
   });
 
   tracing::info!("Worker pool started");
 
   let app = router::create_router(state.clone());
 
-  let addr = format!("{}:{}", config.server.binding, config.server.port);
+  let addr = format!(
+    "{}:{}",
+    Config::get().server.binding,
+    Config::get().server.port
+  );
   let listener = tokio::net::TcpListener::bind(&addr)
     .await
     .unwrap_or_else(|_| panic!("Failed to bind to address: {}", addr));
 
   tracing::info!(
     "Server listening on {}:{}",
-    config.server.host,
-    config.server.port
+    Config::get().server.host,
+    Config::get().server.port
   );
 
   // Run server with graceful shutdown

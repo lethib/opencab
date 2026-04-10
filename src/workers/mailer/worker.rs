@@ -1,22 +1,21 @@
-use crate::{config::Config, models::my_errors::MyErrors, workers::mailer::args::EmailArgs};
+use crate::{models::my_errors::MyErrors, workers::mailer::args::EmailArgs};
 use lettre::{
   message::{header::ContentType, Attachment, Mailbox, MultiPart, SinglePart},
   transport::smtp::authentication::Credentials,
   AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
 };
-use std::sync::Arc;
 
-pub async fn process_email(args: EmailArgs, config: &Arc<Config>) -> Result<(), MyErrors> {
+pub async fn process_email(args: EmailArgs) -> Result<(), MyErrors> {
   tracing::info!("Start sending email to: {}", args.to);
 
-  let email = build_email(&args, config)?;
-  send_email(email, config).await?;
+  let email = build_email(&args)?;
+  send_email(email).await?;
 
   tracing::info!("Email sent successfully");
   Ok(())
 }
 
-fn build_email(args: &EmailArgs, _config: &Arc<Config>) -> Result<Message, MyErrors> {
+fn build_email(args: &EmailArgs) -> Result<Message, MyErrors> {
   let to: Mailbox = if let Some(name) = &args.to_name {
     format!("{} <{}>", name, args.to).parse()?
   } else {
@@ -68,7 +67,7 @@ fn build_multipart_body(
   Ok(builder.multipart(multipart)?)
 }
 
-async fn send_email(email: Message, _config: &Arc<Config>) -> Result<(), MyErrors> {
+async fn send_email(email: Message) -> Result<(), MyErrors> {
   let smtp_host = std::env::var("SMTP_SERVER_HOST")?;
   let smtp_port: u16 = std::env::var("SMTP_SERVER_PORT")?.parse()?;
   let smtp_user = std::env::var("SMTP_AUTH_USER")?;
