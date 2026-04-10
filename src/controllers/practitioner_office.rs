@@ -9,6 +9,7 @@ use serde::Deserialize;
 use crate::{
   app_state::AppState,
   auth::statement::AuthStatement,
+  db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
     _entities::practitioner_offices,
@@ -48,14 +49,14 @@ pub async fn create(
 
 #[debug_handler]
 pub async fn update(
-  State(state): State<AppState>,
+  State(_state): State<AppState>,
   authorize: AuthStatement,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Path(office_id): Path<i32>,
   Json(params): Json<OfficeParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   let office = practitioner_offices::Entity::find_by_id(office_id)
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -83,12 +84,12 @@ pub async fn update(
 
 #[debug_handler]
 pub async fn destroy(
-  State(state): State<AppState>,
+  State(_state): State<AppState>,
   authorize: AuthStatement,
   Path(office_id): Path<i32>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   let office = practitioner_offices::Entity::find_by_id(office_id)
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -97,7 +98,7 @@ pub async fn destroy(
     .await
     .run_complete()?;
 
-  office.clone().delete(&state.db).await?;
+  office.clone().delete(DB::get()).await?;
 
   Ok(Json(serde_json::json!({ "success": true })))
 }

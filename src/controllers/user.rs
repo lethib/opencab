@@ -1,5 +1,6 @@
 use crate::{
   app_state::{AppState, WorkerJob},
+  db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
     _entities::prelude::UserBusinessInformations,
@@ -45,10 +46,10 @@ pub async fn save_business_info(
 
 #[debug_handler]
 pub async fn my_offices(
-  State(state): State<AppState>,
+  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
 ) -> Result<Json<Vec<PractitionerOffice>>, MyErrors> {
-  let my_offices = current_user.get_my_offices(&state.db).await?;
+  let my_offices = current_user.get_my_offices(DB::get()).await?;
 
   let serialized_offices: Vec<PractitionerOffice> = my_offices
     .iter()
@@ -125,7 +126,7 @@ pub async fn get_signature_url(
 
 #[debug_handler]
 pub async fn upload_signature(
-  State(state): State<AppState>,
+  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   mut multipart: Multipart,
 ) -> Result<status::StatusCode, MyErrors> {
@@ -174,13 +175,13 @@ pub async fn upload_signature(
 
   let mut business_information = current_user
     .find_related(UserBusinessInformations)
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::UnprocessableEntity)?
     .into_active_model();
 
   business_information.signature_file_name = ActiveValue::Set(Some(filename));
-  business_information.update(&state.db).await?;
+  business_information.update(DB::get()).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }

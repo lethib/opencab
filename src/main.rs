@@ -1,3 +1,4 @@
+use opencab::db;
 use tokio::signal;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -5,7 +6,6 @@ mod app_state;
 mod auth;
 mod config;
 mod controllers;
-mod initializers;
 mod middleware;
 mod models;
 mod router;
@@ -39,11 +39,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .expect("Failed to connect to database");
   tracing::info!("Connected to database");
 
-  let (worker_transmitter, worker_receiver) = workers::create_worker_channel();
-  let state = AppState::new(db.clone(), config.clone(), worker_transmitter);
+  db::LOCK.set(db).expect("Failed to load DB");
 
-  // Initialize global services
-  initializers::app_services::init_services(&db);
+  let (worker_transmitter, worker_receiver) = workers::create_worker_channel();
+  let state = AppState::new(config.clone(), worker_transmitter);
 
   let worker_config = state.config.clone();
   tokio::spawn(async move {

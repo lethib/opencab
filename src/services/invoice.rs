@@ -1,6 +1,6 @@
 use crate::{
   app_state::{AppState, WorkerJob},
-  initializers::get_services,
+  db::DB,
   models::{
     _entities::{
       patients, practitioner_offices::Entity as PractitionerOffices, user_business_informations,
@@ -90,11 +90,9 @@ pub async fn generate_patient_invoice(
   current_user: &users::Model,
   is_duplicate: bool,
 ) -> Result<GenerateInvoiceResponse, MyErrors> {
-  let services = get_services();
-
   let patient = patients::Entity::find_by_id(*patient_id)
     .filter(patients::Column::UserId.eq(current_user.id))
-    .one(&services.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -110,7 +108,7 @@ pub async fn generate_patient_invoice(
   );
 
   let practitioner_office = PractitionerOffices::find_by_id(params.office_id)
-    .one(&services.db)
+    .one(DB::get())
     .await?
     .ok_or(UnexpectedError::ShouldNotHappen)?;
 
@@ -123,7 +121,7 @@ pub async fn generate_patient_invoice(
     is_duplicate,
   };
 
-  let pdf_data = workers::invoice_generator::generate_invoice_pdf(&services.db, &args).await?;
+  let pdf_data = workers::invoice_generator::generate_invoice_pdf(&args).await?;
 
   Ok(GenerateInvoiceResponse {
     pdf_data,

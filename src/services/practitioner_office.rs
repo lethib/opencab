@@ -4,7 +4,7 @@ use sea_orm::{
 };
 
 use crate::{
-  initializers::get_services,
+  db::DB,
   models::{
     _entities::{practitioner_offices, user_practitioner_offices},
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
@@ -20,8 +20,6 @@ pub async fn update(
   linked_practitioner: &users::Model,
   revenue_share_percentage: Decimal,
 ) -> Result<(), MyErrors> {
-  let services = get_services();
-
   let office_id = office
     .id
     .clone()
@@ -31,7 +29,7 @@ pub async fn update(
   let mut user_practitioner_office = user_practitioner_offices::Entity::find()
     .filter(user_practitioner_offices::Column::PractitionerOfficeId.eq(office_id))
     .filter(user_practitioner_offices::Column::UserId.eq(linked_practitioner.id))
-    .one(&services.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?
     .into_active_model();
@@ -43,7 +41,7 @@ pub async fn update(
 
   user_practitioner_office.revenue_share_percentage = Set(revenue_share_percentage);
 
-  let db_transaction = services.db.begin().await?;
+  let db_transaction = DB::get().begin().await?;
 
   office.update(&db_transaction).await?;
   user_practitioner_office.update(&db_transaction).await?;
@@ -58,9 +56,7 @@ pub async fn create(
   linked_practitioner: &users::Model,
   revenue_share_percentage: Decimal,
 ) -> Result<(), MyErrors> {
-  let services = get_services();
-
-  let db_transaction = services.db.begin().await?;
+  let db_transaction = DB::get().begin().await?;
 
   let created_practitioner_office =
     practitioner_offices::ActiveModel::create(&db_transaction, params).await?;

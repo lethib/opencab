@@ -1,5 +1,6 @@
 use crate::{
   app_state::AppState,
+  db::DB,
   auth::{
     jwt::{JwtService, TOKEN_TYPE_AUTH},
     statement::AuthStatement,
@@ -92,7 +93,7 @@ impl AuthContext {
       return (None, Some(AuthenticationError::InvalidToken));
     }
 
-    let user_result = match users::Model::find_by_pid(&state.db, &claims.pid).await {
+    let user_result = match users::Model::find_by_pid(DB::get(), &claims.pid).await {
       Ok(user) => user,
       Err(_) => return (None, Some(AuthenticationError::InvalidClaims)),
     };

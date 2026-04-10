@@ -2,6 +2,7 @@ use sea_orm::{entity::prelude::*, ActiveValue};
 
 use crate::{
   auth::resource::Resource,
+  db::DB,
   models::{
     _entities::sea_orm_active_enums::PaymentMethod,
     my_errors::{unexpected_error::UnexpectedError, MyErrors},
@@ -45,13 +46,10 @@ impl ActiveModelBehavior for ActiveModel {
 
 // implement your read-oriented logic here
 impl Model {
-  pub async fn practitioner_office(
-    &self,
-    db: &DatabaseConnection,
-  ) -> Result<practitioner_offices::Model, MyErrors> {
+  pub async fn practitioner_office(&self) -> Result<practitioner_offices::Model, MyErrors> {
     self
       .find_related(practitioner_offices::Entity)
-      .one(db)
+      .one(DB::get())
       .await?
       .ok_or(UnexpectedError::ShouldNotHappen.into())
   }

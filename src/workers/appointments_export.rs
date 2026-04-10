@@ -1,5 +1,6 @@
 use crate::{
   app_state::{AppState, WorkerJob},
+  db::DB,
   models::{
     my_errors::{unexpected_error::UnexpectedError, MyErrors},
     users::users,
@@ -36,7 +37,7 @@ pub async fn process_accountability_generation(
     NaiveDate::from_ymd_opt(args.year as i32, 12, 31).ok_or(UnexpectedError::ShouldNotHappen)?;
 
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
-    .extract(&state.db, start_date, end_date)
+    .extract(DB::get(), start_date, end_date)
     .await?
     .generate_accountability()?;
 
@@ -83,7 +84,7 @@ pub async fn process_appointment_extraction(
   state: AppState,
 ) -> Result<(), MyErrors> {
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
-    .extract(&state.db, args.start_date, args.end_date)
+    .extract(DB::get(), args.start_date, args.end_date)
     .await?
     .export_appointments()?;
 
