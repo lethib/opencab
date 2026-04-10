@@ -4,13 +4,13 @@ use oxidize_pdf::text::Font;
 use oxidize_pdf::{Document, Page};
 use serde::Serialize;
 
+use crate::db::DB;
 use crate::models::{
   _entities::{patients, practitioner_offices, user_business_informations, users},
   my_errors::{application_error::ApplicationError, MyErrors},
 };
 use crate::services::storage::StorageService;
 use sea_orm::{prelude::Date, ColumnTrait, EntityTrait, QueryFilter};
-use crate::db::DB;
 
 /// Conversion constant: millimeters to points
 /// PDF uses points (72 per inch), we use mm for convenience

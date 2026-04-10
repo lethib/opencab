@@ -1,8 +1,4 @@
-use axum::{
-  debug_handler,
-  extract::Path,
-  Json,
-};
+use axum::{debug_handler, extract::Path, Json};
 use sea_orm::{prelude::Decimal, EntityTrait, IntoActiveModel, ModelTrait};
 use serde::Deserialize;
 

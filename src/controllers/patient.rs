@@ -173,12 +173,8 @@ pub async fn generate_invoice(
   if params.should_be_sent_by_email {
     match &user_bi {
       Some(business_information) => {
-        services::invoice::send_invoice(
-          &invoice_generated,
-          &current_user,
-          business_information,
-        )
-        .await?
+        services::invoice::send_invoice(&invoice_generated, &current_user, business_information)
+          .await?
       }
       None => return Err(ApplicationError::UnprocessableEntity.into()),
     }

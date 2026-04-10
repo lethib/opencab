@@ -1,9 +1,4 @@
-use axum::{
-  debug_handler,
-  extract::Path,
-  http::status,
-  Json,
-};
+use axum::{debug_handler, extract::Path, http::status, Json};
 use chrono::NaiveDate;
 use reqwest::StatusCode;
 use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};

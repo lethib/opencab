@@ -5,8 +5,8 @@ use crate::{
     users::users,
   },
   services::appointments::{MedicalAppointmentExtractor, ToExcel},
-  workers::{WorkerJob, WorkerTransmitter},
   workers::mailer::{args::EmailArgs, attachment::EmailAttachment},
+  workers::{WorkerJob, WorkerTransmitter},
 };
 use chrono::NaiveDate;
 use rust_xlsxwriter::Workbook;

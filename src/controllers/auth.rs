@@ -16,8 +16,8 @@ use crate::{
   },
   services::{self},
   views::auth::{CurrentResponse, LoginResponse},
-  workers::{WorkerJob, WorkerTransmitter},
   workers::mailer::args::EmailArgs,
+  workers::{WorkerJob, WorkerTransmitter},
 };
 use axum::{
   debug_handler,

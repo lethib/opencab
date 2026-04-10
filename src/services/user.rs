@@ -1,7 +1,4 @@
-use crate::{
-  db::DB,
-  models::_entities::user_business_informations::ActiveModel,
-};
+use crate::{db::DB, models::_entities::user_business_informations::ActiveModel};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, DbErr, IntoActiveModel, ModelTrait};
 
 use crate::models::{
