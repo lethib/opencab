@@ -11,7 +11,6 @@ mod router;
 mod services;
 mod validators;
 mod views;
-mod worker_transmitter;
 mod workers;
 
 use config::Config;
@@ -42,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   db::LOCK.set(db).expect("Failed to load DB");
 
   let (worker_transmitter, worker_receiver) = workers::create_worker_channel();
-  worker_transmitter::LOCK
+  workers::LOCK
     .set(worker_transmitter)
     .expect("Failed to set WorkerTransmitter");
 

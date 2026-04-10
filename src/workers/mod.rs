@@ -1,4 +1,4 @@
-use crate::worker_transmitter::WorkerJob;
+use std::sync::OnceLock;
 use tokio::sync::mpsc;
 
 pub mod appointments_export;
@@ -8,7 +8,22 @@ pub mod mailer;
 
 const WORKER_CHANNEL_SIZE: usize = 100;
 
-/// Create a new worker channel for background job processing
+pub static LOCK: OnceLock<mpsc::Sender<WorkerJob>> = OnceLock::new();
+
+pub struct WorkerTransmitter {}
+impl WorkerTransmitter {
+  pub fn get() -> &'static mpsc::Sender<WorkerJob> {
+    LOCK.get().expect("WorkerTransmitter not initialized")
+  }
+}
+
+#[derive(Debug, Clone)]
+pub enum WorkerJob {
+  Email(mailer::args::EmailArgs),
+  AppointmentExport(appointments_export::AppointmentExtractorArgs),
+  AccountabilityGeneration(appointments_export::AccountabilityGenerationArgs),
+}
+
 pub fn create_worker_channel() -> (mpsc::Sender<WorkerJob>, mpsc::Receiver<WorkerJob>) {
   mpsc::channel(WORKER_CHANNEL_SIZE)
 }

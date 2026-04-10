@@ -8,7 +8,7 @@ use crate::{
   },
   services::{self, storage::StorageService},
   views::practitioner_office::PractitionerOffice,
-  worker_transmitter::{WorkerJob, WorkerTransmitter},
+  workers::{WorkerJob, WorkerTransmitter},
   workers::appointments_export,
 };
 use axum::{debug_handler, extract::Multipart, http::status, Json};

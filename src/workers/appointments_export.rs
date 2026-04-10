@@ -5,7 +5,7 @@ use crate::{
     users::users,
   },
   services::appointments::{MedicalAppointmentExtractor, ToExcel},
-  worker_transmitter::{WorkerJob, WorkerTransmitter},
+  workers::{WorkerJob, WorkerTransmitter},
   workers::mailer::{args::EmailArgs, attachment::EmailAttachment},
 };
 use chrono::NaiveDate;

@@ -8,5 +8,4 @@ pub mod router;
 pub mod services;
 pub mod validators;
 pub mod views;
-pub mod worker_transmitter;
 pub mod workers;

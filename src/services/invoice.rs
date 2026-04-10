@@ -7,7 +7,7 @@ use crate::{
     },
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
   },
-  worker_transmitter::{WorkerJob, WorkerTransmitter},
+  workers::{WorkerJob, WorkerTransmitter},
   workers::{
     self,
     invoice_generator::InvoiceGeneratorArgs,
