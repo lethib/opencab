@@ -1,9 +1,10 @@
 use crate::{
-  app_state::{AppState, WorkerJob},
   auth::{
     jwt::{JwtService, TOKEN_TYPE_AUTH, TOKEN_TYPE_PASSWORD_RESET},
     statement::AuthStatement,
   },
+  config::Config,
+  db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
     _entities::users,
@@ -16,10 +17,10 @@ use crate::{
   services::{self},
   views::auth::{CurrentResponse, LoginResponse},
   workers::mailer::args::EmailArgs,
+  workers::{WorkerJob, WorkerTransmitter},
 };
 use axum::{
   debug_handler,
-  extract::State,
   http::{self, StatusCode},
   Json,
 };
@@ -39,37 +40,36 @@ pub struct ResetParams {
 
 #[debug_handler]
 pub async fn register(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<RegisterParams>,
 ) -> Result<Json<()>, MyErrors> {
   authorize.non_authenticated_user().run_complete()?;
 
-  users::Model::create_with_password(&state.db, &params).await?;
+  users::Model::create_with_password(DB::get(), &params).await?;
 
   Ok(Json(()))
 }
 
 #[debug_handler]
 pub async fn forgot(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<ForgotParams>,
 ) -> Result<http::StatusCode, MyErrors> {
   authorize.non_authenticated_user().run_complete()?;
 
-  let Ok(user) = users::Model::find_by_email(&state.db, &params.email).await else {
+  let Ok(user) = users::Model::find_by_email(DB::get(), &params.email).await else {
     return Ok(http::StatusCode::NO_CONTENT);
   };
 
-  let jwt_service = JwtService::new(&state.config.jwt.secret);
+  let jwt_service = JwtService::new(&Config::get().jwt.secret);
   let secured_token = jwt_service
     .generate_token(&user.pid.to_string(), TOKEN_TYPE_PASSWORD_RESET, 900)
     .map_err(|_| UnexpectedError::ShouldNotHappen)?;
 
   let secured_url = format!(
     "{}/reset_password?access_token={}",
-    state.config.app.base_url, secured_token
+    Config::get().app.base_url,
+    secured_token
   );
 
   let email_args = EmailArgs::new_text(
@@ -81,8 +81,7 @@ pub async fn forgot(
     ),
   );
 
-  state
-    .worker_transmitter
+  WorkerTransmitter::get()
     .send(WorkerJob::Email(email_args))
     .await?;
 
@@ -91,13 +90,12 @@ pub async fn forgot(
 
 #[debug_handler]
 pub async fn reset(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<ResetParams>,
 ) -> Result<Json<()>, MyErrors> {
   authorize.non_authenticated_user().run_complete()?;
 
-  let jwt_service = JwtService::new(&state.config.jwt.secret);
+  let jwt_service = JwtService::new(&Config::get().jwt.secret);
   let claims = jwt_service
     .validate_token(&params.token)
     .map_err(|_| AuthenticationError::InvalidToken)?;
@@ -106,14 +104,14 @@ pub async fn reset(
     return Err(AuthenticationError::InvalidToken.into());
   }
 
-  let user = users::Model::find_by_pid(&state.db, &claims.pid)
+  let user = users::Model::find_by_pid(DB::get(), &claims.pid)
     .await
     .map_err(|_| AuthenticationError::InvalidClaims)?;
 
   user
     .0
     .into_active_model()
-    .update_password(&state.db, &params.password)
+    .update_password(DB::get(), &params.password)
     .await?;
 
   Ok(Json(()))
@@ -122,13 +120,12 @@ pub async fn reset(
 /// Creates a user login and returns a token
 #[debug_handler]
 pub async fn login(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<LoginParams>,
 ) -> Result<Json<LoginResponse>, MyErrors> {
   authorize.non_authenticated_user().run_complete()?;
 
-  let user = users::Model::find_by_email(&state.db, &params.email)
+  let user = users::Model::find_by_email(DB::get(), &params.email)
     .await
     .map_err(|_| AuthenticationError::InvalidCredentials)?;
 
@@ -145,12 +142,12 @@ pub async fn login(
     });
   }
 
-  let jwt_service = JwtService::new(&state.config.jwt.secret);
+  let jwt_service = JwtService::new(&Config::get().jwt.secret);
   let token = jwt_service
     .generate_token(
       &user.pid.to_string(),
       TOKEN_TYPE_AUTH,
-      state.config.jwt.expiration,
+      Config::get().jwt.expiration,
     )
     .map_err(|_| MyErrors {
       code: StatusCode::UNAUTHORIZED,
@@ -163,7 +160,6 @@ pub async fn login(
 /// Get current authenticated user
 #[debug_handler]
 pub async fn me(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, business_info): AuthenticatedUser,
 ) -> Result<Json<CurrentResponse>, MyErrors> {
   Ok(Json(CurrentResponse::new(&(current_user, business_info))))
@@ -177,25 +173,24 @@ pub struct CheckAccessKeyParams {
 
 #[debug_handler]
 pub async fn check_access_key(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Json(params): Json<CheckAccessKeyParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   authorize.non_authenticated_user().run_complete()?;
 
-  let user = users::Model::find_by_email(&state.db, &params.user_email)
+  let user = users::Model::find_by_email(DB::get(), &params.user_email)
     .await
     .map_err(|_| UnexpectedError::ShouldNotHappen)?;
 
   if services::user::check_access_key(&user, params.access_key) {
-    users::ActiveModel::enable_access(&mut user.clone().into_active_model(), &state.db).await?;
+    users::ActiveModel::enable_access(&mut user.clone().into_active_model(), DB::get()).await?;
 
-    let jwt_service = JwtService::new(&state.config.jwt.secret);
+    let jwt_service = JwtService::new(&Config::get().jwt.secret);
     let token = jwt_service
       .generate_token(
         &user.pid.to_string(),
         TOKEN_TYPE_AUTH,
-        state.config.jwt.expiration,
+        Config::get().jwt.expiration,
       )
       .map_err(|error| UnexpectedError::new(error.to_string()))?;
 

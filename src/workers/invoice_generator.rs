@@ -4,12 +4,13 @@ use oxidize_pdf::text::Font;
 use oxidize_pdf::{Document, Page};
 use serde::Serialize;
 
+use crate::db::DB;
 use crate::models::{
   _entities::{patients, practitioner_offices, user_business_informations, users},
   my_errors::{application_error::ApplicationError, MyErrors},
 };
 use crate::services::storage::StorageService;
-use sea_orm::{prelude::Date, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{prelude::Date, ColumnTrait, EntityTrait, QueryFilter};
 
 /// Conversion constant: millimeters to points
 /// PDF uses points (72 per inch), we use mm for convenience
@@ -32,7 +33,6 @@ pub struct InvoiceGeneratorArgs {
 
 /// Generate an invoice PDF based on the French invoice template
 pub async fn generate_invoice_pdf(
-  db: &DatabaseConnection,
   args: &InvoiceGeneratorArgs,
 ) -> std::result::Result<Vec<u8>, MyErrors> {
   // Initialize storage service for signature fetching
@@ -50,7 +50,7 @@ pub async fn generate_invoice_pdf(
   // Fetch business information separately
   let business_info = user_business_informations::Entity::find()
     .filter(user_business_informations::Column::UserId.eq(args.user.id))
-    .one(db)
+    .one(DB::get())
     .await?
     .ok_or_else(|| MyErrors {
       code: StatusCode::BAD_REQUEST,

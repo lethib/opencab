@@ -1,11 +1,12 @@
 use crate::{
-  app_state::{AppState, WorkerJob},
+  db::DB,
   models::{
     my_errors::{unexpected_error::UnexpectedError, MyErrors},
     users::users,
   },
   services::appointments::{MedicalAppointmentExtractor, ToExcel},
   workers::mailer::{args::EmailArgs, attachment::EmailAttachment},
+  workers::{WorkerJob, WorkerTransmitter},
 };
 use chrono::NaiveDate;
 use rust_xlsxwriter::Workbook;
@@ -28,7 +29,6 @@ const EXCEL_CONTENT_TYPE: &str =
 
 pub async fn process_accountability_generation(
   args: AccountabilityGenerationArgs,
-  state: AppState,
 ) -> Result<(), MyErrors> {
   let start_date =
     NaiveDate::from_ymd_opt(args.year as i32, 1, 1).ok_or(UnexpectedError::ShouldNotHappen)?;
@@ -36,11 +36,11 @@ pub async fn process_accountability_generation(
     NaiveDate::from_ymd_opt(args.year as i32, 12, 31).ok_or(UnexpectedError::ShouldNotHappen)?;
 
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
-    .extract(&state.db, start_date, end_date)
+    .extract(DB::get(), start_date, end_date)
     .await?
     .generate_accountability()?;
 
-  send_accountability_by_mail(workbook, args.user.email, args.year, state).await?;
+  send_accountability_by_mail(workbook, args.user.email, args.year).await?;
 
   Ok(())
 }
@@ -49,7 +49,6 @@ async fn send_accountability_by_mail(
   mut workbook: Workbook,
   to: String,
   year: u16,
-  state: AppState,
 ) -> Result<(), MyErrors> {
   let wb_buffer = workbook.save_to_buffer()?;
 
@@ -69,8 +68,7 @@ async fn send_accountability_by_mail(
   )
   .with_attachment(workbook_attachment);
 
-  state
-    .worker_transmitter
+  WorkerTransmitter::get()
     .send(WorkerJob::Email(email_args))
     .await
     .map_err(|_| UnexpectedError::ShouldNotHappen)?;
@@ -80,21 +78,14 @@ async fn send_accountability_by_mail(
 
 pub async fn process_appointment_extraction(
   args: AppointmentExtractorArgs,
-  state: AppState,
 ) -> Result<(), MyErrors> {
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
-    .extract(&state.db, args.start_date, args.end_date)
+    .extract(DB::get(), args.start_date, args.end_date)
     .await?
     .export_appointments()?;
 
-  send_appointment_export_by_mail(
-    workbook,
-    args.user.email,
-    args.start_date,
-    args.end_date,
-    state,
-  )
-  .await?;
+  send_appointment_export_by_mail(workbook, args.user.email, args.start_date, args.end_date)
+    .await?;
 
   Ok(())
 }
@@ -104,7 +95,6 @@ async fn send_appointment_export_by_mail(
   to: String,
   start_date: NaiveDate,
   end_date: NaiveDate,
-  state: AppState,
 ) -> Result<(), MyErrors> {
   let wb_buffer = workbook.save_to_buffer()?;
 
@@ -130,8 +120,7 @@ async fn send_appointment_export_by_mail(
   )
   .with_attachment(workbook_attachment);
 
-  state
-    .worker_transmitter
+  WorkerTransmitter::get()
     .send(WorkerJob::Email(email_args))
     .await
     .map_err(|_| UnexpectedError::ShouldNotHappen)?;

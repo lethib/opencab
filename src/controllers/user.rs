@@ -1,5 +1,5 @@
 use crate::{
-  app_state::{AppState, WorkerJob},
+  db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
     _entities::prelude::UserBusinessInformations,
@@ -9,13 +9,9 @@ use crate::{
   services::{self, storage::StorageService},
   views::practitioner_office::PractitionerOffice,
   workers::appointments_export,
+  workers::{WorkerJob, WorkerTransmitter},
 };
-use axum::{
-  debug_handler,
-  extract::{Multipart, State},
-  http::status,
-  Json,
-};
+use axum::{debug_handler, extract::Multipart, http::status, Json};
 use chrono::{Datelike, NaiveDate, Utc};
 use image::{imageops::FilterType, ImageFormat};
 use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel, ModelTrait};
@@ -34,7 +30,6 @@ pub struct GenerateAccountabilityParams {
 
 #[debug_handler]
 pub async fn save_business_info(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Json(business_information): Json<CreateBusinessInformation>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
@@ -45,10 +40,9 @@ pub async fn save_business_info(
 
 #[debug_handler]
 pub async fn my_offices(
-  State(state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
 ) -> Result<Json<Vec<PractitionerOffice>>, MyErrors> {
-  let my_offices = current_user.get_my_offices(&state.db).await?;
+  let my_offices = current_user.get_my_offices(DB::get()).await?;
 
   let serialized_offices: Vec<PractitionerOffice> = my_offices
     .iter()
@@ -60,7 +54,6 @@ pub async fn my_offices(
 
 #[debug_handler]
 pub async fn generate_accountability(
-  State(state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Json(params): Json<GenerateAccountabilityParams>,
 ) -> Result<status::StatusCode, MyErrors> {
@@ -74,9 +67,8 @@ pub async fn generate_accountability(
     year: params.year,
   };
 
-  state
-    .worker_transmitter
-    .send(WorkerJob::AccountabilityGeneration(args, state.clone()))
+  WorkerTransmitter::get()
+    .send(WorkerJob::AccountabilityGeneration(args))
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
@@ -84,7 +76,6 @@ pub async fn generate_accountability(
 
 #[debug_handler]
 pub async fn extract_medical_appointments(
-  State(state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Json(params): Json<ExtractMedicalAppointmentsParams>,
 ) -> Result<status::StatusCode, MyErrors> {
@@ -101,9 +92,8 @@ pub async fn extract_medical_appointments(
     end_date,
   };
 
-  state
-    .worker_transmitter
-    .send(WorkerJob::AppointmentExport(args, state.clone()))
+  WorkerTransmitter::get()
+    .send(WorkerJob::AppointmentExport(args))
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
@@ -111,7 +101,6 @@ pub async fn extract_medical_appointments(
 
 #[debug_handler]
 pub async fn get_signature_url(
-  State(_state): State<AppState>,
   AuthenticatedUser(_current_user, user_bi): AuthenticatedUser,
 ) -> Result<String, MyErrors> {
   let storage = StorageService::new()?;
@@ -125,7 +114,6 @@ pub async fn get_signature_url(
 
 #[debug_handler]
 pub async fn upload_signature(
-  State(state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   mut multipart: Multipart,
 ) -> Result<status::StatusCode, MyErrors> {
@@ -174,13 +162,13 @@ pub async fn upload_signature(
 
   let mut business_information = current_user
     .find_related(UserBusinessInformations)
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::UnprocessableEntity)?
     .into_active_model();
 
   business_information.signature_file_name = ActiveValue::Set(Some(filename));
-  business_information.update(&state.db).await?;
+  business_information.update(DB::get()).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }

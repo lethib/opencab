@@ -1,17 +1,12 @@
-use axum::{
-  debug_handler,
-  extract::{Path, State},
-  http::status,
-  Json,
-};
+use axum::{debug_handler, extract::Path, http::status, Json};
 use chrono::NaiveDate;
 use reqwest::StatusCode;
 use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};
 use serde::Deserialize;
 
 use crate::{
-  app_state::AppState,
   auth::statement::AuthStatement,
+  db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
     _entities::{medical_appointments, sea_orm_active_enums::PaymentMethod},
@@ -30,13 +25,12 @@ pub struct MedicalAppointmentPayload {
 }
 
 pub async fn delete(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
 ) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -45,21 +39,20 @@ pub async fn delete(
     .await
     .run_complete()?;
 
-  medical_appointment.delete(&state.db).await?;
+  medical_appointment.delete(DB::get()).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
 
 #[debug_handler]
 pub async fn generate_invoice(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   AuthenticatedUser(current_user, user_business_info): AuthenticatedUser,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
 ) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -75,7 +68,7 @@ pub async fn generate_invoice(
   let invoice_generation_params = GenerateInvoiceParams {
     amount: medical_appointment.price_in_cents as f32 / 100.0,
     date: medical_appointment.date.format("%Y-%m-%d").to_string(),
-    office_id: medical_appointment.practitioner_office(&state.db).await?.id,
+    office_id: medical_appointment.practitioner_office(DB::get()).await?.id,
   };
 
   let generated_invoice = services::invoice::generate_patient_invoice(
@@ -90,22 +83,20 @@ pub async fn generate_invoice(
     return Err(ApplicationError::new("no_email_set_on_patient").into());
   }
 
-  services::invoice::send_invoice(&state, &generated_invoice, &current_user, &business_info)
-    .await?;
+  services::invoice::send_invoice(&generated_invoice, &current_user, &business_info).await?;
 
   Ok(StatusCode::NO_CONTENT)
 }
 
 #[debug_handler]
 pub async fn update(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
   Json(params): Json<MedicalAppointmentPayload>,
 ) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -126,7 +117,7 @@ pub async fn update(
 
   medical_appointment
     .into_active_model()
-    .update(&state.db, &medical_appointments_params)
+    .update(DB::get(), &medical_appointments_params)
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
@@ -134,7 +125,6 @@ pub async fn update(
 
 #[debug_handler]
 pub async fn create(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Path(patient_id): Path<i32>,
@@ -154,7 +144,7 @@ pub async fn create(
     payment_method: params.payment_method,
   };
 
-  medical_appointments::ActiveModel::create(&state.db, &medical_appointments_params).await?;
+  medical_appointments::ActiveModel::create(DB::get(), &medical_appointments_params).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }

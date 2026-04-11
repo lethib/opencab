@@ -45,9 +45,9 @@ impl ActiveModelBehavior for ActiveModel {
 
 // implement your read-oriented logic here
 impl Model {
-  pub async fn practitioner_office(
+  pub async fn practitioner_office<C: ConnectionTrait>(
     &self,
-    db: &DatabaseConnection,
+    db: &C,
   ) -> Result<practitioner_offices::Model, MyErrors> {
     self
       .find_related(practitioner_offices::Entity)

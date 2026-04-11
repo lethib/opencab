@@ -1,6 +1,6 @@
 use axum::{
   debug_handler,
-  extract::{Path, Query, State},
+  extract::{Path, Query},
   http::status,
   Json,
 };
@@ -16,8 +16,8 @@ pub struct SearchParams {
 }
 
 use crate::{
-  app_state::AppState,
   auth::statement::AuthStatement,
+  db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
     _entities::{
@@ -33,12 +33,11 @@ use crate::{
 
 #[debug_handler]
 pub async fn get(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Path(patient_id): Path<i32>,
 ) -> Result<Json<PatientResponse>, MyErrors> {
   let patient = patients::Entity::find_by_id(patient_id)
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -52,7 +51,6 @@ pub async fn get(
 
 #[debug_handler]
 pub async fn create(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Json(create_patient_params): Json<CreatePatientParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
@@ -63,13 +61,12 @@ pub async fn create(
 
 #[debug_handler]
 pub async fn update(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Path(patient_id): Path<i32>,
   Json(patient_params): Json<CreatePatientParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   let patient = patients::Entity::find_by_id(patient_id)
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -85,12 +82,11 @@ pub async fn update(
 
 #[debug_handler]
 pub async fn delete(
-  State(state): State<AppState>,
   authorize: AuthStatement,
   Path(patient_id): Path<i32>,
 ) -> Result<status::StatusCode, MyErrors> {
   let patient = patients::Entity::find_by_id(patient_id)
-    .one(&state.db)
+    .one(DB::get())
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
@@ -99,14 +95,13 @@ pub async fn delete(
     .await
     .run_complete()?;
 
-  patient.delete(&state.db).await?;
+  patient.delete(DB::get()).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
 
 #[debug_handler]
 pub async fn search(
-  State(_state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Query(params): Query<SearchParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
@@ -144,7 +139,6 @@ pub struct InvoiceGenerationParams {
 
 #[debug_handler]
 pub async fn generate_invoice(
-  State(state): State<AppState>,
   AuthenticatedUser(current_user, user_bi): AuthenticatedUser,
   Path(patient_id): Path<i32>,
   Json(params): Json<InvoiceGenerationParams>,
@@ -174,18 +168,13 @@ pub async fn generate_invoice(
     price_in_cents: (params.invoice_params.amount * 100.0).round() as i32,
   };
 
-  MedicalAppointments::create(&state.db, &medical_appointment_params).await?;
+  MedicalAppointments::create(DB::get(), &medical_appointment_params).await?;
 
   if params.should_be_sent_by_email {
     match &user_bi {
       Some(business_information) => {
-        services::invoice::send_invoice(
-          &state,
-          &invoice_generated,
-          &current_user,
-          business_information,
-        )
-        .await?
+        services::invoice::send_invoice(&invoice_generated, &current_user, business_information)
+          .await?
       }
       None => return Err(ApplicationError::UnprocessableEntity.into()),
     }
@@ -199,7 +188,6 @@ pub async fn generate_invoice(
 
 #[debug_handler]
 pub async fn get_medical_appointments(
-  State(state): State<AppState>,
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Path(patient_id): Path<i32>,
 ) -> Result<Json<Vec<MedicalAppointmentResponse>>, MyErrors> {
@@ -208,7 +196,7 @@ pub async fn get_medical_appointments(
     .filter(medical_appointments::Column::UserId.eq(current_user.id))
     .order_by_desc(medical_appointments::Column::Date)
     .find_also_related(practitioner_offices::Entity)
-    .all(&state.db)
+    .all(DB::get())
     .await?
     .into_iter()
     .map(|appointment| {

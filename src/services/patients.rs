@@ -1,4 +1,4 @@
-use crate::initializers::get_services;
+use crate::db::DB;
 use crate::models::_entities::patients;
 use crate::models::{
   my_errors::MyErrors,
@@ -12,10 +12,8 @@ pub async fn create(
   patient_params: &CreatePatientParams,
   linked_to_user: &users::Model,
 ) -> Result<PatientModel, MyErrors> {
-  let services = get_services();
-
   let created_patient =
-    patients::ActiveModel::create(&services.db, patient_params, linked_to_user.id).await?;
+    patients::ActiveModel::create(DB::get(), patient_params, linked_to_user.id).await?;
 
   Ok(created_patient)
 }
@@ -24,9 +22,7 @@ pub async fn update(
   patient: &patients::Model,
   patient_params: &CreatePatientParams,
 ) -> Result<(), MyErrors> {
-  let services = get_services();
-
-  patients::ActiveModel::update(&services.db, patient.id, patient_params).await?;
+  patients::ActiveModel::update(DB::get(), patient.id, patient_params).await?;
 
   Ok(())
 }
@@ -36,7 +32,7 @@ pub async fn search_paginated(
   page: u64,
   user: &users::Model,
 ) -> Result<(Vec<PatientModel>, u64), MyErrors> {
-  let db = &get_services().db;
+  let db = DB::get();
 
   // Build search condition for first_name and last_name (case-insensitive)
   let search_condition = Condition::any()

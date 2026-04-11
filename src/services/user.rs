@@ -1,6 +1,4 @@
-use crate::{
-  initializers::get_services, models::_entities::user_business_informations::ActiveModel,
-};
+use crate::{db::DB, models::_entities::user_business_informations::ActiveModel};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, DbErr, IntoActiveModel, ModelTrait};
 
 use crate::models::{
@@ -12,11 +10,9 @@ pub async fn save_business_information(
   params: &CreateBusinessInformation,
   concerned_user: &users::Model,
 ) -> Result<(), DbErr> {
-  let services = get_services();
-
   let business_info = concerned_user
     .find_related(user_business_informations::Entity)
-    .one(&services.db)
+    .one(DB::get())
     .await?;
 
   match business_info {
@@ -28,11 +24,11 @@ pub async fn save_business_information(
       business_information.adeli_number = Set(params.adeli_number.clone());
       business_information.profession = Set(params.profession_enum()?);
 
-      business_information.update(&services.db).await?;
+      business_information.update(DB::get()).await?;
       Ok(())
     }
     None => {
-      ActiveModel::create(&services.db, params, &concerned_user.id).await?;
+      ActiveModel::create(DB::get(), params, &concerned_user.id).await?;
       Ok(())
     }
   }
