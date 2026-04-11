@@ -8,10 +8,15 @@ pub mod mailer;
 
 const WORKER_CHANNEL_SIZE: usize = 100;
 
-pub static LOCK: OnceLock<mpsc::Sender<WorkerJob>> = OnceLock::new();
+static LOCK: OnceLock<mpsc::Sender<WorkerJob>> = OnceLock::new();
 
 pub struct WorkerTransmitter {}
 impl WorkerTransmitter {
+  pub fn init(wt: mpsc::Sender<WorkerJob>) {
+    LOCK
+      .set(wt)
+      .expect("Failed to initiallize WorkerTransmitter");
+  }
   pub fn get() -> &'static mpsc::Sender<WorkerJob> {
     LOCK.get().expect("WorkerTransmitter not initialized")
   }

@@ -1,4 +1,4 @@
-use opencab::db;
+use opencab::db::{self, DB};
 use tokio::signal;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -15,13 +15,15 @@ mod workers;
 
 use config::Config;
 
+use crate::workers::WorkerTransmitter;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
   dotenvy::from_filename(".env.local").ok();
 
   let environment = std::env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string());
   let config = Config::load(&environment).expect("Failed to load configuration");
-  config::LOCK.set(config).expect("Failed to set config");
+  Config::init(config);
 
   setup_logging(&Config::get().logger.level, &Config::get().logger.format);
 
@@ -38,12 +40,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .expect("Failed to connect to database");
   tracing::info!("Connected to database");
 
-  db::LOCK.set(db).expect("Failed to load DB");
+  DB::init(db);
 
   let (worker_transmitter, worker_receiver) = workers::create_worker_channel();
-  workers::LOCK
-    .set(worker_transmitter)
-    .expect("Failed to set WorkerTransmitter");
+  WorkerTransmitter::init(worker_transmitter);
 
   tokio::spawn(async move {
     workers::start_worker_pool(worker_receiver).await;

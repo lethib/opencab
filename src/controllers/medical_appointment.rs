@@ -68,7 +68,7 @@ pub async fn generate_invoice(
   let invoice_generation_params = GenerateInvoiceParams {
     amount: medical_appointment.price_in_cents as f32 / 100.0,
     date: medical_appointment.date.format("%Y-%m-%d").to_string(),
-    office_id: medical_appointment.practitioner_office().await?.id,
+    office_id: medical_appointment.practitioner_office(DB::get()).await?.id,
   };
 
   let generated_invoice = services::invoice::generate_patient_invoice(

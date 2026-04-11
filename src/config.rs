@@ -96,9 +96,12 @@ fn default_cors_allow_methods() -> Vec<String> {
   ]
 }
 
-pub static LOCK: OnceLock<Config> = OnceLock::new();
+static LOCK: OnceLock<Config> = OnceLock::new();
 
 impl Config {
+  pub fn init(config: Config) {
+    LOCK.set(config).expect("Cannot initialize Config")
+  }
   pub fn get() -> &'static Self {
     LOCK.get().expect("Config not initialized")
   }
