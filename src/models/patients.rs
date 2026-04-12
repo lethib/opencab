@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 pub struct CreatePatientParams {
   pub first_name: String,
   pub last_name: String,
-  pub ssn: String,
+  pub ssn: Option<String>,
   pub address_line_1: String,
   pub address_zip_code: String,
   pub address_city: String,
@@ -36,8 +36,12 @@ impl Model {
     Crypto::hash(ssn, &salt)
   }
 
-  pub fn decrypt_ssn(&self) -> Result<String, MyErrors> {
-    Crypto::decrypt(&self.ssn)
+  pub fn decrypt_ssn(&self) -> Result<Option<String>, MyErrors> {
+    self
+      .ssn
+      .as_ref()
+      .map(|ssn| Crypto::decrypt(ssn))
+      .transpose()
   }
 }
 
@@ -68,8 +72,10 @@ impl ActiveModel {
       return Err(ApplicationError::UnprocessableEntity.into());
     }
 
-    let ssn_encrypted = Model::encrypt_ssn(&params.ssn)?;
-    let ssn_hashed = Model::hash_ssn(&params.ssn)?;
+    let (ssn_encrypted, ssn_hashed) = match &params.ssn {
+      Some(ssn) => (Some(Model::encrypt_ssn(ssn)?), Some(Model::hash_ssn(ssn)?)),
+      None => (None, None),
+    };
 
     return Ok(
       patients::ActiveModel {

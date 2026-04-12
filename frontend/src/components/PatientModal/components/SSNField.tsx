@@ -34,7 +34,7 @@ export const SSNField = ({ onChange, disabled }: SSNFieldProps) => {
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="ssn" className="text-sm font-medium">
+      <Label htmlFor="ssn" className="text-sm font-medium" optional>
         {t("patients.form.ssn")}
       </Label>
       <FormInput

@@ -58,7 +58,8 @@ export const PatientModal = ({
       .length(15)
       .regex(FR_SSN_REGEX, {
         message: t("patients.form.validation.ssnInvalid"),
-      }),
+      })
+      .optional(),
     address_line_1: z
       .string()
       .trim()
@@ -81,7 +82,7 @@ export const PatientModal = ({
     defaultValues: {
       first_name: "",
       last_name: "",
-      ssn: "",
+      ssn: undefined,
       address_line_1: "",
       address_zip_code: "",
       address_city: "",
@@ -93,7 +94,7 @@ export const PatientModal = ({
     addPatientForm.reset({
       first_name: "",
       last_name: "",
-      ssn: "",
+      ssn: undefined,
       email: undefined,
       address_line_1: "",
       address_zip_code: "",
@@ -106,7 +107,7 @@ export const PatientModal = ({
       addPatientForm.reset({
         first_name: currentPatient.first_name || "",
         last_name: currentPatient.last_name || "",
-        ssn: currentPatient.ssn || "",
+        ssn: currentPatient.ssn || undefined,
         email: currentPatient.email || undefined,
         address_line_1: currentPatient.address_line_1 || "",
         address_zip_code: currentPatient.address_zip_code || "",
@@ -132,7 +133,7 @@ export const PatientModal = ({
   const handleSSNChange = (e: ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/\D/g, "");
     if (rawValue.length <= 15) {
-      addPatientForm.setValue("ssn", rawValue);
+      addPatientForm.setValue("ssn", rawValue === "" ? undefined : rawValue);
     }
   };
 
