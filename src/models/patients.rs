@@ -111,6 +111,13 @@ impl ActiveModel {
       return Err(ApplicationError::UnprocessableEntity.into());
     }
 
+    let (ssn_encrypted, ssn_hashed) = match &params.ssn {
+      Some(ssn) => (Some(Model::encrypt_ssn(ssn)?), Some(Model::hash_ssn(ssn)?)),
+      None => (None, None),
+    };
+
+    patient.ssn = ActiveValue::Set(ssn_encrypted);
+    patient.hashed_ssn = ActiveValue::Set(ssn_hashed);
     patient.first_name = ActiveValue::Set(params.first_name.trim().to_string());
     patient.last_name = ActiveValue::Set(params.last_name.trim().to_string());
     patient.email = ActiveValue::Set(params.email.as_ref().map(|e| e.trim().to_string()));
