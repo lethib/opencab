@@ -49,7 +49,7 @@ export const PatientRow = ({
       </TableCell>
       <TableCell className="px-4 py-4">
         <span className="font-mono text-sm font-medium">
-          {formatSSN(patient.ssn)}
+          {patient.ssn ? formatSSN(patient.ssn) : "-"}
         </span>
       </TableCell>
       <TableCell className="px-4 py-4 text-muted-foreground">

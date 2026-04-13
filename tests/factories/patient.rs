@@ -46,7 +46,7 @@ impl PatientFactory {
     let params = CreatePatientParams {
       first_name: self.first_name,
       last_name: self.last_name,
-      ssn: self.ssn,
+      ssn: Some(self.ssn),
       address_line_1: self.address_line_1,
       address_zip_code: self.address_zip_code,
       address_city: self.address_city,

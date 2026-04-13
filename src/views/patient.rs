@@ -9,7 +9,7 @@ pub struct PatientResponse {
   pub first_name: String,
   pub last_name: String,
   pub email: Option<String>,
-  pub ssn: String,
+  pub ssn: Option<String>,
   pub address_line_1: String,
   pub address_zip_code: String,
   pub address_city: String,
@@ -27,7 +27,7 @@ impl PatientResponse {
       email: patient.email.clone(),
       ssn: patient
         .decrypt_ssn()
-        .unwrap_or_else(|_| "Unable to decrypt".to_string()),
+        .unwrap_or_else(|_| Some("Unable to decrypt".to_string())),
       address_line_1: patient.address_line_1.clone(),
       address_zip_code: patient.address_zip_code.clone(),
       address_city: patient.address_city.clone(),
@@ -45,7 +45,7 @@ impl PatientResponse {
       email: patient.email.clone(),
       ssn: patient
         .decrypt_ssn()
-        .unwrap_or_else(|_| "Unable to decrypt".to_string()),
+        .unwrap_or_else(|_| Some("Unable to decrypt".to_string())),
       address_line_1: patient.address_line_1.clone(),
       address_zip_code: patient.address_zip_code.clone(),
       address_city: patient.address_city.clone(),

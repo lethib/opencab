@@ -10,10 +10,10 @@ pub struct Model {
   pub updated_at: DateTimeWithTimeZone,
   #[sea_orm(primary_key)]
   pub id: i32,
-  pub ssn: String,
+  pub ssn: Option<String>,
   #[sea_orm(unique)]
   pub pid: Uuid,
-  pub hashed_ssn: String,
+  pub hashed_ssn: Option<String>,
   pub first_name: String,
   pub last_name: String,
   pub address_line_1: String,

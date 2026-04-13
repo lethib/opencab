@@ -44,12 +44,25 @@ export const PatientInformationCard = ({ patientId }: Props) => {
                   {patient.first_name} {patient.last_name}
                 </CardTitle>
                 <CardDescription className="flex flex-col gap-1 mt-2">
-                  <span>SSN: {formatSSN(patient.ssn)}</span>
+                  <span>
+                    {t("patients.table.ssn")}:{" "}
+                    {patient.ssn ? formatSSN(patient.ssn) : "-"}
+                  </span>
                   <span>
                     {patient.address_line_1}, {patient.address_zip_code}{" "}
                     {patient.address_city}
                   </span>
-                  {patient.email && <span>Email: {patient.email}</span>}
+                  {patient.email && (
+                    <span>
+                      Email:{" "}
+                      <a
+                        href={`mailto:${patient.email}`}
+                        className="underline text-primary hover:opacity-80"
+                      >
+                        {patient.email}
+                      </a>
+                    </span>
+                  )}
                 </CardDescription>
               </div>
             </div>

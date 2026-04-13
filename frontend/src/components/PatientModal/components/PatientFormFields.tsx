@@ -43,7 +43,7 @@ export const PatientFormFields = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium">
+        <Label htmlFor="email" className="text-sm font-medium" optional>
           {t("patients.form.email")}
         </Label>
         <FormInput

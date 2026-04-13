@@ -12,7 +12,7 @@ export type SavePatientParams = {
   first_name: string;
   last_name: string;
   email?: string;
-  ssn: string;
+  ssn?: string;
   address_line_1: string;
   address_zip_code: string;
   address_city: string;
@@ -29,7 +29,7 @@ export type SearchPatientResponse = {
   first_name: string;
   last_name: string;
   email: string | null;
-  ssn: string;
+  ssn: string | null;
   address_line_1: string;
   address_zip_code: string;
   address_city: string;

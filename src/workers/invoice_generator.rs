@@ -92,7 +92,7 @@ pub async fn generate_invoice_pdf(
     &args.user,
     &business_info,
     &args.patient,
-    &patient_ssn,
+    patient_ssn,
     &args.amount,
     &args.invoice_date,
     &args.practitioner_office,
@@ -209,7 +209,7 @@ fn create_modern_invoice_pdf(
   user: &users::Model,
   business_info: &user_business_informations::Model,
   patient: &patients::Model,
-  patient_ssn: &str,
+  patient_ssn: Option<String>,
   amount: &f32,
   invoice_date: &Date,
   practitioner_office: &practitioner_offices::Model,
@@ -357,29 +357,31 @@ fn create_modern_invoice_pdf(
 
   y_position -= mm(12.0);
 
-  // Social security number with box
-  let ssn_y = y_position;
-  page
-    .text()
-    .set_font(Font::Helvetica, 11.0)
-    .at(margin, y_position)
-    .write(&format!("Numéro de sécurité sociale : {}", patient_ssn))
-    .map_err(|e| format!("Failed to write SSN: {}", e))?;
+  if let Some(patient_ssn) = patient_ssn {
+    // Social security number with box
+    let ssn_y = y_position;
+    page
+      .text()
+      .set_font(Font::Helvetica, 11.0)
+      .at(margin, y_position)
+      .write(&format!("Numéro de sécurité sociale : {}", patient_ssn))
+      .map_err(|e| format!("Failed to write SSN: {}", e))?;
 
-  // Draw box around SSN field
-  let box_x = margin - mm(2.0);
-  let box_y = ssn_y - mm(3.0);
-  let box_width = mm(185.0) - box_x;
-  let box_height = mm(8.0);
+    // Draw box around SSN field
+    let box_x = margin - mm(2.0);
+    let box_y = ssn_y - mm(3.0);
+    let box_width = mm(185.0) - box_x;
+    let box_height = mm(8.0);
 
-  page
-    .graphics()
-    .set_stroke_color(Color::black())
-    .set_line_width(mm(0.5))
-    .rect(box_x, box_y, box_width, box_height)
-    .stroke();
+    page
+      .graphics()
+      .set_stroke_color(Color::black())
+      .set_line_width(mm(0.5))
+      .rect(box_x, box_y, box_width, box_height)
+      .stroke();
 
-  y_position -= mm(18.0);
+    y_position -= mm(18.0);
+  }
 
   // Address with box
   let addr_y = y_position;
