@@ -104,7 +104,7 @@ impl ActiveModel {
     let mut patient = Entity::find_by_id(patient_id)
       .one(db)
       .await?
-      .expect("Patient not found")
+      .ok_or(ApplicationError::NotFound)?
       .into_active_model();
 
     if !is_address_valid(&params.address_line_1, &params.address_zip_code) {
