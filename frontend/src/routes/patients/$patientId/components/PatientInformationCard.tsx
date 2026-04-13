@@ -55,15 +55,12 @@ export const PatientInformationCard = ({ patientId }: Props) => {
                   {patient.email && (
                     <span>
                       Email:{" "}
-                      <Button
-                        variant="link"
-                        className="-mt-2 -ml-1"
-                        onClick={() =>
-                          (window.location.href = `mailto:${patient.email}`)
-                        }
+                      <a
+                        href={`mailto:${patient.email}`}
+                        className="underline text-primary hover:opacity-80"
                       >
                         {patient.email}
-                      </Button>
+                      </a>
                     </span>
                   )}
                 </CardDescription>
