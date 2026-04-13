@@ -154,7 +154,7 @@ export const PatientModal = ({
           onSubmit={onSubmit}
           className="space-y-4"
         >
-          <SSNField onChange={handleSSNChange} disabled={!!selectedPatient} />
+          <SSNField onChange={handleSSNChange} />
 
           <PatientFormFields />
 

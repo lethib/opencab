@@ -7,7 +7,6 @@ import { Label } from "@/components/ui";
 
 interface SSNFieldProps {
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  disabled?: boolean;
 }
 
 const formatSSN = (value: string) => {
@@ -26,7 +25,7 @@ const formatSSN = (value: string) => {
   return `${digits[0]} ${digits.slice(1, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 10)} ${digits.slice(10, 13)} ${digits.slice(13, 15)}`;
 };
 
-export const SSNField = ({ onChange, disabled }: SSNFieldProps) => {
+export const SSNField = ({ onChange }: SSNFieldProps) => {
   const { t } = useTranslation();
   const { watch } = useFormContext();
 
@@ -45,7 +44,6 @@ export const SSNField = ({ onChange, disabled }: SSNFieldProps) => {
         value={formatSSN(ssnValue)}
         placeholder={t("patients.form.ssnPlaceholder")}
         className="pl-10 h-11"
-        disabled={disabled}
         icon={
           <IdCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         }
