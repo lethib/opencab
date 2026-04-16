@@ -31,7 +31,7 @@ function PatientPage() {
   return (
     <>
       <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto px-4 py-8 space-y-6">
+        <div className="container mx-auto space-y-6">
           <Button
             variant="link"
             onClick={() => navigate({ to: "/patients" })}
@@ -43,7 +43,7 @@ function PatientPage() {
 
           <PatientInformationCard patientId={+patientId} />
 
-          <div className="space-y-4">
+          <div className="space-y-4 px-2">
             <div className="flex justify-between items-center">
               <div>
                 <H2 className="text-2xl font-bold flex items-center gap-2">
