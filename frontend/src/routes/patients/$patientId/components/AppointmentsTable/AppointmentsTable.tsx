@@ -53,7 +53,7 @@ export const AppointmentsTable = ({ patientId }: Props) => {
 
   return (
     <>
-      <div className="rounded-lg border bg-card">
+      <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-b bg-muted/50">
