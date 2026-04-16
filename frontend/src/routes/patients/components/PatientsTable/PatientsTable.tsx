@@ -38,7 +38,7 @@ export const PatientsTable = ({ searchQuery }: Props) => {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border bg-card">
+      <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-b bg-muted/50">

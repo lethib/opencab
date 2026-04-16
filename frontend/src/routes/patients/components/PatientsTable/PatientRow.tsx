@@ -38,7 +38,7 @@ export const PatientRow = ({
             <User className="h-5 w-5 text-primary" />
           </div>
           <div className="flex flex-col">
-            <span className="font-semibold text-foreground">
+            <span className="font-bold text-foreground">
               {patient.first_name} {patient.last_name}
             </span>
             <span className="text-xs text-muted-foreground">
