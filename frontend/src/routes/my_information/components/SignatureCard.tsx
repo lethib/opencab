@@ -83,13 +83,13 @@ export const SignatureCard = () => {
       <CardContent className="space-y-4">
         {currentUser?.business_information?.signature_filename && (
           <div
-            className="rounded-md border border-gray-200 bg-gray-50 p-3 hover:cursor-pointer hover:bg-gray-100 transition-colors"
+            className="rounded-md border border-border bg-muted p-3 hover:cursor-pointer hover:bg-accent transition-colors"
             onClick={displaySignatureInNewTab}
           >
             <Label className="text-sm font-medium hover:cursor-pointer">
               {t("signature.currentFile")}
             </Label>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-muted-foreground">
               {currentUser.business_information.signature_filename}
             </p>
           </div>
@@ -136,13 +136,13 @@ export const SignatureCard = () => {
         </div>
 
         {uploadStatus === "success" && (
-          <div className="rounded-md bg-green-50 p-3 text-sm text-green-800">
+          <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-400">
             {t("signature.uploadSuccess")}
           </div>
         )}
 
         {uploadStatus === "error" && (
-          <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
             {t("signature.uploadError")}
           </div>
         )}
