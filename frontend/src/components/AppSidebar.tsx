@@ -1,5 +1,6 @@
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Building2, Info, LogOut, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   Sidebar,
   SidebarContent,
@@ -12,22 +13,24 @@ import {
 import { logout } from "@/lib/authUtils";
 import { H2 } from "./ui/typography/h2";
 
-const navItems = [
-  { label: "Mes patients", icon: Users, to: "/patients" },
-  { label: "Mon profil", icon: Info, to: "/my_information" },
-  { label: "Mes cabinets", icon: Building2, to: "/offices" },
-];
-
 export function AppSidebar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { t } = useTranslation();
 
-  console.log(pathname.startsWith("/patients"));
+  const navItems = [
+    { label: t("navigation.patients"), icon: Users, to: "/patients" },
+    { label: t("navigation.myInformation"), icon: Info, to: "/my_information" },
+    { label: t("navigation.myOffices"), icon: Building2, to: "/offices" },
+  ];
 
   return (
     <Sidebar>
       <SidebarHeader className="mb-3 mt-1">
-        <div className="flex items-center ml-2 gap-2">
+        <div
+          className="flex items-center ml-2 gap-2 hover:cursor-pointer"
+          onClick={() => navigate({ to: "/" })}
+        >
           <img src="/favicon/favicon.svg" width={30} />
           <H2 className="text-primary">OpenCab</H2>
         </div>
@@ -37,12 +40,11 @@ export function AppSidebar() {
         <SidebarMenu>
           {navItems.map(({ label, icon: Icon, to }) => (
             <SidebarMenuItem key={to}>
-              <SidebarMenuButton
-                isActive={pathname.startsWith(to)}
-                onClick={() => navigate({ to })}
-              >
-                <Icon />
-                {label}
+              <SidebarMenuButton asChild isActive={pathname.startsWith(to)}>
+                <Link to={to}>
+                  <Icon />
+                  {label}
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -54,7 +56,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton onClick={logout} className="text-destructive">
               <LogOut />
-              Déconnexion
+              {t("auth.logout")}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
