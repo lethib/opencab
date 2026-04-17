@@ -12,7 +12,6 @@ import { Toaster } from "@/components/ui/sonner.tsx";
 const mq = window.matchMedia("(prefers-color-scheme: dark)");
 const applyTheme = (e: MediaQueryList | MediaQueryListEvent) =>
   document.documentElement.classList.toggle("dark", e.matches);
-applyTheme(mq);
 mq.addEventListener("change", applyTheme);
 
 createRoot(document.getElementById("root")!).render(

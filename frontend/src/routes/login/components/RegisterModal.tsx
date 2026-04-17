@@ -89,7 +89,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 shadow-lg border-0 backdrop-blur-sm">
+      <DialogContent className="sm:max-w-md shadow-lg border-0 backdrop-blur-sm">
         <DialogHeader className="space-y-2 text-center pb-4">
           <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
             {t("auth.register.title")}

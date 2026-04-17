@@ -95,8 +95,8 @@
     "logout": "Déconnexion"
   },
   "navigation": {
-    "patients": "Patients",
-    "myInformation": "Mes informations",
+    "patients": "Mes patients",
+    "myInformation": "Mon profil",
     "myOffices": "Mes cabinets",
     "account": "Compte"
   },

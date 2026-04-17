@@ -32,8 +32,8 @@
   --sidebar-foreground: oklch(0.2138 0.0019 286.2347);
   --sidebar-primary: oklch(0.2138 0.0019 286.2347);
   --sidebar-primary-foreground: oklch(0.9851 0 0);
-  --sidebar-accent: oklch(0.9702 0 0);
-  --sidebar-accent-foreground: oklch(0.2138 0.0019 286.2347);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--primary);
   --sidebar-border: oklch(0.9219 0 0);
   --sidebar-ring: oklch(0.709 0 0);
   --font-sans: "DM Sans Variable", ui-sans-serif, sans-serif, system-ui;
@@ -97,7 +97,7 @@
   --sidebar-ring: oklch(0.7 0.14 143);
   --font-sans: "DM Sans Variable", ui-sans-serif, sans-serif, system-ui;
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: Geist Mono, ui-monospace, monospace;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
   --radius: 1rem;
   --shadow-x: 0;
   --shadow-y: 1px;
