@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { logout } from "@/lib/authUtils";
+import { ThemePicker } from "./ThemePicker";
 import { H2 } from "./ui/typography/h2";
 
 export function AppSidebar() {
@@ -53,11 +54,15 @@ export function AppSidebar() {
 
       <SidebarFooter className="ml-2">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={logout} className="text-destructive">
+          <SidebarMenuItem className="flex items-center">
+            <SidebarMenuButton
+              onClick={logout}
+              className="text-destructive flex-1"
+            >
               <LogOut />
               {t("auth.logout")}
             </SidebarMenuButton>
+            <ThemePicker />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
