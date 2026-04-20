@@ -29,17 +29,17 @@ export const ThemePicker = () => {
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="right" align="end" alignOffset={4}>
-        {Object.entries(THEMES_ICONS).map((theme) => (
+        {Object.entries(THEMES_ICONS).map(([key, icon]) => (
           <DropdownMenuItem
-            key={theme[0]}
-            onClick={() => setTheme(theme[0])}
+            key={key}
+            onClick={() => setTheme(key)}
             className="flex items-center justify-between"
           >
             <div className="flex items-center gap-2">
-              {theme[1]}
-              {t(`components.themePicker.${theme[0]}`)}
+              {icon}
+              {t(`components.themePicker.${key}`)}
             </div>
-            {selectedTheme === theme[0] && <Check className="text-primary" />}
+            {selectedTheme === key && <Check className="text-primary" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
