@@ -390,6 +390,11 @@
   "components": {
     "datePicker": {
       "selectDate": "Sélectionner une date"
+    },
+    "themePicker": {
+      "system": "Système",
+      "light": "Jour",
+      "dark": "Nuit"
     }
   }
 }
