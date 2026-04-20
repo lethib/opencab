@@ -36,7 +36,7 @@ export const ThemePicker = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton className="w-9 shrink-0 [&>svg]:size-5">
-          {THEMES_ICONS_AND_TEXTS[(selectedTheme as AppTheme) ?? "system"].icon}
+          {THEMES_ICONS_AND_TEXTS[((selectedTheme ?? "system") as AppTheme)].icon}
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="right" align="end" alignOffset={4}>
