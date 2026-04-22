@@ -79,7 +79,7 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: BDD tests
+      - name: Tests
         run: cargo test
 
   frontend:
