@@ -1,7 +1,4 @@
-use opencab::models::{
-  _entities::users,
-  users::RegisterParams,
-};
+use opencab::models::{_entities::users, users::RegisterParams};
 use sea_orm::{ActiveModelTrait, ActiveValue, DatabaseConnection, IntoActiveModel};
 
 pub struct UserFactory {
