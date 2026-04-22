@@ -28,16 +28,6 @@ impl UserFactory {
     Self::default()
   }
 
-  pub fn with_password(mut self, password: &str) -> Self {
-    self.password = password.to_string();
-    self
-  }
-
-  pub fn unverified(mut self) -> Self {
-    self.is_access_key_verified = false;
-    self
-  }
-
   pub async fn create(self, db: &DatabaseConnection) -> users::Model {
     let is_verified = self.is_access_key_verified;
 
