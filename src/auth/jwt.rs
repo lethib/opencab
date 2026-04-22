@@ -59,7 +59,7 @@ impl JwtService {
 
 #[cfg(test)]
 mod tests {
-  use std::sync::LazyLock;
+  use std::{sync::LazyLock, thread::sleep, time::Duration};
 
   use super::*;
 
@@ -88,8 +88,9 @@ mod tests {
   #[test]
   fn expired_token_is_rejected() {
     let token = JWT_SERVICE
-      .generate_token("user-pid-123", TOKEN_TYPE_AUTH, 0)
+      .generate_token("user-pid-123", TOKEN_TYPE_AUTH, 1)
       .unwrap();
+    sleep(Duration::from_secs(2));
     assert!(JWT_SERVICE.validate_token(&token).is_err())
   }
 }
