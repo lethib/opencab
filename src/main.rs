@@ -1,21 +1,11 @@
-use opencab::db::{self, DB};
+use opencab::{
+  config::Config,
+  db::DB,
+  router,
+  workers::{self, WorkerTransmitter},
+};
 use tokio::signal;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-
-mod auth;
-mod config;
-mod controllers;
-mod middleware;
-mod models;
-mod router;
-mod services;
-mod validators;
-mod views;
-mod workers;
-
-use config::Config;
-
-use crate::workers::WorkerTransmitter;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -68,7 +58,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Config::get().server.port
   );
 
-  // Run server with graceful shutdown
   axum::serve(listener, app)
     .with_graceful_shutdown(shutdown_signal())
     .await

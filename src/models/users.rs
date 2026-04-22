@@ -9,11 +9,10 @@ use validator::Validate;
 use crate::{
   auth::password,
   models::{
-    ModelError, ModelResult,
     _entities::{
       prelude::UserBusinessInformations, user_business_informations, user_practitioner_offices,
     },
-    practitioner_offices,
+    practitioner_offices, ModelError, ModelResult,
   },
   services,
 };

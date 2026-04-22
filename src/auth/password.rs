@@ -20,3 +20,27 @@ pub fn verify_password(password: &str, hash: &str) -> bool {
     .verify_password(password.as_bytes(), &parsed_hash)
     .is_ok()
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn correct_password_are_verified() {
+    let hashed_password = hash_password("test123").unwrap();
+    assert!(verify_password("test123", &hashed_password));
+  }
+
+  #[test]
+  fn incorrect_password_are_not_verified() {
+    let hashed_password = hash_password("test123").unwrap();
+    assert!(!verify_password("123test", &hashed_password));
+  }
+
+  #[test]
+  fn different_password_have_different_hash() {
+    let hashed_password_1 = hash_password("test123").unwrap();
+    let hashed_password_2 = hash_password("123test").unwrap();
+    assert_ne!(hashed_password_1, hashed_password_2)
+  }
+}

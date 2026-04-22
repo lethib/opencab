@@ -43,18 +43,20 @@ impl PatientFactory {
   }
 
   pub async fn create(self, db: &DatabaseConnection, user_id: i32) -> PatientModel {
-    let params = CreatePatientParams {
-      first_name: self.first_name,
-      last_name: self.last_name,
-      ssn: Some(self.ssn),
-      address_line_1: self.address_line_1,
-      address_zip_code: self.address_zip_code,
-      address_city: self.address_city,
-      email: Some(self.email),
-    };
-
-    PatientActiveModel::create(db, &params, user_id)
-      .await
-      .unwrap()
+    PatientActiveModel::create(
+      db,
+      &CreatePatientParams {
+        first_name: self.first_name,
+        last_name: self.last_name,
+        ssn: Some(self.ssn),
+        address_line_1: self.address_line_1,
+        address_zip_code: self.address_zip_code,
+        address_city: self.address_city,
+        email: Some(self.email),
+      },
+      user_id,
+    )
+    .await
+    .unwrap()
   }
 }

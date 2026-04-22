@@ -1,5 +1,6 @@
-use opencab::models::{_entities::users, users::RegisterParams};
 use sea_orm::{ActiveModelTrait, ActiveValue, DatabaseConnection, IntoActiveModel};
+
+use crate::models::{_entities::users, users::RegisterParams};
 
 pub struct UserFactory {
   email: String,
@@ -28,6 +29,17 @@ impl UserFactory {
     Self::default()
   }
 
+  pub fn with_password(mut self, password: &str) -> Self {
+    self.password = password.to_string();
+    self
+  }
+
+  pub fn unverified(mut self) -> Self {
+    self.is_access_key_verified = false;
+    self
+  }
+
+  /// Creates a user in the real database. Verified by default; call `.unverified()` to skip.
   pub async fn create(self, db: &DatabaseConnection) -> users::Model {
     let is_verified = self.is_access_key_verified;
 
