@@ -32,7 +32,12 @@ async fn background() -> Background {
     .last_name("Dupont")
     .create(&db, user.id)
     .await;
-  Background { db, user, office, patient }
+  Background {
+    db,
+    user,
+    office,
+    patient,
+  }
 }
 
 // ============================================================
@@ -255,8 +260,14 @@ mod extract_appointments_with_multiple_offices {
 
     // Then
     assert_eq!(results.len(), 2);
-    let central = results.iter().find(|r| r.office.name == "Cabinet Central").unwrap();
-    let sud = results.iter().find(|r| r.office.name == "Cabinet Sud").unwrap();
+    let central = results
+      .iter()
+      .find(|r| r.office.name == "Cabinet Central")
+      .unwrap();
+    let sud = results
+      .iter()
+      .find(|r| r.office.name == "Cabinet Sud")
+      .unwrap();
     assert_eq!(central.revenue_share_percentage, 70.0);
     assert_eq!(sud.revenue_share_percentage, 50.0);
   }

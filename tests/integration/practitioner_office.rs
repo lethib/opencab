@@ -3,10 +3,10 @@ use opencab::models::{
   _entities::{practitioner_offices, user_practitioner_offices},
   practitioner_offices::PractitionerOfficeParams,
 };
+use sea_orm::ActiveValue::Set;
 use sea_orm::{
   prelude::Decimal, ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter,
 };
-use sea_orm::ActiveValue::Set;
 use serial_test::serial;
 use std::str::FromStr;
 

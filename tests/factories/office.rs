@@ -1,6 +1,8 @@
 use opencab::models::{
   _entities::user_practitioner_offices,
-  practitioner_offices::{ActiveModel as OfficeActiveModel, Model as OfficeModel, PractitionerOfficeParams},
+  practitioner_offices::{
+    ActiveModel as OfficeActiveModel, Model as OfficeModel, PractitionerOfficeParams,
+  },
   user_practitioner_offices::CreateLinkParams,
 };
 use sea_orm::{prelude::Decimal, DatabaseConnection};
