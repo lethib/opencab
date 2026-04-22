@@ -3,6 +3,7 @@ use sea_orm::{ConnectionTrait, Database, DatabaseConnection};
 
 const DEFAULT_TEST_DATABASE_URL: &str = "postgres://loco:loco@localhost:5431/opencab_test";
 
+// Callers must use #[serial] to prevent races on the env vars set below.
 pub async fn setup_db() -> DatabaseConnection {
   unsafe {
     std::env::set_var("SSN_ENCRYPTION_KEY", "12345678901234567890123456789012");

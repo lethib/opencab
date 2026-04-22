@@ -1,5 +1,8 @@
-use opencab::models::users::{Model as UserModel, RegisterParams};
-use sea_orm::DatabaseConnection;
+use opencab::models::{
+  _entities::users,
+  users::RegisterParams,
+};
+use sea_orm::{ActiveModelTrait, ActiveValue, DatabaseConnection, IntoActiveModel};
 
 pub struct UserFactory {
   email: String,
@@ -7,16 +10,18 @@ pub struct UserFactory {
   first_name: String,
   last_name: String,
   phone_number: String,
+  is_access_key_verified: bool,
 }
 
 impl Default for UserFactory {
   fn default() -> Self {
     Self {
       email: "doctor@test.com".to_string(),
-      password: "password123".to_string(),
+      password: "Test1234!".to_string(),
       first_name: "John".to_string(),
       last_name: "Doe".to_string(),
       phone_number: "0600000000".to_string(),
+      is_access_key_verified: true,
     }
   }
 }
@@ -26,8 +31,20 @@ impl UserFactory {
     Self::default()
   }
 
-  pub async fn create(self, db: &DatabaseConnection) -> UserModel {
-    UserModel::create_with_password(
+  pub fn with_password(mut self, password: &str) -> Self {
+    self.password = password.to_string();
+    self
+  }
+
+  pub fn unverified(mut self) -> Self {
+    self.is_access_key_verified = false;
+    self
+  }
+
+  pub async fn create(self, db: &DatabaseConnection) -> users::Model {
+    let is_verified = self.is_access_key_verified;
+
+    let created = users::Model::create_with_password(
       db,
       &RegisterParams {
         email: self.email,
@@ -38,6 +55,14 @@ impl UserFactory {
       },
     )
     .await
-    .unwrap()
+    .unwrap();
+
+    if is_verified {
+      let mut active = created.into_active_model();
+      active.is_access_key_verified = ActiveValue::Set(true);
+      active.update(db).await.unwrap()
+    } else {
+      created
+    }
   }
 }

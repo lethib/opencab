@@ -4,6 +4,7 @@ use crate::models::{_entities::users, users::RegisterParams};
 
 pub struct UserFactory {
   email: String,
+  password: String,
   first_name: String,
   last_name: String,
   phone_number: String,
@@ -14,6 +15,7 @@ impl Default for UserFactory {
   fn default() -> Self {
     Self {
       email: "doctor@test.com".to_string(),
+      password: "Test1234!".to_string(),
       first_name: "John".to_string(),
       last_name: "Doe".to_string(),
       phone_number: "0600000000".to_string(),
@@ -25,6 +27,11 @@ impl Default for UserFactory {
 impl UserFactory {
   pub fn new() -> Self {
     Self::default()
+  }
+
+  pub fn with_password(mut self, password: &str) -> Self {
+    self.password = password.to_string();
+    self
   }
 
   pub fn unverified(mut self) -> Self {
@@ -40,7 +47,7 @@ impl UserFactory {
       db,
       &RegisterParams {
         email: self.email,
-        password: "Test1234!".to_string(),
+        password: self.password,
         first_name: self.first_name,
         last_name: self.last_name,
         phone_number: self.phone_number,
