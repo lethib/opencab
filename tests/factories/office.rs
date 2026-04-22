@@ -1,7 +1,9 @@
-use opencab::models::practitioner_offices::{
-  ActiveModel as OfficeActiveModel, Model as OfficeModel, PractitionerOfficeParams,
+use opencab::models::{
+  _entities::user_practitioner_offices,
+  practitioner_offices::{ActiveModel as OfficeActiveModel, Model as OfficeModel, PractitionerOfficeParams},
+  user_practitioner_offices::CreateLinkParams,
 };
-use sea_orm::DatabaseConnection;
+use sea_orm::{prelude::Decimal, DatabaseConnection};
 
 pub struct OfficeFactory {
   name: String,
@@ -43,5 +45,25 @@ impl OfficeFactory {
     )
     .await
     .unwrap()
+  }
+
+  pub async fn create_for_user(
+    self,
+    db: &DatabaseConnection,
+    user_id: i32,
+    revenue_share: i64,
+  ) -> OfficeModel {
+    let office = self.create(db).await;
+    user_practitioner_offices::ActiveModel::create(
+      db,
+      &CreateLinkParams {
+        user_id,
+        practitioner_office_id: office.id,
+        revenue_share_percentage: Decimal::from(revenue_share),
+      },
+    )
+    .await
+    .unwrap();
+    office
   }
 }

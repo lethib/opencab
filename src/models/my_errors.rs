@@ -6,7 +6,7 @@ use axum::response::IntoResponse;
 use serde::ser::SerializeStruct;
 use serde::Serialize;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct MyErrors {
   pub code: axum::http::StatusCode,
   pub msg: String,

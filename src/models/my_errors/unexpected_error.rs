@@ -1,6 +1,7 @@
 use crate::models::my_errors::MyErrors;
 use axum::http::StatusCode;
 
+#[derive(Debug)]
 pub enum UnexpectedError {
   ShouldNotHappen,
   #[allow(non_camel_case_types)]

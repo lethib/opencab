@@ -82,3 +82,104 @@ impl Crypto {
     )
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use base64::{engine::general_purpose::STANDARD, Engine};
+
+  use super::*;
+
+  fn setup() {
+    unsafe {
+      std::env::set_var("SSN_ENCRYPTION_KEY", "12345678901234567890123456789012");
+      std::env::set_var("SSN_SALT_KEY", "bdd_test_salt_key_for_patients!!");
+    }
+  }
+
+  mod encrypt {
+    use super::*;
+
+    mod when_encrypting_then_decrypting {
+      use super::*;
+
+      #[test]
+      fn then_the_original_value_is_retrieved() {
+        setup();
+        let value = "1234567890123456";
+        let encrypted = Crypto::encrypt(value).unwrap();
+        let decrypted = Crypto::decrypt(&encrypted).unwrap();
+        assert_eq!(decrypted, value);
+      }
+    }
+
+    mod when_encrypting_the_same_value_twice {
+      use super::*;
+
+      #[test]
+      fn then_the_two_results_are_different() {
+        setup();
+        let value = "1234567890123456";
+        let first = Crypto::encrypt(value).unwrap();
+        let second = Crypto::encrypt(value).unwrap();
+        assert_ne!(first, second);
+      }
+    }
+  }
+
+  mod decrypt {
+    use super::*;
+
+    mod when_the_input_is_not_valid_base64 {
+      use super::*;
+
+      #[test]
+      fn then_decryption_fails() {
+        setup();
+        let result = Crypto::decrypt("this!is!not!valid!base64");
+        assert!(result.is_err());
+      }
+    }
+
+    mod when_the_encoded_data_is_too_short {
+      use super::*;
+
+      #[test]
+      fn then_decryption_fails() {
+        setup();
+        let short_b64 = STANDARD.encode(b"short");
+        let result = Crypto::decrypt(&short_b64);
+        assert!(result.is_err());
+      }
+    }
+  }
+
+  mod hash {
+    use super::*;
+
+    mod when_hashing_the_same_value_with_the_same_salt {
+      use super::*;
+
+      #[test]
+      fn then_the_two_hashes_are_identical() {
+        setup();
+        let value = "my_secret";
+        let salt = "test_salt_1234".to_string();
+        let first = Crypto::hash(value, &salt).unwrap();
+        let second = Crypto::hash(value, &salt).unwrap();
+        assert_eq!(first, second);
+      }
+    }
+
+    mod when_hashing_a_value {
+      use super::*;
+
+      #[test]
+      fn then_the_result_is_in_argon2_format() {
+        setup();
+        let salt = "test_salt_1234".to_string();
+        let hash = Crypto::hash("my_secret", &salt).unwrap();
+        assert!(hash.starts_with("$argon2"));
+      }
+    }
+  }
+}
