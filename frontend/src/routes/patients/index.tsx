@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FileDown, Plus, Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 import { APIHooks } from "@/api/hooks";
 import { PatientModal } from "@/components/PatientModal/PatientModal";
 import { Button } from "@/components/ui/button";
@@ -17,24 +18,35 @@ import { ExportAccountabilityModal } from "./components/ExportAccountabilityModa
 import { ExportAppointmentsModal } from "./components/ExportAppointmentsModal";
 import { PatientsTable } from "./components/PatientsTable/PatientsTable";
 
+const patientSearchSchema = z.object({
+  page: z.number().default(1),
+  q: z.string().default(""),
+});
+
 export const Route = createFileRoute("/patients/")({
   component: Patients,
+  validateSearch: patientSearchSchema,
 });
 
 function Patients() {
   const { t } = useTranslation();
+  const { q } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [isAddPatientModalOpened, setIsAddPatientModalOpened] = useState(false);
   const [isExportAppointmentsModalOpen, setIsExportAppointmentsModalOpen] =
     useState(false);
   const [isAccountabilityExportModalOpen, setIsAccountabilityExportModalOpen] =
     useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 700);
+  const debouncedSearchQuery = useDebounce(q, 700);
 
   const addPatientMutation = APIHooks.patient.createPatient.useMutation();
 
   const handleOnOpenChange = (value: boolean) => {
     setIsAddPatientModalOpened(value);
+  };
+
+  const setSearchQuery = (query: string) => {
+    navigate({ search: (prev) => ({ ...prev, q: query }) });
   };
 
   return (
@@ -47,7 +59,7 @@ function Patients() {
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={t("patients.searchPlaceholder")}
-                value={searchQuery}
+                value={q}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-12 text-base"
               />
