@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { APIHooks } from "@/api/hooks";
 import {
@@ -10,6 +10,7 @@ import {
   TablePagination,
   TableRow,
 } from "@/components/ui/table";
+import { Route } from "../..";
 import { PatientList } from "./PatientsList";
 
 interface Props {
@@ -18,8 +19,13 @@ interface Props {
 
 export const PatientsTable = ({ searchQuery }: Props) => {
   const { t } = useTranslation();
-  const [page, setPage] = useState(1);
+  const { page } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const prevSearchQueryRef = useRef(searchQuery);
+
+  const setPage = (pageNumber: number) => {
+    navigate({ search: (prev) => ({ ...prev, page: pageNumber }) });
+  };
 
   // Reset page during render when searchQuery changes (prevents double requests)
   if (prevSearchQueryRef.current !== searchQuery) {
