@@ -1,4 +1,9 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useCanGoBack,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
 import { ArrowLeft, Calendar, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +20,8 @@ export const Route = createFileRoute("/patients/$patientId/")({
 
 function PatientPage() {
   const { t } = useTranslation();
+  const router = useRouter();
+  const canGoBack = useCanGoBack();
   const navigate = useNavigate();
   const { patientId } = Route.useParams();
 
@@ -28,13 +35,21 @@ function PatientPage() {
     .createMedicalAppointment(+patientId)
     .useMutation();
 
+  const handleBackNavigation = () => {
+    if (canGoBack) {
+      router.history.back();
+    } else {
+      navigate({ to: "/patients" });
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
         <div className="container mx-auto space-y-6">
           <Button
             variant="link"
-            onClick={() => navigate({ to: "/patients" })}
+            onClick={handleBackNavigation}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
