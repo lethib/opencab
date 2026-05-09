@@ -17,37 +17,31 @@ import {
   DialogTitle,
   Label,
 } from "@/components/ui";
+import i18n from "@/i18n";
 
 interface Props {
   open: boolean;
   setIsOpen: (open: boolean) => void;
 }
 
-const FR_ZIP_CODE_REGEX = /^(?:0[1-9]|[1-8]\d|9[0-8])\d{3}$/;
+const schema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, i18n.t("companies.form.validation.nameRequired")),
+  contact_email: z
+    .email(i18n.t("companies.form.validation.emailInvalid"))
+    .trim()
+    .min(1, i18n.t("companies.form.validation.emailRequired")),
+  address_line_1: z.string().trim().optional(),
+  address_zip_code: z.string().trim().optional(),
+});
 
 export const CompanyModal = ({ open, setIsOpen }: Props) => {
   const { t } = useTranslation();
   const createMutation = APIHooks.company.create.useMutation();
 
-  const schema = z.object({
-    name: z.string().trim().min(1, t("companies.form.validation.nameRequired")),
-    contact_email: z
-      .email(t("companies.form.validation.emailInvalid"))
-      .trim()
-      .min(1, t("companies.form.validation.emailRequired")),
-    address_line_1: z.string().trim().optional(),
-    address_zip_code: z
-      .string()
-      .trim()
-      .refine((v) => !v || FR_ZIP_CODE_REGEX.test(v), {
-        message: t("companies.form.validation.zipCodeInvalid"),
-      })
-      .optional(),
-  });
-
-  type FormValues = z.infer<typeof schema>;
-
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
@@ -63,13 +57,8 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
-    await createMutation
-      .mutateAsync({
-        name: values.name,
-        contact_email: values.contact_email,
-        address_line_1: values.address_line_1 || undefined,
-        address_zip_code: values.address_zip_code || undefined,
-      })
+    createMutation
+      .mutateAsync(values)
       .then(() => {
         queryClient.invalidateQueries({ queryKey: ["/companies"] });
         handleClose();
