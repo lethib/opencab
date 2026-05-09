@@ -95,7 +95,8 @@ pub fn create_router() -> Router<()> {
     // Companies routes
     .route(
       "/api/companies",
-      post(controllers::practitioner_companies::create),
+      post(controllers::practitioner_companies::create)
+        .get(controllers::practitioner_companies::index),
     )
     .route(
       "/api/companies/{company_id}",

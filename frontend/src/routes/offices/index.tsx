@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Building2, Plus } from "lucide-react";
+import { Building2, Home, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { APIHooks } from "@/api/hooks";
@@ -47,7 +47,7 @@ function Offices() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 px-2">
             <div>
               <H2 className="text-3xl font-bold mb-2 flex items-center gap-2">
-                <Building2 className="h-8 w-8" />
+                <Home className="h-8 w-8" color="var(--primary)" />
                 {t("offices.title")}
               </H2>
               <p className="text-muted-foreground">{t("offices.subtitle")}</p>

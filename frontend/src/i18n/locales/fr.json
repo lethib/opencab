@@ -96,6 +96,7 @@
   },
   "navigation": {
     "patients": "Mes patients",
+    "companies": "Mes entreprises",
     "myInformation": "Mon profil",
     "myOffices": "Mes cabinets",
     "account": "Compte"
@@ -376,6 +377,45 @@
     "unspecified": "Non spécifié",
     "errors": {
       "start_date_before_end_date": "La date de début doit être antérieure à la date de fin"
+    }
+  },
+  "companies": {
+    "title": "Mes entreprises",
+    "subtitle": "Gérez vos clients institutionnels et générez leurs factures",
+    "addCompany": "Ajouter une entreprise",
+    "noCompanies": {
+      "title": "Aucune entreprise enregistrée",
+      "description": "Ajoutez vos premiers clients entreprises — clubs sportifs, mutuelles, services de santé au travail — pour leur facturer en quelques clics les soins prodigués à leurs salariés ou adhérents.",
+      "cta": "Ajouter ma première entreprise",
+      "features": {
+        "multipleLines": {
+          "title": "Lignes multiples",
+          "description": "Regroupez plusieurs consultations sur une même facture."
+        },
+        "directSend": {
+          "title": "Envoi direct",
+          "description": "Le PDF part au service comptabilité et numéro ADELI."
+        }
+      }
+    },
+    "form": {
+      "addTitle": "Ajouter une entreprise",
+      "addDescription": "Créez un nouveau client institutionnel pour pouvoir lui adresser des factures.",
+      "name": "Raison sociale",
+      "namePlaceholder": "Ex. Stade Français Paris",
+      "email": "Email comptabilité",
+      "emailPlaceholder": "facturation@entreprise.fr",
+      "address": "Adresse de facturation",
+      "addressPlaceholder": "5 rue Robert de Flers, 75015 Paris",
+      "zipCode": "Code postal",
+      "zipCodePlaceholder": "75015",
+      "add": "Ajouter",
+      "validation": {
+        "nameRequired": "La raison sociale est requise",
+        "emailRequired": "L'email est requis",
+        "emailInvalid": "Email invalide",
+        "zipCodeInvalid": "Code postal invalide"
+      }
     }
   },
   "errors": {
