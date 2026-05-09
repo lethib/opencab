@@ -1,5 +1,6 @@
 use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait};
 use serde::Deserialize;
+use validator::Validate;
 
 use crate::{
   auth::resource::Resource,
@@ -10,9 +11,10 @@ use crate::{
   validators::address::is_address_valid,
 };
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct CompanyParams {
   pub name: String,
+  #[validate(email(message = "invalid_email"))]
   pub contact_email: String,
   pub address_line_1: Option<String>,
   pub address_zip_code: Option<String>,
@@ -24,19 +26,12 @@ impl practitioner_companies::ActiveModel {
     owner_id: i32,
     params: &CompanyParams,
   ) -> Result<practitioner_companies::Model, MyErrors> {
-    let mut is_address_provided = false;
+    params.validate()?;
+    validate_address_params(params)?;
 
-    if let (Some(address_line_1), Some(zip_code)) = (
-      params.address_line_1.as_ref(),
-      params.address_zip_code.as_ref(),
-    ) {
-      is_address_provided = true;
-      if !is_address_valid(address_line_1, zip_code) {
-        return Err(ApplicationError::UnprocessableEntity.into());
-      }
-    }
+    let is_address_provided = params.address_line_1.is_some();
 
-    return Ok(
+    Ok(
       Self {
         name: ActiveValue::Set(params.name.trim().to_string()),
         user_id: ActiveValue::Set(owner_id),
@@ -58,7 +53,7 @@ impl practitioner_companies::ActiveModel {
       }
       .insert(db)
       .await?,
-    );
+    )
   }
 
   pub async fn update<T: ConnectionTrait>(
@@ -66,6 +61,8 @@ impl practitioner_companies::ActiveModel {
     db: &T,
     params: &CompanyParams,
   ) -> Result<(), MyErrors> {
+    params.validate()?;
+    validate_address_params(params)?;
     let is_address_provided = params.address_line_1.is_some();
 
     self.name = ActiveValue::Set(params.name.trim().to_string());
@@ -88,6 +85,19 @@ impl practitioner_companies::ActiveModel {
 
     Ok(())
   }
+}
+
+fn validate_address_params(params: &CompanyParams) -> Result<(), MyErrors> {
+  if let (Some(address_line_1), Some(zip_code)) = (
+    params.address_line_1.as_ref(),
+    params.address_zip_code.as_ref(),
+  ) {
+    if !is_address_valid(address_line_1, zip_code) {
+      return Err(ApplicationError::UnprocessableEntity.into());
+    }
+  }
+
+  Ok(())
 }
 
 impl Resource for practitioner_companies::Model {

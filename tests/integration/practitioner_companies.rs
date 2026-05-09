@@ -9,8 +9,8 @@ use opencab::{
   models::_entities::{practitioner_companies, users},
 };
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-use serial_test::serial;
 use serde_json::json;
+use serial_test::serial;
 use tower::ServiceExt;
 
 use crate::common::{setup_http, RUNTIME};
@@ -222,7 +222,9 @@ mod update_a_company {
         // Given
         let router = setup_http().await;
         let user = UserFactory::new().create(DB::get()).await;
-        let company = CompanyFactory::new().create_for_user(DB::get(), user.id).await;
+        let company = CompanyFactory::new()
+          .create_for_user(DB::get(), user.id)
+          .await;
 
         // When
         let response = router
@@ -305,8 +307,13 @@ mod update_a_company {
         // Given
         let router = setup_http().await;
         let owner = UserFactory::new().create(DB::get()).await;
-        let other = UserFactory::new().email("other@test.com").create(DB::get()).await;
-        let company = CompanyFactory::new().create_for_user(DB::get(), owner.id).await;
+        let other = UserFactory::new()
+          .email("other@test.com")
+          .create(DB::get())
+          .await;
+        let company = CompanyFactory::new()
+          .create_for_user(DB::get(), owner.id)
+          .await;
         let token = token_for(&other);
 
         // When
@@ -349,7 +356,9 @@ mod update_a_company {
         // Given
         let router = setup_http().await;
         let user = UserFactory::new().create(DB::get()).await;
-        let company = CompanyFactory::new().create_for_user(DB::get(), user.id).await;
+        let company = CompanyFactory::new()
+          .create_for_user(DB::get(), user.id)
+          .await;
         let token = token_for(&user);
 
         // When

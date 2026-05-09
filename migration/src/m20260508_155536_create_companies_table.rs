@@ -29,10 +29,24 @@ impl MigrationTrait for Migration {
           )
           .to_owned(),
       )
+      .await?;
+
+    manager
+      .create_index(
+        Index::create()
+          .name("idx-companies-user_id")
+          .table("practitioner_companies")
+          .col("user_id")
+          .to_owned(),
+      )
       .await
   }
 
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+    manager
+      .drop_index(Index::drop().name("idx-companies-user_id").to_owned())
+      .await?;
+
     manager
       .drop_table(Table::drop().table("practitioner_companies").to_owned())
       .await

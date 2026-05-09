@@ -55,8 +55,8 @@ pub async fn setup_http() -> Router {
   }
 
   if HTTP_DB_SETUP.get().is_none() {
-    let db_url = std::env::var("TEST_DATABASE_URL")
-      .unwrap_or_else(|_| DEFAULT_TEST_DATABASE_URL.to_string());
+    let db_url =
+      std::env::var("TEST_DATABASE_URL").unwrap_or_else(|_| DEFAULT_TEST_DATABASE_URL.to_string());
     let db = Database::connect(&db_url).await.unwrap();
     Migrator::up(&db, None).await.unwrap();
     DB::init(db);
