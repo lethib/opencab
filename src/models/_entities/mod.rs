@@ -4,6 +4,7 @@ pub mod prelude;
 
 pub mod medical_appointments;
 pub mod patients;
+pub mod practitioner_companies;
 pub mod practitioner_offices;
 pub mod sea_orm_active_enums;
 pub mod user_business_informations;

@@ -92,6 +92,15 @@ pub fn create_router() -> Router<()> {
       "/api/practitioner_office/{office_id}",
       delete(controllers::practitioner_office::destroy),
     )
+    // Companies routes
+    .route(
+      "/api/companies",
+      post(controllers::practitioner_companies::create),
+    )
+    .route(
+      "/api/companies/{company_id}",
+      put(controllers::practitioner_companies::update),
+    )
     // Apply auth middleware to all protected routes
     .layer(middleware::from_fn(authenticated_request));
 
