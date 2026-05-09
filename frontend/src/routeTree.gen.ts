@@ -15,6 +15,7 @@ import { Route as PatientsIndexRouteImport } from './routes/patients/index'
 import { Route as OfficesIndexRouteImport } from './routes/offices/index'
 import { Route as My_informationIndexRouteImport } from './routes/my_information/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as CompaniesIndexRouteImport } from './routes/companies/index'
 import { Route as PatientsPatientIdIndexRouteImport } from './routes/patients/$patientId/index'
 
 const Reset_passwordRoute = Reset_passwordRouteImport.update({
@@ -47,6 +48,11 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
   path: '/login/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompaniesIndexRoute = CompaniesIndexRouteImport.update({
+  id: '/companies/',
+  path: '/companies/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PatientsPatientIdIndexRoute = PatientsPatientIdIndexRouteImport.update({
   id: '/patients/$patientId/',
   path: '/patients/$patientId/',
@@ -56,6 +62,7 @@ const PatientsPatientIdIndexRoute = PatientsPatientIdIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/reset_password': typeof Reset_passwordRoute
+  '/companies': typeof CompaniesIndexRoute
   '/login': typeof LoginIndexRoute
   '/my_information': typeof My_informationIndexRoute
   '/offices': typeof OfficesIndexRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/reset_password': typeof Reset_passwordRoute
+  '/companies': typeof CompaniesIndexRoute
   '/login': typeof LoginIndexRoute
   '/my_information': typeof My_informationIndexRoute
   '/offices': typeof OfficesIndexRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/reset_password': typeof Reset_passwordRoute
+  '/companies/': typeof CompaniesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/my_information/': typeof My_informationIndexRoute
   '/offices/': typeof OfficesIndexRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/reset_password'
+    | '/companies'
     | '/login'
     | '/my_information'
     | '/offices'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/reset_password'
+    | '/companies'
     | '/login'
     | '/my_information'
     | '/offices'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/reset_password'
+    | '/companies/'
     | '/login/'
     | '/my_information/'
     | '/offices/'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   Reset_passwordRoute: typeof Reset_passwordRoute
+  CompaniesIndexRoute: typeof CompaniesIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   My_informationIndexRoute: typeof My_informationIndexRoute
   OfficesIndexRoute: typeof OfficesIndexRoute
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/companies/': {
+      id: '/companies/'
+      path: '/companies'
+      fullPath: '/companies'
+      preLoaderRoute: typeof CompaniesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/patients/$patientId/': {
       id: '/patients/$patientId/'
       path: '/patients/$patientId'
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   Reset_passwordRoute: Reset_passwordRoute,
+  CompaniesIndexRoute: CompaniesIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   My_informationIndexRoute: My_informationIndexRoute,
   OfficesIndexRoute: OfficesIndexRoute,

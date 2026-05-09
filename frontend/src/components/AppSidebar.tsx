@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { Building2, Info, LogOut, Users } from "lucide-react";
+import { Building2, House, Info, LogOut, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   Sidebar,
@@ -21,8 +21,9 @@ export function AppSidebar() {
 
   const navItems = [
     { label: t("navigation.patients"), icon: Users, to: "/patients" },
+    { label: t("navigation.companies"), icon: Building2, to: "/companies" },
     { label: t("navigation.myInformation"), icon: Info, to: "/my_information" },
-    { label: t("navigation.myOffices"), icon: Building2, to: "/offices" },
+    { label: t("navigation.myOffices"), icon: House, to: "/offices" },
   ];
 
   return (

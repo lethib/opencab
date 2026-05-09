@@ -1,5 +1,5 @@
 use axum::{debug_handler, extract::Path, http::status, Json};
-use sea_orm::{EntityTrait, IntoActiveModel};
+use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
 
 use crate::{
   auth::statement::AuthStatement,
@@ -11,6 +11,18 @@ use crate::{
     practitioner_companies::CompanyParams,
   },
 };
+
+#[debug_handler]
+pub async fn index(
+  AuthenticatedUser(current_user, _): AuthenticatedUser,
+) -> Result<Json<Vec<practitioner_companies::Model>>, MyErrors> {
+  let companies = practitioner_companies::Entity::find()
+    .filter(practitioner_companies::Column::UserId.eq(current_user.id))
+    .all(DB::get())
+    .await?;
+
+  Ok(Json(companies))
+}
 
 #[debug_handler]
 pub async fn create(
