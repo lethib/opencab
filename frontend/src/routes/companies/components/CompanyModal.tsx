@@ -30,15 +30,11 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
   const createMutation = APIHooks.company.create.useMutation();
 
   const schema = z.object({
-    name: z
-      .string()
-      .trim()
-      .min(1, t("companies.form.validation.nameRequired")),
+    name: z.string().trim().min(1, t("companies.form.validation.nameRequired")),
     contact_email: z
-      .string()
+      .email(t("companies.form.validation.emailInvalid"))
       .trim()
-      .min(1, t("companies.form.validation.emailRequired"))
-      .email(t("companies.form.validation.emailInvalid")),
+      .min(1, t("companies.form.validation.emailRequired")),
     address_line_1: z.string().trim().optional(),
     address_zip_code: z
       .string()
