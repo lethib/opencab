@@ -25,3 +25,11 @@ database:
 jwt:
   secret: stD5fLU9skaypSXXOXzg
   expiration: 604800  # 7 days for tests
+
+# CORS configuration
+cors:
+  allow_origins: ["*"]
+
+# Application configuration
+app:
+  base_url: http://localhost:5150

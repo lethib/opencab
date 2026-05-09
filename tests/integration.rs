@@ -5,5 +5,7 @@ mod factories;
 
 #[path = "integration/appointments.rs"]
 mod appointments;
+#[path = "integration/practitioner_companies.rs"]
+mod practitioner_companies;
 #[path = "integration/practitioner_office.rs"]
 mod practitioner_office;

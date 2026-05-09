@@ -100,7 +100,7 @@ static LOCK: OnceLock<Config> = OnceLock::new();
 
 impl Config {
   pub fn init(config: Config) {
-    LOCK.set(config).expect("Cannot initialize Config")
+    let _ = LOCK.set(config);
   }
   pub fn get() -> &'static Self {
     LOCK.get().expect("Config not initialized")
