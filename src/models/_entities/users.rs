@@ -27,6 +27,8 @@ pub enum Relation {
   MedicalAppointments,
   #[sea_orm(has_many = "super::patients::Entity")]
   Patients,
+  #[sea_orm(has_many = "super::practitioner_companies::Entity")]
+  PractitionerCompanies,
   #[sea_orm(has_one = "super::user_business_informations::Entity")]
   UserBusinessInformations,
   #[sea_orm(has_many = "super::user_practitioner_offices::Entity")]
@@ -42,6 +44,12 @@ impl Related<super::medical_appointments::Entity> for Entity {
 impl Related<super::patients::Entity> for Entity {
   fn to() -> RelationDef {
     Relation::Patients.def()
+  }
+}
+
+impl Related<super::practitioner_companies::Entity> for Entity {
+  fn to() -> RelationDef {
+    Relation::PractitionerCompanies.def()
   }
 }
 

@@ -28,6 +28,11 @@ impl UserFactory {
     Self::default()
   }
 
+  pub fn email(mut self, email: &str) -> Self {
+    self.email = email.to_string();
+    self
+  }
+
   pub async fn create(self, db: &DatabaseConnection) -> users::Model {
     let is_verified = self.is_access_key_verified;
 
