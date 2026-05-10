@@ -9,9 +9,12 @@ pub struct Model {
   #[sea_orm(primary_key)]
   pub id: i32,
   pub name: String,
+  pub contact_name: String,
+  pub siret: Option<String>,
   pub contact_email: String,
   pub address_line_1: Option<String>,
   pub address_zip_code: Option<String>,
+  pub address_city: Option<String>,
   pub address_country: Option<String>,
   pub created_at: DateTimeWithTimeZone,
   pub updated_at: DateTimeWithTimeZone,

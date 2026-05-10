@@ -3,6 +3,7 @@ use sea_orm::DatabaseConnection;
 
 pub struct CompanyFactory {
   name: String,
+  contact_name: String,
   contact_email: String,
 }
 
@@ -10,6 +11,7 @@ impl Default for CompanyFactory {
   fn default() -> Self {
     Self {
       name: "Test Company".to_string(),
+      contact_name: "John Doe".to_string(),
       contact_email: "company@test.com".to_string(),
     }
   }
@@ -30,9 +32,12 @@ impl CompanyFactory {
       user_id,
       &CompanyParams {
         name: self.name,
+        contact_name: self.contact_name,
         contact_email: self.contact_email,
+        siret: None,
         address_line_1: None,
         address_zip_code: None,
+        address_city: None,
       },
     )
     .await

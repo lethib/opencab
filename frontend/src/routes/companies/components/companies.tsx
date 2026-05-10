@@ -1,4 +1,4 @@
-import { Briefcase, Layers, Plus, Send } from "lucide-react";
+import { Building2, Layers, Plus, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { APIHooks } from "@/api/hooks";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ const EmptyState = ({ onAdd }: { onAdd: VoidFunction }) => {
   return (
     <div className="border rounded-xl px-8 py-16 flex flex-col items-center text-center">
       <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-        <Briefcase className="h-9 w-9 text-primary" />
+        <Building2 className="h-9 w-9 text-primary" />
       </div>
 
       <h3 className="text-xl font-semibold mb-3">
@@ -59,7 +59,7 @@ const EmptyState = ({ onAdd }: { onAdd: VoidFunction }) => {
 export const Companies = ({ onAdd }: { onAdd: VoidFunction }) => {
   const companiesQuery = APIHooks.company.list.useQuery(null);
 
-  if (companiesQuery.isFetching) return <CenteredSpineer />;
+  if (companiesQuery.isLoading) return <CenteredSpineer />;
 
   if (
     !companiesQuery.isLoading &&

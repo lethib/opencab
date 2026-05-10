@@ -47,6 +47,7 @@ mod create_a_company {
               .body(Body::from(
                 json!({
                   "name": "My Company",
+                  "contact_name": "Jane Doe",
                   "contact_email": "contact@example.com",
                   "address_line_1": null,
                   "address_zip_code": null
@@ -89,6 +90,7 @@ mod create_a_company {
               .body(Body::from(
                 json!({
                   "name": "My Company",
+                  "contact_name": "Jane Doe",
                   "contact_email": "contact@example.com",
                   "address_line_1": null,
                   "address_zip_code": null
@@ -140,6 +142,7 @@ mod create_a_company {
               .body(Body::from(
                 json!({
                   "name": "My Company",
+                  "contact_name": "Jane Doe",
                   "contact_email": "contact@example.com",
                   "address_line_1": "1 rue de la Paix",
                   "address_zip_code": "75001"
@@ -189,6 +192,7 @@ mod create_a_company {
               .body(Body::from(
                 json!({
                   "name": "My Company",
+                  "contact_name": "Jane Doe",
                   "contact_email": "contact@example.com",
                   "address_line_1": "1 rue de la Paix",
                   "address_zip_code": "INVALID"
@@ -236,6 +240,7 @@ mod update_a_company {
               .body(Body::from(
                 json!({
                   "name": "Updated Name",
+                  "contact_name": "Jane Doe",
                   "contact_email": "updated@example.com",
                   "address_line_1": null,
                   "address_zip_code": null
@@ -278,6 +283,7 @@ mod update_a_company {
               .body(Body::from(
                 json!({
                   "name": "Updated Name",
+                  "contact_name": "Jane Doe",
                   "contact_email": "updated@example.com",
                   "address_line_1": null,
                   "address_zip_code": null
@@ -327,6 +333,7 @@ mod update_a_company {
               .body(Body::from(
                 json!({
                   "name": "Updated Name",
+                  "contact_name": "Jane Doe",
                   "contact_email": "updated@example.com",
                   "address_line_1": null,
                   "address_zip_code": null
@@ -372,6 +379,7 @@ mod update_a_company {
               .body(Body::from(
                 json!({
                   "name": "Updated Name",
+                  "contact_name": "Jane Doe",
                   "contact_email": "updated@example.com",
                   "address_line_1": null,
                   "address_zip_code": null
