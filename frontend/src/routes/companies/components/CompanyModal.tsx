@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, MapPin } from "lucide-react";
+import { Contact, HashIcon, Mail, MapPin } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import z from "zod";
@@ -29,12 +29,18 @@ const schema = z.object({
     .string()
     .trim()
     .min(1, i18n.t("companies.form.validation.nameRequired")),
+  contact_name: z
+    .string()
+    .trim()
+    .min(1, i18n.t("companies.form.validation.contactNameRequired")),
   contact_email: z
     .email(i18n.t("companies.form.validation.emailInvalid"))
     .trim()
     .min(1, i18n.t("companies.form.validation.emailRequired")),
+  siret: z.string().trim().optional(),
   address_line_1: z.string().trim().optional(),
   address_zip_code: z.string().trim().optional(),
+  address_city: z.string().trim().optional(),
 });
 
 export const CompanyModal = ({ open, setIsOpen }: Props) => {
@@ -45,9 +51,8 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
+      contact_name: "",
       contact_email: "",
-      address_line_1: "",
-      address_zip_code: "",
     },
   });
 
@@ -57,10 +62,10 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
-    createMutation
+    await createMutation
       .mutateAsync(values)
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: ["/companies"] });
+      .then(async () => {
+        await queryClient.invalidateQueries({ queryKey: ["/companies"] });
         handleClose();
       })
       .catch((error) => alert((error as Error).message));
@@ -88,22 +93,56 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact_name">
+                {t("companies.form.contactName")}
+              </Label>
+              <FormInput
+                id="contact_name"
+                name="contact_name"
+                type="text"
+                placeholder={t("companies.form.contactNamePlaceholder")}
+                className="pl-10 h-11"
+                icon={
+                  <Contact className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contact_email">{t("companies.form.email")}</Label>
+              <FormInput
+                id="contact_email"
+                name="contact_email"
+                type="email"
+                placeholder={t("companies.form.emailPlaceholder")}
+                className="pl-10 h-11"
+                icon={
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                }
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="contact_email">{t("companies.form.email")}</Label>
+            <Label optional htmlFor="siret">
+              {t("companies.form.siret")}
+            </Label>
             <FormInput
-              id="contact_email"
-              name="contact_email"
-              type="email"
-              placeholder={t("companies.form.emailPlaceholder")}
+              id="siret"
+              name="siret"
+              type="text"
+              placeholder={t("companies.form.siretPlaceholder")}
               className="pl-10 h-11"
               icon={
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <HashIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               }
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address_line_1">
+            <Label optional htmlFor="address_line_1">
               {t("companies.form.address")}
             </Label>
             <FormInput
@@ -118,17 +157,32 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address_zip_code">
-              {t("companies.form.zipCode")}
-            </Label>
-            <FormInput
-              id="address_zip_code"
-              name="address_zip_code"
-              type="text"
-              placeholder={t("companies.form.zipCodePlaceholder")}
-              className="h-11"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label optional htmlFor="address_zip_code">
+                {t("companies.form.zipCode")}
+              </Label>
+              <FormInput
+                id="address_zip_code"
+                name="address_zip_code"
+                type="text"
+                placeholder={t("companies.form.zipCodePlaceholder")}
+                className="h-11"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label optional htmlFor="address_city">
+                {t("companies.form.city")}
+              </Label>
+              <FormInput
+                id="address_city"
+                name="address_city"
+                type="text"
+                placeholder={t("companies.form.cityPlaceholder")}
+                className="h-11"
+              />
+            </div>
           </div>
 
           <DialogFooter>

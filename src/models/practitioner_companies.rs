@@ -14,10 +14,13 @@ use crate::{
 #[derive(Debug, Deserialize, Validate)]
 pub struct CompanyParams {
   pub name: String,
+  pub contact_name: String,
   #[validate(email(message = "invalid_email"))]
   pub contact_email: String,
+  pub siret: Option<String>,
   pub address_line_1: Option<String>,
   pub address_zip_code: Option<String>,
+  pub address_city: Option<String>,
 }
 
 impl practitioner_companies::ActiveModel {
@@ -35,7 +38,9 @@ impl practitioner_companies::ActiveModel {
       Self {
         name: ActiveValue::Set(params.name.trim().to_string()),
         user_id: ActiveValue::Set(owner_id),
+        contact_name: ActiveValue::Set(params.contact_name.trim().to_string()),
         contact_email: ActiveValue::Set(params.contact_email.trim().to_string()),
+        siret: ActiveValue::Set(params.siret.as_ref().map(|siret| siret.trim().to_string())),
         address_line_1: ActiveValue::Set(
           params
             .address_line_1
@@ -47,6 +52,12 @@ impl practitioner_companies::ActiveModel {
             .address_zip_code
             .as_ref()
             .map(|zip_code| zip_code.trim().to_string()),
+        ),
+        address_city: ActiveValue::Set(
+          params
+            .address_city
+            .as_ref()
+            .map(|city| city.trim().to_string()),
         ),
         address_country: ActiveValue::Set(is_address_provided.then_some("FRANCE".to_string())),
         ..Default::default()
@@ -66,7 +77,9 @@ impl practitioner_companies::ActiveModel {
     let is_address_provided = params.address_line_1.is_some();
 
     self.name = ActiveValue::Set(params.name.trim().to_string());
+    self.contact_name = ActiveValue::Set(params.contact_name.trim().to_string());
     self.contact_email = ActiveValue::Set(params.contact_email.trim().to_string());
+    self.siret = ActiveValue::Set(params.siret.as_ref().map(|siret| siret.trim().to_string()));
     self.address_line_1 = ActiveValue::Set(
       params
         .address_line_1
@@ -78,6 +91,12 @@ impl practitioner_companies::ActiveModel {
         .address_zip_code
         .as_ref()
         .map(|zip_code| zip_code.trim().to_string()),
+    );
+    self.address_city = ActiveValue::Set(
+      params
+        .address_city
+        .as_ref()
+        .map(|city| city.trim().to_string()),
     );
     self.address_country = ActiveValue::Set(is_address_provided.then_some("FRANCE".to_string()));
 
