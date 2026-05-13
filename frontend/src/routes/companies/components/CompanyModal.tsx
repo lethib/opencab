@@ -29,7 +29,10 @@ const schema = z.object({
     .string()
     .trim()
     .min(1, i18n.t("companies.form.validation.nameRequired")),
-  contact_name: z.string().trim().min(1, i18n.t("companies.form.validation.contactNameRequired")),
+  contact_name: z
+    .string()
+    .trim()
+    .min(1, i18n.t("companies.form.validation.contactNameRequired")),
   contact_email: z
     .email(i18n.t("companies.form.validation.emailInvalid"))
     .trim()
@@ -92,7 +95,9 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="contact_name">{t("companies.form.contactName")}</Label>
+              <Label htmlFor="contact_name">
+                {t("companies.form.contactName")}
+              </Label>
               <FormInput
                 id="contact_name"
                 name="contact_name"
