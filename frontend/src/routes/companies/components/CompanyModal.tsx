@@ -29,7 +29,7 @@ const schema = z.object({
     .string()
     .trim()
     .min(1, i18n.t("companies.form.validation.nameRequired")),
-  contact_name: z.string().trim().min(1, "Le nom du contacy est requis."),
+  contact_name: z.string().trim().min(1, i18n.t("companies.form.validation.contactNameRequired")),
   contact_email: z
     .email(i18n.t("companies.form.validation.emailInvalid"))
     .trim()
@@ -48,6 +48,7 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
+      contact_name: "",
       contact_email: "",
     },
   });
@@ -91,12 +92,12 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="contact_name">Contact de facturation</Label>
+              <Label htmlFor="contact_name">{t("companies.form.contactName")}</Label>
               <FormInput
                 id="contact_name"
                 name="contact_name"
                 type="text"
-                placeholder="Jean Dupont"
+                placeholder={t("companies.form.contactNamePlaceholder")}
                 className="pl-10 h-11"
                 icon={
                   <Contact className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -121,13 +122,13 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
 
           <div className="space-y-2">
             <Label optional htmlFor="siret">
-              SIRET
+              {t("companies.form.siret")}
             </Label>
             <FormInput
               id="siret"
               name="siret"
               type="text"
-              placeholder="345 130 488 00017"
+              placeholder={t("companies.form.siretPlaceholder")}
               className="pl-10 h-11"
               icon={
                 <HashIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -167,13 +168,13 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
 
             <div className="space-y-2">
               <Label optional htmlFor="address_city">
-                Ville
+                {t("companies.form.city")}
               </Label>
               <FormInput
                 id="address_city"
                 name="address_city"
                 type="text"
-                placeholder="Paris"
+                placeholder={t("companies.form.cityPlaceholder")}
                 className="h-11"
               />
             </div>

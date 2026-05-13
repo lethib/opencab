@@ -61,11 +61,7 @@ export const Companies = ({ onAdd }: { onAdd: VoidFunction }) => {
 
   if (companiesQuery.isLoading) return <CenteredSpineer />;
 
-  if (
-    !companiesQuery.isLoading &&
-    !companiesQuery.isError &&
-    companiesQuery.data?.length === 0
-  ) {
+  if (!companiesQuery.isError && companiesQuery.data?.length === 0) {
     return <EmptyState onAdd={onAdd} />;
   }
 
