@@ -110,7 +110,8 @@
     "error": "Erreur lors du chargement des patients",
     "deleteModal": {
       "title": "Suppression du patient",
-      "description": "La suppression du patient entraîne la perte de toutes les consultations avec {{firstName}} {{lastName}}. Voulez-vous continuez?"
+      "description": "La suppression du patient entraîne la perte de toutes les consultations avec {{firstName}} {{lastName}}. Voulez-vous continuez?",
+      "successMessage": "{{firstName}} {{lastName}} a bien été retiré de la liste de vos patients."
     },
     "form": {
       "title": {

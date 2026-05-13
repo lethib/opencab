@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { queryClient } from "@/api/api";
 import { APIHooks } from "@/api/hooks";
 import type { SearchPatientResponse } from "@/api/hooks/patient";
@@ -33,6 +34,12 @@ export const ConfirmPatientDeleteModal = ({
     deletePatientMutation.mutateAsync(null).then(() => {
       queryClient.invalidateQueries({ queryKey: ["/patient/_search"] });
       onClose();
+      toast.success(
+        t("patients.deleteModal.successMessage", {
+          firstName: patient.first_name,
+          lastName: patient.last_name,
+        }),
+      );
     });
   };
 
@@ -57,6 +64,7 @@ export const ConfirmPatientDeleteModal = ({
             type="button"
             variant="destructive"
             onClick={deletePatient}
+            disabled={deletePatientMutation.isPending}
             className="w-full sm:w-auto"
           >
             {t("common.delete")}
