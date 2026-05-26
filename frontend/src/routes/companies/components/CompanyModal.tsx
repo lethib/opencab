@@ -71,12 +71,22 @@ export const CompanyModal = ({ open, setIsOpen, company }: Props) => {
     form.reset();
   };
 
+  const invalidateQueries = async () => {
+    if (company) {
+      await queryClient.invalidateQueries({
+        queryKey: [`/companies/${company.id}`, null],
+      });
+    } else {
+      await queryClient.invalidateQueries({ queryKey: ["/companies"] });
+    }
+  };
+
   const onSubmit = form.handleSubmit(async (values) => {
     const mutation = isEditing ? updateMutation : createMutation;
     await mutation
       .mutateAsync(values)
       .then(async () => {
-        await queryClient.invalidateQueries({ queryKey: ["/companies"] });
+        invalidateQueries();
         handleClose();
       })
       .catch((error) => alert((error as Error).message));
