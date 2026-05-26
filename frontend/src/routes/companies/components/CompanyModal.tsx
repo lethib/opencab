@@ -49,7 +49,9 @@ export const CompanyModal = ({ open, setIsOpen, company }: Props) => {
   const { t } = useTranslation();
   const isEditing = !!company;
   const createMutation = APIHooks.company.create.useMutation();
-  const updateMutation = APIHooks.company.update(company?.id ?? 0).useMutation();
+  const updateMutation = APIHooks.company
+    .update(company?.id ?? 0)
+    .useMutation();
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -85,7 +87,9 @@ export const CompanyModal = ({ open, setIsOpen, company }: Props) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? t("companies.form.editTitle") : t("companies.form.addTitle")}
+            {isEditing
+              ? t("companies.form.editTitle")
+              : t("companies.form.addTitle")}
           </DialogTitle>
           <DialogDescription>
             {isEditing
