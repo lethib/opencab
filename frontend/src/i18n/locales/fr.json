@@ -369,6 +369,7 @@
     "close": "Fermer",
     "back": "Retour",
     "backToPatients": "Retour aux patients",
+    "backToCompanies": "Retour aux entreprises",
     "next": "Suivant",
     "previous": "Précédent",
     "submit": "Soumettre",
@@ -402,6 +403,8 @@
     "form": {
       "addTitle": "Ajouter une entreprise",
       "addDescription": "Créez un nouveau client institutionnel pour pouvoir lui adresser des factures.",
+      "editTitle": "Modifier l'entreprise",
+      "editDescription": "Mettez à jour les informations de ce client institutionnel.",
       "name": "Raison sociale",
       "namePlaceholder": "Ex. Stade Français Paris",
       "email": "Email comptabilité",
@@ -417,6 +420,15 @@
       "city": "Ville",
       "cityPlaceholder": "Paris",
       "add": "Ajouter",
+      "save": "Enregistrer",
+      "show": {
+        "siret": "SIRET",
+        "billingAddress": "Adresse de facturation",
+        "billingContact": "Contact facturation",
+        "billingEmail": "Email comptabilité",
+        "edit": "Modifier",
+        "notFound": "Entreprise introuvable"
+      },
       "validation": {
         "nameRequired": "La raison sociale est requise",
         "contactNameRequired": "Le nom du contact est requis",

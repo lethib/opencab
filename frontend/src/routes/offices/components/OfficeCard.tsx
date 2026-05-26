@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui";
+import { formatAddress } from "@/lib/utils";
 
 interface OfficeCardProps {
   office: PractitionerOffice;
@@ -29,10 +30,7 @@ export const OfficeCard = ({ office, onEdit, onDelete }: OfficeCardProps) => {
             </CardTitle>
             <CardDescription className="flex items-center gap-2 mt-2">
               <MapPin className="h-4 w-4" />
-              <span>
-                {office.address_line_1}, {office.address_zip_code}{" "}
-                {office.address_city}
-              </span>
+              <span>{formatAddress(office)}</span>
             </CardDescription>
           </div>
           <div className="flex gap-2">

@@ -27,8 +27,18 @@ export const companySchema = {
     type: "GET",
     path: "/companies",
   }),
+  get: (companyId: number) =>
+    queryEndpoint<null, Company>({
+      type: "GET",
+      path: `/companies/${companyId}`,
+    }),
   create: mutationEndpoint<CompanyParams, void>({
     type: "POST",
     path: "/companies",
   }),
+  update: (companyId: number) =>
+    mutationEndpoint<CompanyParams, void>({
+      type: "PUT",
+      path: `/companies/${companyId}`,
+    }),
 };
