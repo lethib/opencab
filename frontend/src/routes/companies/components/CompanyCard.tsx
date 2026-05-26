@@ -1,29 +1,31 @@
+import { useNavigate } from "@tanstack/react-router";
 import { HashIcon, Mail, MapPin, User } from "lucide-react";
 import type { Company } from "@/api/hooks/practitioner_company";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatAddress } from "@/lib/utils";
+import { CompanyAvatar } from "./CompanyAvatar";
 
 interface Props {
   company: Company;
 }
 
-const getInitials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0].toUpperCase())
-    .join("");
-
 export const CompanyCard = ({ company }: Props) => {
+  const navigate = useNavigate({ from: "/companies" });
+  const address = formatAddress(company);
+
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+    <Card
+      className="hover:shadow-md transition-shadow cursor-pointer"
+      onClick={() =>
+        navigate({
+          to: "$companyId",
+          params: { companyId: company.id.toString() },
+        })
+      }
+    >
       <CardContent className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
-            <span className="text-sm font-semibold text-primary">
-              {getInitials(company.name)}
-            </span>
-          </div>
+          <CompanyAvatar name={company.name} />
           <div>
             <h3 className="font-semibold text-base leading-tight flex-1 min-w-0">
               {company.name}
@@ -46,14 +48,10 @@ export const CompanyCard = ({ company }: Props) => {
             <Mail className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">{company.contact_email}</span>
           </div>
-          {company.address_line_1 && (
+          {address && (
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span>
-                {company.address_line_1}
-                {company.address_zip_code && `, ${company.address_zip_code}`}
-                {company.address_city && `, ${company.address_city}`}
-              </span>
+              <span>{address}</span>
             </div>
           )}
         </div>

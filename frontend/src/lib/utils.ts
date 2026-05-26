@@ -15,3 +15,25 @@ export function formatAccessKey(accessKey: string): string {
 
 export const formatSSN = (ssn: string): string =>
   `${ssn[0]} ${ssn.slice(1, 3)} ${ssn.slice(3, 5)} ${ssn.slice(5, 7)} ${ssn.slice(7, 10)} ${ssn.slice(10, 13)} ${ssn.slice(13, 15)}`;
+
+export const formatAddress = (address: {
+  address_line_1?: string | null;
+  address_zip_code?: string | null;
+  address_city?: string | null;
+  address_country?: string | null;
+}): string =>
+  [
+    address.address_line_1,
+    [address.address_zip_code, address.address_city].filter(Boolean).join(" "),
+    address.address_country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+export const getInitials = (name: string): string =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join("");

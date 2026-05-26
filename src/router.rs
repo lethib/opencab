@@ -100,7 +100,8 @@ pub fn create_router() -> Router<()> {
     )
     .route(
       "/api/companies/{company_id}",
-      put(controllers::practitioner_companies::update),
+      put(controllers::practitioner_companies::update)
+        .get(controllers::practitioner_companies::get),
     )
     // Apply auth middleware to all protected routes
     .layer(middleware::from_fn(authenticated_request));

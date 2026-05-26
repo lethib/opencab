@@ -25,6 +25,25 @@ pub async fn index(
 }
 
 #[debug_handler]
+pub async fn get(
+  authorize: AuthStatement,
+  Path(company_id): Path<i32>,
+) -> Result<Json<practitioner_companies::Model>, MyErrors> {
+  let company = practitioner_companies::Entity::find_by_id(company_id)
+    .one(DB::get())
+    .await?
+    .ok_or(ApplicationError::NotFound)?;
+
+  authorize
+    .authenticated_user()
+    .user_owning_resource(&company)
+    .await
+    .run_complete()?;
+
+  Ok(Json(company))
+}
+
+#[debug_handler]
 pub async fn create(
   AuthenticatedUser(current_user, _): AuthenticatedUser,
   Json(params): Json<CompanyParams>,

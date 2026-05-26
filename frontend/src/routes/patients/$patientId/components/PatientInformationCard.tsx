@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui";
 import { CenteredSpineer } from "@/components/ui/spinner";
-import { formatSSN } from "@/lib/utils";
+import { formatAddress, formatSSN } from "@/lib/utils";
 
 interface Props {
   patientId: number;
@@ -48,10 +48,7 @@ export const PatientInformationCard = ({ patientId }: Props) => {
                     {t("patients.table.ssn")}:{" "}
                     {patient.ssn ? formatSSN(patient.ssn) : "-"}
                   </span>
-                  <span>
-                    {patient.address_line_1}, {patient.address_zip_code}{" "}
-                    {patient.address_city}
-                  </span>
+                  <span>{formatAddress(patient)}</span>
                   {patient.email && (
                     <span>
                       Email:{" "}

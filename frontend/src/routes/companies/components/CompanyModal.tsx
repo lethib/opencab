@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import z from "zod";
 import { queryClient } from "@/api/api";
 import { APIHooks } from "@/api/hooks";
+import type { Company } from "@/api/hooks/practitioner_company";
 import { FormInput } from "@/components/form/FormInput";
 import { FormProvider } from "@/components/form/FormProvider";
 import {
@@ -22,6 +23,7 @@ import i18n from "@/i18n";
 interface Props {
   open: boolean;
   setIsOpen: (open: boolean) => void;
+  company?: Company;
 }
 
 const schema = z.object({
@@ -43,16 +45,22 @@ const schema = z.object({
   address_city: z.string().trim().optional(),
 });
 
-export const CompanyModal = ({ open, setIsOpen }: Props) => {
+export const CompanyModal = ({ open, setIsOpen, company }: Props) => {
   const { t } = useTranslation();
+  const isEditing = !!company;
   const createMutation = APIHooks.company.create.useMutation();
+  const updateMutation = APIHooks.company.update(company?.id ?? 0).useMutation();
 
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: "",
-      contact_name: "",
-      contact_email: "",
+      name: company?.name ?? "",
+      contact_name: company?.contact_name ?? "",
+      contact_email: company?.contact_email ?? "",
+      siret: company?.siret ?? "",
+      address_line_1: company?.address_line_1 ?? "",
+      address_zip_code: company?.address_zip_code ?? "",
+      address_city: company?.address_city ?? "",
     },
   });
 
@@ -62,7 +70,8 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
   };
 
   const onSubmit = form.handleSubmit(async (values) => {
-    await createMutation
+    const mutation = isEditing ? updateMutation : createMutation;
+    await mutation
       .mutateAsync(values)
       .then(async () => {
         await queryClient.invalidateQueries({ queryKey: ["/companies"] });
@@ -75,9 +84,13 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("companies.form.addTitle")}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? t("companies.form.editTitle") : t("companies.form.addTitle")}
+          </DialogTitle>
           <DialogDescription>
-            {t("companies.form.addDescription")}
+            {isEditing
+              ? t("companies.form.editDescription")
+              : t("companies.form.addDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -189,8 +202,11 @@ export const CompanyModal = ({ open, setIsOpen }: Props) => {
             <Button type="button" variant="outline" onClick={handleClose}>
               {t("common.cancel")}
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {t("companies.form.add")}
+            <Button
+              type="submit"
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {isEditing ? t("companies.form.save") : t("companies.form.add")}
             </Button>
           </DialogFooter>
         </FormProvider>
