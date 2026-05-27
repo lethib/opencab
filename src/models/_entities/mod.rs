@@ -2,6 +2,7 @@
 
 pub mod prelude;
 
+pub mod company_interventions;
 pub mod medical_appointments;
 pub mod patients;
 pub mod practitioner_companies;

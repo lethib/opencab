@@ -1,4 +1,5 @@
 pub mod _entities;
+pub mod company_interventions;
 pub mod enums;
 pub mod medical_appointments;
 pub mod my_errors;

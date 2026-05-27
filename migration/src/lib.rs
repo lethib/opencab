@@ -32,6 +32,7 @@ mod m20260310_175025_add_revenue_share_percentage_to_user_practitioner_office;
 mod m20260317_220127_make_patient_email_nullable;
 mod m20260412_074522_make_patient_ssn_nullable;
 mod m20260508_155536_create_companies_table;
+mod m20260526_185055_create_company_interventions_table;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -70,6 +71,7 @@ impl MigratorTrait for Migrator {
       Box::new(m20260317_220127_make_patient_email_nullable::Migration),
       Box::new(m20260412_074522_make_patient_ssn_nullable::Migration),
       Box::new(m20260508_155536_create_companies_table::Migration),
+      Box::new(m20260526_185055_create_company_interventions_table::Migration),
     ]
   }
 }

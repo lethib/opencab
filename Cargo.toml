@@ -54,6 +54,7 @@ dotenvy = "0.15"
 # Random number generation for access keys
 rand = "0.8"
 rust_xlsxwriter = "0.93.0"
+rust_decimal = { version = "1.42.0", default-features = false }
 
 [dev-dependencies]
 serial_test = { version = "3.1.1" }
