@@ -24,6 +24,7 @@ impl company_interventions::ActiveModel {
     validate_vat_values(&params.vat_rate)?;
 
     let unit_price_in_cents = (params.unit_price * 100.0)
+      .round()
       .to_i32()
       .ok_or(ApplicationError::UnprocessableEntity)?;
 
@@ -49,6 +50,7 @@ impl company_interventions::ActiveModel {
     validate_vat_values(&params.vat_rate)?;
 
     let unit_price_in_cents = (params.unit_price * 100.0)
+      .round()
       .to_i32()
       .ok_or(ApplicationError::UnprocessableEntity)?;
 
@@ -67,7 +69,7 @@ fn validate_vat_values(vat_rate: &Decimal) -> Result<(), MyErrors> {
     .to_f32()
     .ok_or(ApplicationError::UnprocessableEntity)?;
 
-  if !ALLOWED_VAT_VALUES.to_vec().contains(&vat_rate) {
+  if !ALLOWED_VAT_VALUES.contains(&vat_rate) {
     return Err(ApplicationError::UnprocessableEntity.into());
   }
 
