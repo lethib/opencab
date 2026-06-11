@@ -747,7 +747,7 @@ fn create_company_invoice_pdf(args: &CompanyInvoiceArgs) -> Result<Vec<u8>, Stri
     .map_err(|e| format!("vat amount: {}", e))?;
 
   // Divider above TTC
-  let y_line3 = y_total_ht - mm(7.0);
+  let y_line3 = y_vat - mm(7.0);
   page
     .graphics()
     .set_stroke_color(Color::black())
