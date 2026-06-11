@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use rust_decimal::{prelude::ToPrimitive, Decimal};
 use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait};
 
@@ -10,6 +11,8 @@ pub struct InterventionParams {
   pub quantity: i32,
   pub unit_price: f32,
   pub vat_rate: Decimal,
+  pub issue_date: NaiveDate,
+  pub object: String,
 }
 
 const ALLOWED_VAT_VALUES: [f32; 4] = [0.0, 5.5, 10.0, 20.0];
@@ -35,6 +38,8 @@ impl company_interventions::ActiveModel {
         quantity: ActiveValue::Set(params.quantity),
         unit_price_in_cents: ActiveValue::Set(unit_price_in_cents),
         vat_rate_in_percent: ActiveValue::Set(params.vat_rate),
+        issue_date: ActiveValue::Set(params.issue_date),
+        object: ActiveValue::Set(params.object.clone()),
         ..Default::default()
       }
       .insert(db)
@@ -57,6 +62,8 @@ impl company_interventions::ActiveModel {
     self.quantity = ActiveValue::Set(params.quantity);
     self.unit_price_in_cents = ActiveValue::Set(unit_price_in_cents);
     self.vat_rate_in_percent = ActiveValue::Set(params.vat_rate);
+    self.issue_date = ActiveValue::Set(params.issue_date);
+    self.object = ActiveValue::Set(params.object.clone());
 
     self.save(db).await?;
 

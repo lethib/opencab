@@ -2,17 +2,18 @@ use crate::{
   db::DB,
   models::{
     _entities::{
-      patients, practitioner_offices::Entity as PractitionerOffices, user_business_informations,
-      users,
+      company_interventions, patients, practitioner_companies, practitioner_offices,
+      user_business_informations, users,
     },
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
   },
+  services::storage::StorageService,
   workers::{
     self,
-    invoice_generator::InvoiceGeneratorArgs,
+    invoice_generator::{CompanyInvoiceArgs, InvoiceGeneratorArgs},
     mailer::{args::EmailArgs, attachment::EmailAttachment},
+    WorkerJob, WorkerTransmitter,
   },
-  workers::{WorkerJob, WorkerTransmitter},
 };
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::Deserialize;
@@ -105,7 +106,7 @@ pub async fn generate_patient_invoice(
     invoice_date.format("%d_%m_%Y")
   );
 
-  let practitioner_office = PractitionerOffices::find_by_id(params.office_id)
+  let practitioner_office = practitioner_offices::Entity::find_by_id(params.office_id)
     .one(DB::get())
     .await?
     .ok_or(UnexpectedError::ShouldNotHappen)?;
@@ -127,4 +128,61 @@ pub async fn generate_patient_invoice(
     patient_email: patient.email,
     invoice_date,
   })
+}
+
+pub async fn generate_company_invoice(
+  company_intervention: &company_interventions::Model,
+  current_user: &users::Model,
+  practitioner_office: practitioner_offices::Model,
+) -> Result<Vec<u8>, MyErrors> {
+  let business_info = user_business_informations::Entity::find()
+    .filter(user_business_informations::Column::UserId.eq(current_user.id))
+    .one(DB::get())
+    .await?
+    .ok_or(ApplicationError::NotFound)?;
+
+  let company = practitioner_companies::Entity::find_by_id(company_intervention.company_id)
+    .one(DB::get())
+    .await?
+    .ok_or(ApplicationError::NotFound)?;
+
+  let emission_date = chrono::Utc::now().date_naive();
+
+  let signature_data = match StorageService::new() {
+    Ok(service) => {
+      if let Some(ref sig_name) = business_info.signature_file_name {
+        match service.fetch_signature(sig_name).await {
+          Ok(data) => Some(data),
+          Err(e) => {
+            tracing::warn!(
+              "Failed to fetch signature for company invoice: {}. Continuing without.",
+              e
+            );
+            None
+          }
+        }
+      } else {
+        None
+      }
+    }
+    Err(e) => {
+      tracing::warn!(
+        "Storage service unavailable for company invoice: {}. Continuing without signature.",
+        e
+      );
+      None
+    }
+  };
+
+  let args = CompanyInvoiceArgs {
+    intervention: company_intervention.clone(),
+    user: current_user.clone(),
+    business_info,
+    company,
+    emission_date,
+    practitioner_office,
+    signature_data,
+  };
+
+  workers::invoice_generator::generate_company_invoice_pdf(&args)
 }

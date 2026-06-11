@@ -17,6 +17,8 @@ impl MigrationTrait for Migration {
           .col(integer("quantity"))
           .col(integer("unit_price_in_cents"))
           .col(decimal_len("vat_rate_in_percent", 4, 1))
+          .col(date("issue_date"))
+          .col(string("object"))
           .col(timestamp_with_time_zone("created_at").default(Expr::current_timestamp()))
           .col(timestamp_with_time_zone("updated_at").default(Expr::current_timestamp()))
           .foreign_key(
