@@ -103,6 +103,10 @@ pub fn create_router() -> Router<()> {
       put(controllers::practitioner_companies::update)
         .get(controllers::practitioner_companies::get),
     )
+    .route(
+      "/api/companies/{company_id}/_generate_invoice",
+      post(controllers::practitioner_companies::generate_invoice),
+    )
     // Apply auth middleware to all protected routes
     .layer(middleware::from_fn(authenticated_request));
 

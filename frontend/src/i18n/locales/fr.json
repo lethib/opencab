@@ -427,6 +427,7 @@
         "billingContact": "Contact facturation",
         "billingEmail": "Email comptabilité",
         "edit": "Modifier",
+        "generateInvoice": "Générer une facture",
         "notFound": "Entreprise introuvable"
       },
       "validation": {
@@ -436,6 +437,44 @@
         "emailInvalid": "Email invalide",
         "zipCodeInvalid": "Code postal invalide"
       }
+    },
+    "invoice": {
+      "title": "Générer une facture",
+      "for": "Pour {{name}}",
+      "date": "Date de la facture",
+      "billingLine": "Ligne de facturation",
+      "object": "Objet",
+      "objectPlaceholder": "Ex. Consultation ostéopathique",
+      "quantity": "Qté",
+      "unitPriceHt": "P.U. HT (€)",
+      "vat": "TVA",
+      "totalHt": "Total HT",
+      "totalTtc": "Total TTC",
+      "vatNotApplicable": "Non applicable",
+      "generate": "Générer",
+      "success": "Facture générée et téléchargée avec succès"
+    },
+    "billingModel": {
+      "title": "Modèle de facturation",
+      "subtitle": "Lignes proposées par défaut au moment de générer une facture pour {{name}}",
+      "edit": "Modifier le modèle",
+      "description": "Description",
+      "defaultQty": "Qté par défaut",
+      "unitPriceHt": "Prix unitaire HT",
+      "vat": "TVA",
+      "empty": "Aucune ligne configurée",
+      "emptyDescription": "Configurez votre modèle de facturation pour pré-remplir vos futures factures."
+    },
+    "interventions": {
+      "title": "Interventions en entreprise",
+      "subtitle": "Séances réalisées et planifiées chez {{name}}",
+      "add": "Ajouter une intervention",
+      "date": "Date",
+      "patient": "Patient",
+      "careType": "Prestation",
+      "duration": "Durée",
+      "amount": "Montant",
+      "empty": "Aucune intervention enregistrée"
     }
   },
   "errors": {

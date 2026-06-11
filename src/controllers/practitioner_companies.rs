@@ -1,16 +1,34 @@
 use axum::{debug_handler, extract::Path, http::status, Json};
+use base64::Engine;
+use rust_decimal::Decimal;
 use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
+use serde::Deserialize;
+use std::str::FromStr;
 
 use crate::{
   auth::statement::AuthStatement,
   db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
-    _entities::practitioner_companies,
-    my_errors::{application_error::ApplicationError, MyErrors},
+    _entities::{company_interventions, practitioner_companies, practitioner_offices},
+    company_interventions::InterventionParams,
+    my_errors::{
+      application_error::ApplicationError, authentication_error::AuthenticationError, MyErrors,
+    },
     practitioner_companies::CompanyParams,
   },
+  services,
 };
+
+#[derive(Deserialize)]
+pub struct GenerateCompanyInvoiceParams {
+  pub invoice_date: String,
+  pub description: String,
+  pub quantity: i32,
+  pub unit_price_ht: f32,
+  pub vat_rate: String,
+  pub practitioner_office_id: i32,
+}
 
 #[debug_handler]
 pub async fn index(
@@ -76,4 +94,61 @@ pub async fn update(
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
+}
+
+#[debug_handler]
+pub async fn generate_invoice(
+  AuthenticatedUser(current_user, _): AuthenticatedUser,
+  Path(company_id): Path<i32>,
+  Json(params): Json<GenerateCompanyInvoiceParams>,
+) -> Result<Json<serde_json::Value>, MyErrors> {
+  let company = practitioner_companies::Entity::find_by_id(company_id)
+    .one(DB::get())
+    .await?
+    .ok_or(ApplicationError::NotFound)?;
+
+  if company.user_id != current_user.id {
+    return Err(AuthenticationError::AccessDenied(Some("company".to_string())).into());
+  }
+
+  let issue_date = chrono::NaiveDate::parse_from_str(&params.invoice_date, "%Y-%m-%d")?;
+  let vat_rate =
+    Decimal::from_str(&params.vat_rate).map_err(|_| ApplicationError::UnprocessableEntity)?;
+
+  let intervention_params = InterventionParams {
+    quantity: params.quantity,
+    unit_price: params.unit_price_ht,
+    vat_rate,
+    issue_date,
+    object: params.description,
+  };
+
+  let intervention = company_interventions::ActiveModel::create(
+    DB::get(),
+    current_user.id,
+    company_id,
+    &intervention_params,
+  )
+  .await?;
+
+  let practitioner_office = practitioner_offices::Entity::find_by_id(params.practitioner_office_id)
+    .one(DB::get())
+    .await?
+    .ok_or(ApplicationError::NotFound)?;
+
+  let pdf_data =
+    services::invoice::generate_company_invoice(&intervention, &current_user, practitioner_office)
+      .await?;
+
+  let filename = format!(
+    "{} Facture {} {}.pdf",
+    current_user.full_name(),
+    company.name,
+    intervention.issue_date.format("%d_%m_%Y"),
+  );
+
+  Ok(Json(serde_json::json!({
+    "pdf_data": base64::prelude::BASE64_STANDARD.encode(&pdf_data),
+    "filename": filename,
+  })))
 }

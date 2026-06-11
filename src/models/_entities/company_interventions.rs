@@ -15,6 +15,8 @@ pub struct Model {
   pub unit_price_in_cents: i32,
   #[sea_orm(column_type = "Decimal(Some((4, 1)))")]
   pub vat_rate_in_percent: Decimal,
+  pub issue_date: Date,
+  pub object: String,
   pub created_at: DateTimeWithTimeZone,
   pub updated_at: DateTimeWithTimeZone,
 }

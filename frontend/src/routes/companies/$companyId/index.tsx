@@ -4,7 +4,7 @@ import {
   useNavigate,
   useRouter,
 } from "@tanstack/react-router";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, FileText, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { APIHooks } from "@/api/hooks";
@@ -14,6 +14,8 @@ import { CenteredSpineer } from "@/components/ui/spinner";
 import { formatAddress } from "@/lib/utils";
 import { CompanyAvatar } from "../components/CompanyAvatar";
 import { CompanyModal } from "../components/CompanyModal";
+import { CompanyInterventionsSection } from "./components/CompanyInterventionsSection";
+import { GenerateInvoiceModal } from "./components/GenerateInvoiceModal";
 import { InfoField } from "./components/InfoField";
 
 export const Route = createFileRoute("/companies/$companyId/")({
@@ -28,6 +30,7 @@ function CompanyPage() {
   const { companyId } = Route.useParams();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
 
   const companyQuery = APIHooks.company.get(+companyId).useQuery(null);
   const company = companyQuery.data;
@@ -98,6 +101,13 @@ function CompanyPage() {
                     <Pencil className="h-4 w-4" />
                     {t("companies.form.show.edit")}
                   </Button>
+                  <Button
+                    onClick={() => setIsInvoiceModalOpen(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    {t("companies.form.show.generateInvoice")}
+                  </Button>
                 </div>
               </div>
 
@@ -121,12 +131,20 @@ function CompanyPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/*<CompanyInterventionsSection company={company} />*/}
         </div>
       </div>
 
       <CompanyModal
         open={isEditModalOpen}
         setIsOpen={setIsEditModalOpen}
+        company={company}
+      />
+
+      <GenerateInvoiceModal
+        open={isInvoiceModalOpen}
+        setIsOpen={setIsInvoiceModalOpen}
         company={company}
       />
     </>
