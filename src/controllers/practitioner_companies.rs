@@ -10,13 +10,12 @@ use crate::{
   db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
-    _entities::{company_interventions, practitioner_companies},
+    _entities::{company_interventions, practitioner_companies, practitioner_offices},
     company_interventions::InterventionParams,
     my_errors::{
       application_error::ApplicationError, authentication_error::AuthenticationError, MyErrors,
     },
     practitioner_companies::CompanyParams,
-    practitioner_offices,
   },
   services,
 };

@@ -278,10 +278,9 @@ fn create_company_invoice_pdf(args: &CompanyInvoiceArgs) -> Result<Vec<u8>, Stri
     format!("{} %", vat_rate)
   };
 
-  let issue_date = args.intervention.issue_date;
   let emission_date = args.emission_date;
   let due_date = emission_date + Duration::days(30);
-  let invoice_number = format!("FAC-{}-{:03}", issue_date.year(), args.intervention.id);
+  let invoice_number = format!("FAC-{}-{:03}", emission_date.year(), args.intervention.id);
 
   // ===========================
   // HEADER
@@ -730,6 +729,23 @@ fn create_company_invoice_pdf(args: &CompanyInvoiceArgs) -> Result<Vec<u8>, Stri
     .write(&format_euro(total_ht))
     .map_err(|e| format!("total ht amount: {}", e))?;
 
+  let y_vat = y_total_ht - mm(6.0);
+  page
+    .text()
+    .set_font(Font::Helvetica, 10.0)
+    .set_fill_color(Color::black())
+    .at(mm(118.0), y_vat)
+    .write("TVA")
+    .map_err(|e| format!("vat label: {}", e))?;
+
+  page
+    .text()
+    .set_font(Font::Helvetica, 10.0)
+    .set_fill_color(Color::black())
+    .at(col_total, y_vat)
+    .write(&format_euro(vat_amount))
+    .map_err(|e| format!("vat amount: {}", e))?;
+
   // Divider above TTC
   let y_line3 = y_total_ht - mm(7.0);
   page
@@ -759,7 +775,7 @@ fn create_company_invoice_pdf(args: &CompanyInvoiceArgs) -> Result<Vec<u8>, Stri
     .map_err(|e| format!("total ttc amount: {}", e))?;
 
   // ===========================
-  // SIGNATURE (bottom-left, aligned with totals)
+  // SIGNATURE (bottom-left)
   // ===========================
   if let Some(ref sig_bytes) = args.signature_data {
     let sig_x_mm = (margin_l + mm(5.0)) / MM_TO_POINTS;
@@ -782,13 +798,15 @@ fn create_company_invoice_pdf(args: &CompanyInvoiceArgs) -> Result<Vec<u8>, Stri
     .line_to(margin_r, y_footer)
     .stroke();
 
-  page
-    .text()
-    .set_font(Font::Helvetica, 8.0)
-    .set_fill_color(Color::gray(0.45))
-    .at(margin_l, y_footer - mm(5.0))
-    .write("TVA non applicable — art. 261 4° 1° du CGI")
-    .map_err(|e| format!("footer legal: {}", e))?;
+  if vat_rate != 0.0 {
+    page
+      .text()
+      .set_font(Font::Helvetica, 8.0)
+      .set_fill_color(Color::gray(0.45))
+      .at(margin_l, y_footer - mm(5.0))
+      .write("TVA non applicable — art. 261 4° 1° du CGI")
+      .map_err(|e| format!("footer legal: {}", e))?;
+  }
 
   page
     .text()

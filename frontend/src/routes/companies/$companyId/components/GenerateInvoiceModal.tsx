@@ -128,6 +128,9 @@ export const GenerateInvoiceModal = ({ open, setIsOpen, company }: Props) => {
           toast.success(t("companies.invoice.success"));
           handleClose();
         },
+        onError: (error) => {
+          toast.error(error.message);
+        },
       },
     );
   });
