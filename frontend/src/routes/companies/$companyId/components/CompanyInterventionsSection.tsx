@@ -1,5 +1,3 @@
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Building2, Calendar, Euro, Hash, Percent, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { APIHooks } from "@/api/hooks";
@@ -14,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { H2 } from "@/components/ui/typography/h2";
+import { formatDate, formatPrice } from "@/lib/utils";
 
 interface Props {
   company: Company;
@@ -26,11 +25,6 @@ export const CompanyInterventionsSection = ({ company }: Props) => {
     .listInterventions(company.id)
     .useQuery(null);
   const interventions = interventionsQuery.data ?? [];
-
-  const formatPrice = (cents: number) => `${(cents / 100).toFixed(2)} €`;
-
-  const formatDate = (dateStr: string) =>
-    format(new Date(dateStr), "dd/MM/yyyy", { locale: fr });
 
   return (
     <div className="space-y-4 px-2">
