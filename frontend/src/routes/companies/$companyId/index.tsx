@@ -132,7 +132,7 @@ function CompanyPage() {
             </CardContent>
           </Card>
 
-          {/*<CompanyInterventionsSection company={company} />*/}
+          <CompanyInterventionsSection company={company} />
         </div>
       </div>
 

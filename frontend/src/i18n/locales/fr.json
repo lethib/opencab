@@ -470,10 +470,11 @@
       "subtitle": "Séances réalisées et planifiées chez {{name}}",
       "add": "Ajouter une intervention",
       "date": "Date",
-      "patient": "Patient",
-      "careType": "Prestation",
-      "duration": "Durée",
-      "amount": "Montant",
+      "description": "Description",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire HT",
+      "vat": "TVA",
+      "amount": "Montant HT",
       "empty": "Aucune intervention enregistrée"
     }
   },

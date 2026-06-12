@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { t } from "i18next";
 import { FileText } from "lucide-react";
@@ -62,6 +63,7 @@ interface Props {
 
 export const GenerateInvoiceModal = ({ open, setIsOpen, company }: Props) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const form = useForm<GenerateInvoiceFormValues>({
     resolver: zodResolver(schema),
@@ -125,6 +127,9 @@ export const GenerateInvoiceModal = ({ open, setIsOpen, company }: Props) => {
           link.download = filename;
           link.click();
           window.URL.revokeObjectURL(url);
+          queryClient.invalidateQueries({
+            queryKey: [`/companies/${company.id}/interventions`],
+          });
           toast.success(t("companies.invoice.success"));
           handleClose();
         },

@@ -1,7 +1,7 @@
 use axum::{debug_handler, extract::Path, http::status, Json};
 use base64::Engine;
 use rust_decimal::Decimal;
-use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
+use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder};
 use serde::Deserialize;
 use std::str::FromStr;
 
@@ -94,6 +94,31 @@ pub async fn update(
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
+}
+
+#[debug_handler]
+pub async fn list_interventions(
+  authorize: AuthStatement,
+  Path(company_id): Path<i32>,
+) -> Result<Json<Vec<company_interventions::Model>>, MyErrors> {
+  let company = practitioner_companies::Entity::find_by_id(company_id)
+    .one(DB::get())
+    .await?
+    .ok_or(ApplicationError::NotFound)?;
+
+  authorize
+    .authenticated_user()
+    .user_owning_resource(&company)
+    .await
+    .run_complete()?;
+
+  let interventions = company_interventions::Entity::find()
+    .filter(company_interventions::Column::CompanyId.eq(company_id))
+    .order_by_desc(company_interventions::Column::IssueDate)
+    .all(DB::get())
+    .await?;
+
+  Ok(Json(interventions))
 }
 
 #[debug_handler]
