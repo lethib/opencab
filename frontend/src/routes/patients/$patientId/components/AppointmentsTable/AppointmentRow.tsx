@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { MedicalAppointment } from "@/api/hooks/patient";
 import { Button } from "@/components/ui";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { formatDate, formatPrice } from "@/lib/utils";
 
 interface Props {
   appointment: MedicalAppointment;
@@ -29,16 +30,14 @@ export const AppointmentRow = ({
       }`}
     >
       <TableCell className="px-6 py-4">
-        <span className="font-medium">
-          {new Date(appointment.date).toLocaleDateString()}
-        </span>
+        <span className="font-medium">{formatDate(appointment.date)}</span>
       </TableCell>
       <TableCell className="px-4 py-4 text-muted-foreground">
         {appointment.office.name}
       </TableCell>
       <TableCell className="px-4 py-4">
         <span className="font-mono font-medium">
-          {(appointment.price_in_cents / 100).toFixed(2)} €
+          {formatPrice(appointment.price_in_cents)}
         </span>
       </TableCell>
       <TableCell align="center" className="px-4 py-4">

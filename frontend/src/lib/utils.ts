@@ -1,4 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -37,3 +39,8 @@ export const getInitials = (name: string): string =>
     .slice(0, 2)
     .map((word) => word[0].toUpperCase())
     .join("");
+
+export const formatPrice = (cents: number) => `${(cents / 100).toFixed(2)} €`;
+
+export const formatDate = (dateStr: string) =>
+  format(new Date(dateStr), "dd/MM/yyyy", { locale: fr });

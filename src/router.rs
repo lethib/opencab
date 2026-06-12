@@ -104,6 +104,10 @@ pub fn create_router() -> Router<()> {
         .get(controllers::practitioner_companies::get),
     )
     .route(
+      "/api/companies/{company_id}/interventions",
+      get(controllers::practitioner_companies::list_interventions),
+    )
+    .route(
       "/api/companies/{company_id}/_generate_invoice",
       post(controllers::practitioner_companies::generate_invoice),
     )
