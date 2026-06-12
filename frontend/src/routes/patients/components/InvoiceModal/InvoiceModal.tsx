@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { type SearchPatientResponse } from "@/api/hooks/patient";
 import { Dialog } from "@/components/ui/dialog";
+import type { DownloadableBlob } from "@/lib/DownloadableBlob";
 import { DownloadGeneratedInvoiceContent } from "./DownloadGeneratedInvoiceContent";
 import { GenerateInvoiceContent } from "./GenerateInvoiceContent";
 
@@ -10,15 +11,13 @@ interface InvoiceModalProps {
   patient: SearchPatientResponse;
 }
 
-export type LocalInvoiceFile = { blob: Blob; filename: string };
-
 export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   isOpen,
   onClose,
   patient,
 }) => {
   const [generatedInvoice, setGeneratedInvoice] =
-    useState<LocalInvoiceFile | null>(null);
+    useState<DownloadableBlob | null>(null);
   const [isEmailSent, setIsEmailSent] = useState(false);
 
   const handleClose = () => {

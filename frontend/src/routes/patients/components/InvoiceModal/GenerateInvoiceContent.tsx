@@ -25,12 +25,12 @@ import {
   Label,
 } from "@/components/ui";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import type { LocalInvoiceFile } from "./InvoiceModal";
+import type { DownloadableBlob } from "@/lib/DownloadableBlob";
 
 interface GenerateInvoiceContent {
   patient: SearchPatientResponse;
   onClose: VoidFunction;
-  setGeneratedInvoice: (invoice: LocalInvoiceFile) => void;
+  setGeneratedInvoice: (invoice: DownloadableBlob) => void;
   setIsEmailSent: (val: boolean) => void;
 }
 
@@ -111,8 +111,8 @@ export const GenerateInvoiceContent = ({
         practitioner_office_id: +data.practitionerOfficeId,
         payment_method: data.paymentMethod ?? null,
       })
-      .then(({ blob, filename }) => {
-        setGeneratedInvoice({ blob, filename });
+      .then((blob) => {
+        setGeneratedInvoice(blob);
         setIsEmailSent(data.shouldSendInvoiceByEmail);
       });
   });
