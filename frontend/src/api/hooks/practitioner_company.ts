@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { base64ToBlob, DownloadableBlob } from "@/lib/fileUtils";
 import { APIClient } from "../api";
 import { mutationEndpoint, queryEndpoint } from "../endpointGenerator";
 
@@ -79,14 +80,12 @@ export const companySchema = {
             filename: string;
           }>(`/companies/${companyId}/_generate_invoice`, data);
 
-          const binaryString = atob(response.data.pdf_data);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          const blob = new Blob([bytes], { type: "application/pdf" });
+          const blob = base64ToBlob(response.data.pdf_data);
+          const downloadableBlob = new DownloadableBlob([blob], {
+            filename: response.data.filename,
+          });
 
-          return { blob, filename: response.data.filename };
+          return downloadableBlob;
         },
       }),
   }),

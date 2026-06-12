@@ -8,10 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { LocalInvoiceFile } from "./InvoiceModal";
+import type { DownloadableBlob } from "@/lib/fileUtils";
 
 interface DownloadGeneratedInvoiceModal {
-  generatedInvoice: LocalInvoiceFile;
+  generatedInvoice: DownloadableBlob;
   isEmailSent: boolean;
   handleClose: VoidFunction;
 }
@@ -22,17 +22,6 @@ export const DownloadGeneratedInvoiceContent = ({
   handleClose,
 }: DownloadGeneratedInvoiceModal) => {
   const { t } = useTranslation();
-
-  const handleDownload = () => {
-    const url = window.URL.createObjectURL(generatedInvoice.blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = generatedInvoice.filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  };
 
   return (
     <DialogContent
@@ -73,7 +62,7 @@ export const DownloadGeneratedInvoiceContent = ({
           </Button>
           <Button
             type="button"
-            onClick={handleDownload}
+            onClick={generatedInvoice.download}
             className="w-full sm:w-auto"
           >
             <Download className="h-4 w-4" />

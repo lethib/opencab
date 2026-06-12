@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import type { UUID } from "crypto";
+import { base64ToBlob, DownloadableBlob } from "@/lib/fileUtils";
 import { APIClient } from "../api";
 import {
   mutationEndpoint,
@@ -134,16 +135,12 @@ export const patientSchema = {
             payment_method,
           });
 
-          // Decode base64 PDF data to blob
-          const pdfData = response.data.pdf_data;
-          const binaryString = atob(pdfData);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          const blob = new Blob([bytes], { type: "application/pdf" });
+          const blob = base64ToBlob(response.data.pdf_data);
+          const downloadableBlob = new DownloadableBlob([blob], {
+            filename: response.data.filename,
+          });
 
-          return { blob, filename: response.data.filename };
+          return downloadableBlob;
         },
       });
     },

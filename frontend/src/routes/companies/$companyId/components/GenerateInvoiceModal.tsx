@@ -120,13 +120,8 @@ export const GenerateInvoiceModal = ({ open, setIsOpen, company }: Props) => {
         practitioner_office_id: +values.practitioner_office_id,
       },
       {
-        onSuccess: ({ blob, filename }) => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = filename;
-          link.click();
-          window.URL.revokeObjectURL(url);
+        onSuccess: (blob) => {
+          blob.download();
           queryClient.invalidateQueries({
             queryKey: [`/companies/${company.id}/interventions`],
           });
