@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import type { UUID } from "crypto";
-import { base64ToBlob, DownloadableBlob } from "@/lib/fileUtils";
+import { DownloadableBlob } from "@/lib/DownloadableBlob";
 import { APIClient } from "../api";
 import {
   mutationEndpoint,
@@ -135,12 +135,11 @@ export const patientSchema = {
             payment_method,
           });
 
-          const blob = base64ToBlob(response.data.pdf_data);
-          const downloadableBlob = new DownloadableBlob([blob], {
-            filename: response.data.filename,
-          });
-
-          return downloadableBlob;
+          return DownloadableBlob.fromBase64(
+            response.data.pdf_data,
+            "application/pdf",
+            response.data.filename,
+          );
         },
       });
     },

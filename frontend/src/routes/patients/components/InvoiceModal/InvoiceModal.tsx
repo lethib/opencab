@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { type SearchPatientResponse } from "@/api/hooks/patient";
 import { Dialog } from "@/components/ui/dialog";
-import type { DownloadableBlob } from "@/lib/fileUtils";
+import type { DownloadableBlob } from "@/lib/DownloadableBlob";
 import { DownloadGeneratedInvoiceContent } from "./DownloadGeneratedInvoiceContent";
 import { GenerateInvoiceContent } from "./GenerateInvoiceContent";
 

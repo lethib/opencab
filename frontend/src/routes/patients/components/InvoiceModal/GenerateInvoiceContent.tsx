@@ -25,7 +25,7 @@ import {
   Label,
 } from "@/components/ui";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import type { DownloadableBlob } from "@/lib/fileUtils";
+import type { DownloadableBlob } from "@/lib/DownloadableBlob";
 
 interface GenerateInvoiceContent {
   patient: SearchPatientResponse;

@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { DownloadableBlob } from "@/lib/fileUtils";
+import type { DownloadableBlob } from "@/lib/DownloadableBlob";
 
 interface DownloadGeneratedInvoiceModal {
   generatedInvoice: DownloadableBlob;
