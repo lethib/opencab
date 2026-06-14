@@ -3,7 +3,7 @@
 
   **A secure patient management system for healthcare practitioners**
 
-  Modern, privacy-focused application for managing patient records and generating professional invoices.
+  Modern, privacy-focused application for managing patient records, companies, and generating professional invoices.
 
   [Features](#-features) • [Tech Stack](#️-tech-stack) • [Getting Started](#-getting-started) • [Development](#-development) • [Deployment](#-deployment)
 
@@ -15,7 +15,7 @@
 
 OpenCab is a full-stack web application designed to help healthcare practitioners manage their patient records securely. Built with a focus on data privacy and security, it provides encrypted storage for sensitive patient information including social security numbers, along with automated invoice generation and delivery capabilities.
 
-Key capabilities include comprehensive patient management, medical appointment tracking with accounting exports, multi-office support, professional PDF invoice generation, and automated email delivery through background job processing.
+Key capabilities include comprehensive patient management, company and intervention tracking with PDF invoice generation, medical appointment management with accounting exports, multi-office support, and automated email delivery through background job processing.
 
 This is a personal project built to explore modern web technologies including Rust backend development, secure cryptographic practices, and asynchronous background job processing.
 
@@ -37,6 +37,12 @@ This is a personal project built to explore modern web technologies including Ru
 - **Email Delivery** - Send invoices directly to patients via email with automatic PDF attachment
 - **Custom Invoice Dates** - Set specific dates for invoices instead of using the current date
 - **Business Information** - Complete practitioner business details integration
+
+### Company Management
+- **Company Directory** - Create and manage companies with contact details, SIRET number, and billing address
+- **Company Interventions** - Track billable interventions per company with description, quantity, unit price (HT), and VAT rate (0%, 5.5%, 10%, 20%)
+- **Company Invoices** - Generate and download PDF invoices for companies with automatic HT/TVA/TTC calculations
+- **Intervention History** - View all past interventions and generated invoices per company
 
 ### Office Management
 - **Multiple Offices** - Create and manage multiple practitioner office locations
