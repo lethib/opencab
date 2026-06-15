@@ -13,7 +13,7 @@ use crate::{
     medical_appointments::{CreateMedicalAppointmentParams, UpdateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, MyErrors},
   },
-  services::{self, invoice::GenerateInvoiceParams},
+  services::{self, invoice::patient_invoice::GenerateInvoiceParams},
 };
 
 #[derive(Debug, Deserialize)]
@@ -71,7 +71,7 @@ pub async fn generate_invoice(
     office_id: medical_appointment.practitioner_office(DB::get()).await?.id,
   };
 
-  let generated_invoice = services::invoice::generate_patient_invoice(
+  let generated_invoice = services::invoice::patient_invoice::generate(
     &patient_id,
     &invoice_generation_params,
     &current_user,
@@ -83,7 +83,7 @@ pub async fn generate_invoice(
     return Err(ApplicationError::new("no_email_set_on_patient").into());
   }
 
-  services::invoice::send_invoice(&generated_invoice, &current_user, &business_info).await?;
+  services::invoice::email::send_invoice(&generated_invoice, &current_user, &business_info).await?;
 
   Ok(StatusCode::NO_CONTENT)
 }

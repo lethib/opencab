@@ -162,7 +162,7 @@ pub async fn generate_invoice(
     .ok_or(ApplicationError::NotFound)?;
 
   let pdf_data =
-    services::invoice::generate_company_invoice(&intervention, &current_user, practitioner_office)
+    services::invoice::company_invoice::generate(&intervention, &current_user, practitioner_office)
       .await?;
 
   let filename = format!(

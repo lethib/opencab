@@ -138,8 +138,6 @@ fn embed_signature_image(
   let rgb_img = img.to_rgb8();
   let (width, height) = rgb_img.dimensions();
 
-  tracing::info!("Loaded signature image: {}x{} pixels", width, height);
-
   // Calculate aspect ratio and target dimensions
   let max_width_mm = 60.0; // Maximum width for signature
   let max_height_mm = 30.0; // Maximum height for signature
@@ -152,12 +150,6 @@ fn embed_signature_image(
     // Height-constrained
     (max_height_mm * aspect_ratio, max_height_mm)
   };
-
-  tracing::info!(
-    "Target signature dimensions: {:.2}x{:.2} mm",
-    target_width_mm,
-    target_height_mm
-  );
 
   // Convert image to JPEG format for oxidizePdf
   let mut jpg_data = Vec::new();
