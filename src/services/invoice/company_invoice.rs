@@ -1,12 +1,6 @@
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-
 use crate::{
   db::DB,
-  models::{
-    _entities::{company_interventions, practitioner_companies, user_business_informations},
-    my_errors::{application_error::ApplicationError, MyErrors},
-    practitioner_offices, users,
-  },
+  models::{_entities::company_interventions, my_errors::MyErrors, practitioner_offices, users},
   services::{
     invoice::pdf::company::{CompanyInvoiceGenerator, CompanyPdfArgs},
     storage::StorageService,
@@ -18,16 +12,8 @@ pub async fn generate(
   current_user: &users::Model,
   practitioner_office: practitioner_offices::Model,
 ) -> Result<Vec<u8>, MyErrors> {
-  let business_info = user_business_informations::Entity::find()
-    .filter(user_business_informations::Column::UserId.eq(current_user.id))
-    .one(DB::get())
-    .await?
-    .ok_or(ApplicationError::NotFound)?;
-
-  let company = practitioner_companies::Entity::find_by_id(company_intervention.company_id)
-    .one(DB::get())
-    .await?
-    .ok_or(ApplicationError::NotFound)?;
+  let business_info = current_user.business_information(DB::get()).await?;
+  let company = company_intervention.company(DB::get()).await?;
 
   let emission_date = chrono::Utc::now().date_naive();
 
