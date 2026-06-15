@@ -7,8 +7,10 @@ use crate::{
     my_errors::{application_error::ApplicationError, MyErrors},
     practitioner_offices, users,
   },
-  services::storage::StorageService,
-  workers::{self, invoice_generator::CompanyInvoiceArgs},
+  services::{
+    invoice::pdf::company::{CompanyInvoiceGenerator, CompanyPdfArgs},
+    storage::StorageService,
+  },
 };
 
 pub async fn generate(
@@ -55,7 +57,7 @@ pub async fn generate(
     }
   };
 
-  let args = CompanyInvoiceArgs {
+  let args = CompanyPdfArgs {
     intervention: company_intervention.clone(),
     user: current_user.clone(),
     business_info,
@@ -65,5 +67,5 @@ pub async fn generate(
     signature_data,
   };
 
-  workers::invoice_generator::generate_company_invoice_pdf(&args)
+  CompanyInvoiceGenerator::new(args).build()?.to_bytes()
 }

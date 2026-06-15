@@ -1,5 +1,6 @@
 use oxidize_pdf::Page;
 
+pub(in crate::services::invoice) mod company;
 pub(in crate::services::invoice) mod patient;
 
 /// Conversion constant: millimeters to points
@@ -20,8 +21,8 @@ pub(super) fn embed_signature_image(
   use image::ImageEncoder;
   use oxidize_pdf::graphics::Image;
 
-  let img = image::load_from_memory(&image_bytes)
-    .map_err(|e| format!("Failed to decode image: {}", e))?;
+  let img =
+    image::load_from_memory(&image_bytes).map_err(|e| format!("Failed to decode image: {}", e))?;
 
   let rgb = img.to_rgb8();
   let (pixel_width, pixel_height) = rgb.dimensions();
@@ -45,8 +46,8 @@ pub(super) fn embed_signature_image(
     )
     .map_err(|e| format!("Failed to encode as JPEG: {}", e))?;
 
-  let image_obj =
-    Image::from_jpeg_data(jpg_data).map_err(|e| format!("Failed to load signature image: {}", e))?;
+  let image_obj = Image::from_jpeg_data(jpg_data)
+    .map_err(|e| format!("Failed to load signature image: {}", e))?;
 
   page.add_image("signature", image_obj);
   page
