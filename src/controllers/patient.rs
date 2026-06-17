@@ -27,7 +27,7 @@ use crate::{
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
     patients::CreatePatientParams,
   },
-  services::{self, invoice::GenerateInvoiceParams},
+  services::{self, invoice::patient_invoice::GenerateInvoiceParams},
   views::{medical_appointments::MedicalAppointmentResponse, patient::PatientResponse},
 };
 
@@ -151,7 +151,7 @@ pub async fn generate_invoice(
     return Err(ApplicationError::UnprocessableEntity.into());
   }
 
-  let invoice_generated = services::invoice::generate_patient_invoice(
+  let invoice_generated = services::invoice::patient_invoice::generate(
     &patient_id,
     &params.invoice_params,
     &current_user,
@@ -173,8 +173,12 @@ pub async fn generate_invoice(
   if params.should_be_sent_by_email {
     match &user_bi {
       Some(business_information) => {
-        services::invoice::send_invoice(&invoice_generated, &current_user, business_information)
-          .await?
+        services::invoice::email::send_invoice(
+          &invoice_generated,
+          &current_user,
+          business_information,
+        )
+        .await?
       }
       None => return Err(ApplicationError::UnprocessableEntity.into()),
     }

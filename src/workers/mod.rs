@@ -3,7 +3,6 @@ use tokio::sync::mpsc;
 
 pub mod appointments_export;
 pub mod downloader;
-pub mod invoice_generator;
 pub mod mailer;
 
 const WORKER_CHANNEL_SIZE: usize = 100;

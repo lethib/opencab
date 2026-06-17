@@ -1,9 +1,9 @@
 use chrono::NaiveDate;
 use rust_decimal::{prelude::ToPrimitive, Decimal};
-use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection, ModelTrait};
 
 use crate::models::{
-  _entities::company_interventions,
+  _entities::{company_interventions, practitioner_companies, prelude},
   my_errors::{application_error::ApplicationError, MyErrors},
 };
 
@@ -16,6 +16,19 @@ pub struct InterventionParams {
 }
 
 const ALLOWED_VAT_VALUES: [f32; 4] = [0.0, 5.5, 10.0, 20.0];
+
+impl company_interventions::Model {
+  pub async fn company(
+    &self,
+    db: &DatabaseConnection,
+  ) -> Result<practitioner_companies::Model, MyErrors> {
+    self
+      .find_related(prelude::PractitionerCompanies)
+      .one(db)
+      .await?
+      .ok_or(ApplicationError::NotFound.into())
+  }
+}
 
 impl company_interventions::ActiveModel {
   pub async fn create<T: ConnectionTrait>(

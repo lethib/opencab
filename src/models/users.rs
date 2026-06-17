@@ -176,6 +176,17 @@ impl Model {
 
     Ok(user)
   }
+
+  pub async fn business_information(
+    &self,
+    db: &DatabaseConnection,
+  ) -> ModelResult<user_business_informations::Model> {
+    self
+      .find_related(UserBusinessInformations)
+      .one(db)
+      .await?
+      .ok_or(ModelError::EntityNotFound)
+  }
 }
 
 impl ActiveModel {

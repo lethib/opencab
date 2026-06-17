@@ -12,9 +12,7 @@ use crate::{
   models::{
     _entities::{company_interventions, practitioner_companies, practitioner_offices},
     company_interventions::InterventionParams,
-    my_errors::{
-      application_error::ApplicationError, authentication_error::AuthenticationError, MyErrors,
-    },
+    my_errors::{application_error::ApplicationError, MyErrors},
     practitioner_companies::CompanyParams,
   },
   services,
@@ -124,6 +122,7 @@ pub async fn list_interventions(
 #[debug_handler]
 pub async fn generate_invoice(
   AuthenticatedUser(current_user, _): AuthenticatedUser,
+  authorize: AuthStatement,
   Path(company_id): Path<i32>,
   Json(params): Json<GenerateCompanyInvoiceParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
@@ -132,9 +131,10 @@ pub async fn generate_invoice(
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
-  if company.user_id != current_user.id {
-    return Err(AuthenticationError::AccessDenied(Some("company".to_string())).into());
-  }
+  authorize
+    .user_owning_resource(&company)
+    .await
+    .run_complete()?;
 
   let issue_date = chrono::NaiveDate::parse_from_str(&params.invoice_date, "%Y-%m-%d")?;
   let vat_rate =
@@ -162,7 +162,7 @@ pub async fn generate_invoice(
     .ok_or(ApplicationError::NotFound)?;
 
   let pdf_data =
-    services::invoice::generate_company_invoice(&intervention, &current_user, practitioner_office)
+    services::invoice::company_invoice::generate(&intervention, &current_user, practitioner_office)
       .await?;
 
   let filename = format!(
