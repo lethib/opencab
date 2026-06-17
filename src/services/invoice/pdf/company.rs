@@ -421,15 +421,7 @@ impl CompanyInvoiceGenerator {
   }
 
   fn build_table(&mut self) -> Result<(), MyErrors> {
-    let unit_price = self.args.intervention.unit_price_in_cents as f64 / 100.0;
-    let quantity = self.args.intervention.quantity;
-    let total_ht = unit_price * quantity as f64;
-    let vat_rate = self
-      .args
-      .intervention
-      .vat_rate_in_percent
-      .to_f32()
-      .unwrap_or(0.0);
+    let (unit_price, quantity, total_ht, vat_rate) = self.compute_amounts();
     let vat_display = if vat_rate.fract() == 0.0 {
       format!("{:.0} %", vat_rate)
     } else {
@@ -529,15 +521,7 @@ impl CompanyInvoiceGenerator {
   }
 
   fn build_totals(&mut self) -> Result<(), MyErrors> {
-    let unit_price = self.args.intervention.unit_price_in_cents as f64 / 100.0;
-    let quantity = self.args.intervention.quantity;
-    let total_ht = unit_price * quantity as f64;
-    let vat_rate = self
-      .args
-      .intervention
-      .vat_rate_in_percent
-      .to_f32()
-      .unwrap_or(0.0);
+    let (_, _, total_ht, vat_rate) = self.compute_amounts();
     let vat_amount = total_ht * vat_rate as f64 / 100.0;
     let total_ttc = total_ht + vat_amount;
 
@@ -614,12 +598,7 @@ impl CompanyInvoiceGenerator {
       .map_err(|e| UnexpectedError::new(e.to_string()))?;
 
     if let Some(sig_bytes) = self.args.signature_data.take() {
-      match embed_signature_image(
-        &mut self.page,
-        sig_bytes,
-        self.margin_l + mm(5.0),
-        y_sig,
-      ) {
+      match embed_signature_image(&mut self.page, sig_bytes, self.margin_l + mm(5.0), y_sig) {
         Ok(_) => tracing::info!("Embedded signature in company invoice"),
         Err(e) => tracing::warn!("Failed to embed signature in company invoice: {}", e),
       }
@@ -629,12 +608,6 @@ impl CompanyInvoiceGenerator {
   }
 
   fn build_footer(&mut self) -> Result<(), MyErrors> {
-    let vat_rate = self
-      .args
-      .intervention
-      .vat_rate_in_percent
-      .to_f32()
-      .unwrap_or(0.0);
     let border_gray = Color::gray(0.80);
 
     let y_footer = mm(25.0);
@@ -647,16 +620,14 @@ impl CompanyInvoiceGenerator {
       .line_to(self.margin_r, y_footer)
       .stroke();
 
-    if vat_rate != 0.0 {
-      self
-        .page
-        .text()
-        .set_font(Font::Helvetica, 8.0)
-        .set_fill_color(Color::gray(0.45))
-        .at(self.margin_l, y_footer - mm(5.0))
-        .write("TVA non applicable — art. 261 4° 1° du CGI")
-        .map_err(|e| UnexpectedError::new(e.to_string()))?;
-    }
+    self
+      .page
+      .text()
+      .set_font(Font::Helvetica, 8.0)
+      .set_fill_color(Color::gray(0.45))
+      .at(self.margin_l, y_footer - mm(5.0))
+      .write("TVA non applicable — art. 261 4° 1° du CGI")
+      .map_err(|e| UnexpectedError::new(e.to_string()))?;
 
     self
       .page
@@ -668,6 +639,20 @@ impl CompanyInvoiceGenerator {
       .map_err(|e| UnexpectedError::new(e.to_string()))?;
 
     Ok(())
+  }
+
+  fn compute_amounts(&self) -> (f64, i32, f64, f32) {
+    let unit_price = self.args.intervention.unit_price_in_cents as f64 / 100.0;
+    let quantity = self.args.intervention.quantity;
+    let total_ht = unit_price * quantity as f64;
+    let vat_rate = self
+      .args
+      .intervention
+      .vat_rate_in_percent
+      .to_f32()
+      .unwrap_or(0.0);
+
+    (unit_price, quantity, total_ht, vat_rate)
   }
 
   fn load_favicon() -> Result<Image, MyErrors> {

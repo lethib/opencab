@@ -1,5 +1,5 @@
 use chrono::NaiveDate;
-use oxidize_pdf::{Color, Document, Font, Page};
+use oxidize_pdf::{measure_text, Color, Document, Font, Page};
 
 use crate::{
   models::{
@@ -260,7 +260,7 @@ impl PatientInvoiceGenerator {
 
     // Draw underline only for "Honoraire :"
     let underline_text = "Honoraire :";
-    let text_width = underline_text.len() as f64 * 2.5;
+    let text_width = measure_text(&underline_text, Font::Helvetica, 11.0);
     let underline_y = self.y_position - mm(1.0);
 
     self
@@ -343,7 +343,7 @@ impl PatientInvoiceGenerator {
 
   fn setup_document() -> (Document, Page, f64, f64) {
     let mut document = Document::new();
-    document.set_title("Note d'honoraires acquitée");
+    document.set_title("Note d'honoraires acquittée");
 
     let page = Page::a4();
 
