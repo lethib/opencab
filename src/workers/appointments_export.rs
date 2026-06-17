@@ -54,7 +54,7 @@ async fn send_accountability_by_mail(
 
   let workbook_attachment = EmailAttachment::from_bytes(
     format!("{}_accountability.xlsx", year),
-    EXCEL_CONTENT_TYPE.to_string(),
+    EXCEL_CONTENT_TYPE,
     &wb_buffer,
   );
 
@@ -104,7 +104,7 @@ async fn send_appointment_export_by_mail(
       start_date.format("%d-%m-%Y"),
       end_date.format("%d-%m-%Y")
     ),
-    EXCEL_CONTENT_TYPE.to_string(),
+    EXCEL_CONTENT_TYPE,
     &wb_buffer,
   );
 

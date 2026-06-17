@@ -39,10 +39,26 @@ const schema = z.object({
     .email(i18n.t("companies.form.validation.emailInvalid"))
     .trim()
     .min(1, i18n.t("companies.form.validation.emailRequired")),
-  siret: z.string().trim().optional(),
-  address_line_1: z.string().trim().optional(),
-  address_zip_code: z.string().trim().optional(),
-  address_city: z.string().trim().optional(),
+  siret: z
+    .string()
+    .trim()
+    .transform((v) => v || undefined)
+    .optional(),
+  address_line_1: z
+    .string()
+    .trim()
+    .transform((v) => v || undefined)
+    .optional(),
+  address_zip_code: z
+    .string()
+    .trim()
+    .transform((v) => v || undefined)
+    .optional(),
+  address_city: z
+    .string()
+    .trim()
+    .transform((v) => v || undefined)
+    .optional(),
 });
 
 export const CompanyModal = ({ open, setIsOpen, company }: Props) => {
