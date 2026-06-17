@@ -70,30 +70,27 @@ pub async fn generate(
   };
 
   let signature_data = match &storage_service {
-    Some(service) => match service
+    Some(service) => (service
       .fetch_signature(
         business_info
           .signature_file_name
           .as_ref()
           .ok_or(ApplicationError::UnprocessableEntity)?,
       )
-      .await
-    {
-      Ok(data) => Some(data),
-      Err(_) => None,
-    },
+      .await)
+      .ok(),
     None => None,
   };
 
   let args = PatientPdfArgs {
     user: current_user.clone(),
-    business_info: business_info,
-    patient: patient,
-    decrypted_patient_ssn: decrypted_patient_ssn,
+    business_info,
+    patient,
+    decrypted_patient_ssn,
     amount: params.amount,
     date: invoice_date,
     office: practitioner_office,
-    signature_data: signature_data,
+    signature_data,
   };
 
   let mut pdf_generator = PatientInvoiceGenerator::new(args).build()?;
@@ -105,7 +102,7 @@ pub async fn generate(
   Ok(GenerateInvoiceResponse {
     pdf_data: pdf_generator.to_bytes()?,
     filename,
-    patient_email: patient_email,
+    patient_email,
     invoice_date,
   })
 }

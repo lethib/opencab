@@ -84,6 +84,7 @@ impl CompanyInvoiceGenerator {
     Ok(self)
   }
 
+  #[allow(clippy::wrong_self_convention)]
   pub(in crate::services::invoice) fn to_bytes(mut self) -> Result<Vec<u8>, MyErrors> {
     self.doc.add_page(self.page);
     self

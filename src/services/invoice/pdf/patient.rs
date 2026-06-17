@@ -260,7 +260,7 @@ impl PatientInvoiceGenerator {
 
     // Draw underline only for "Honoraire :"
     let underline_text = "Honoraire :";
-    let text_width = measure_text(&underline_text, Font::Helvetica, 11.0);
+    let text_width = measure_text(underline_text, Font::Helvetica, 11.0);
     let underline_y = self.y_position - mm(1.0);
 
     self
@@ -333,6 +333,7 @@ impl PatientInvoiceGenerator {
     Ok(self)
   }
 
+  #[allow(clippy::wrong_self_convention)]
   pub(in crate::services::invoice) fn to_bytes(mut self) -> Result<Vec<u8>, MyErrors> {
     self.doc.add_page(self.page);
     self
