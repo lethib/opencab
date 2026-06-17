@@ -8,10 +8,10 @@ pub struct EmailAttachment {
 }
 
 impl EmailAttachment {
-  pub fn from_bytes(filename: String, content_type: String, data: &Vec<u8>) -> Self {
+  pub fn from_bytes(filename: String, content_type: &str, data: &Vec<u8>) -> Self {
     Self {
       filename,
-      content_type,
+      content_type: content_type.to_string(),
       data: base64::Engine::encode(&base64::engine::general_purpose::STANDARD, data),
     }
   }
