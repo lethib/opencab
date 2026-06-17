@@ -42,8 +42,8 @@ pub async fn send_invoice(
   }
 
   let attachment = EmailAttachment::from_bytes(
-    generated_invoice.filename.to_string(),
-    "application/pdf".to_string(),
+    generated_invoice.filename.clone(),
+    "application/pdf",
     &generated_invoice.pdf_data,
   );
 

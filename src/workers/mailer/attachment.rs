@@ -3,12 +3,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EmailAttachment {
   pub filename: String,
-  pub content_type: String,
+  pub content_type: &'static str,
   pub data: String,
 }
 
 impl EmailAttachment {
-  pub fn from_bytes(filename: String, content_type: String, data: &Vec<u8>) -> Self {
+  pub fn from_bytes(filename: String, content_type: &'static str, data: &Vec<u8>) -> Self {
     Self {
       filename,
       content_type,
