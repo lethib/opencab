@@ -2,7 +2,10 @@ use crate::{
   db::DB,
   models::{_entities::company_interventions, my_errors::MyErrors, practitioner_offices, users},
   services::{
-    invoice::pdf::company::{CompanyInvoiceGenerator, CompanyPdfArgs},
+    invoice::{
+      pdf::company::{CompanyInvoiceGenerator, CompanyPdfArgs},
+      Invoice, InvoiceKind,
+    },
     storage::StorageService,
   },
 };
@@ -11,7 +14,7 @@ pub async fn generate(
   company_intervention: &company_interventions::Model,
   current_user: &users::Model,
   practitioner_office: practitioner_offices::Model,
-) -> Result<Vec<u8>, MyErrors> {
+) -> Result<Invoice, MyErrors> {
   let business_info = current_user.business_information(DB::get()).await?;
   let company = company_intervention.company(DB::get()).await?;
 
@@ -43,6 +46,13 @@ pub async fn generate(
     }
   };
 
+  let filename = format!(
+    "{} Facture {} {}.pdf",
+    current_user.full_name(),
+    company.name,
+    company_intervention.issue_date.format("%d_%m_%Y"),
+  );
+
   let args = CompanyPdfArgs {
     intervention: company_intervention.clone(),
     user: current_user.clone(),
@@ -53,5 +63,12 @@ pub async fn generate(
     signature_data,
   };
 
-  CompanyInvoiceGenerator::new(args).build()?.to_bytes()
+  let data = CompanyInvoiceGenerator::new(args).build()?.to_bytes()?;
+
+  Ok(Invoice {
+    data,
+    filename,
+    date: company_intervention.issue_date,
+    kind: InvoiceKind::Company,
+  })
 }

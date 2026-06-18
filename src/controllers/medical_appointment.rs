@@ -9,7 +9,7 @@ use crate::{
   db::DB,
   middleware::auth::AuthenticatedUser,
   models::{
-    _entities::{medical_appointments, sea_orm_active_enums::PaymentMethod},
+    _entities::{medical_appointments, patients, sea_orm_active_enums::PaymentMethod},
     medical_appointments::{CreateMedicalAppointmentParams, UpdateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, MyErrors},
   },
@@ -56,7 +56,15 @@ pub async fn generate_invoice(
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
+  let patient = patients::Entity::find_by_id(patient_id)
+    .filter(patients::Column::UserId.eq(current_user.id))
+    .one(DB::get())
+    .await?
+    .ok_or(ApplicationError::NotFound)?;
+
   authorize
+    .user_owning_resource(&patient)
+    .await
     .user_owning_resource(&medical_appointment)
     .await
     .run_complete()?;
@@ -72,18 +80,20 @@ pub async fn generate_invoice(
   };
 
   let generated_invoice = services::invoice::patient_invoice::generate(
-    &patient_id,
+    &patient,
     &invoice_generation_params,
     &current_user,
     true,
   )
   .await?;
 
-  if generated_invoice.patient_email.is_none() {
+  if let Some(email) = patient.email {
+    generated_invoice
+      .send_to(&email, &current_user, &business_info.profession)
+      .await?;
+  } else {
     return Err(ApplicationError::new("no_email_set_on_patient").into());
   }
-
-  services::invoice::email::send_invoice(&generated_invoice, &current_user, &business_info).await?;
 
   Ok(StatusCode::NO_CONTENT)
 }

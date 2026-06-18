@@ -140,9 +140,21 @@ pub struct InvoiceGenerationParams {
 #[debug_handler]
 pub async fn generate_invoice(
   AuthenticatedUser(current_user, user_bi): AuthenticatedUser,
+  authorize: AuthStatement,
   Path(patient_id): Path<i32>,
   Json(params): Json<InvoiceGenerationParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
+  let patient = patients::Entity::find_by_id(patient_id)
+    .filter(patients::Column::UserId.eq(current_user.id))
+    .one(DB::get())
+    .await?
+    .ok_or(ApplicationError::NotFound)?;
+
+  authorize
+    .user_owning_resource(&patient)
+    .await
+    .run_complete()?;
+
   if params.invoice_params.amount <= 0.0 {
     return Err(ApplicationError::UnprocessableEntity.into());
   }
@@ -151,8 +163,8 @@ pub async fn generate_invoice(
     return Err(ApplicationError::UnprocessableEntity.into());
   }
 
-  let invoice_generated = services::invoice::patient_invoice::generate(
-    &patient_id,
+  let generated_invoice = services::invoice::patient_invoice::generate(
+    &patient,
     &params.invoice_params,
     &current_user,
     false,
@@ -173,20 +185,21 @@ pub async fn generate_invoice(
   if params.should_be_sent_by_email {
     match &user_bi {
       Some(business_information) => {
-        services::invoice::email::send_invoice(
-          &invoice_generated,
-          &current_user,
-          business_information,
-        )
-        .await?
+        if let Some(email) = patient.email {
+          generated_invoice
+            .send_to(&email, &current_user, &business_information.profession)
+            .await?
+        } else {
+          return Err(ApplicationError::UnprocessableEntity.into());
+        }
       }
       None => return Err(ApplicationError::UnprocessableEntity.into()),
     }
   }
 
   Ok(Json(serde_json::json!({
-    "pdf_data": base64::prelude::BASE64_STANDARD.encode(&invoice_generated.pdf_data),
-    "filename": invoice_generated.filename
+    "pdf_data": base64::prelude::BASE64_STANDARD.encode(&generated_invoice.data),
+    "filename": generated_invoice.filename
   })))
 }
 

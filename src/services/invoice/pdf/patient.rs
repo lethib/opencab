@@ -11,10 +11,10 @@ use crate::{
   services::invoice::pdf::{embed_signature_image, mm},
 };
 
-pub(in crate::services::invoice) struct PatientPdfArgs {
+pub(in crate::services::invoice) struct PatientPdfArgs<'a> {
   pub user: users::Model,
   pub business_info: user_business_informations::Model,
-  pub patient: patients::Model,
+  pub patient: &'a patients::Model,
   pub decrypted_patient_ssn: Option<String>,
   pub amount: f32,
   pub date: NaiveDate,
@@ -22,16 +22,16 @@ pub(in crate::services::invoice) struct PatientPdfArgs {
   pub signature_data: Option<Vec<u8>>,
 }
 
-pub(in crate::services::invoice) struct PatientInvoiceGenerator {
-  pub args: PatientPdfArgs,
+pub(in crate::services::invoice) struct PatientInvoiceGenerator<'args> {
+  pub args: PatientPdfArgs<'args>,
   doc: Document,
   page: Page,
   y_position: f64,
   margin: f64,
 }
 
-impl PatientInvoiceGenerator {
-  pub(in crate::services::invoice) fn new(args: PatientPdfArgs) -> Self {
+impl<'args> PatientInvoiceGenerator<'args> {
+  pub(in crate::services::invoice) fn new(args: PatientPdfArgs<'args>) -> Self {
     let (doc, page, margin, y_position) = Self::setup_document();
 
     Self {

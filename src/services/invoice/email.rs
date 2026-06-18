@@ -1,47 +1,44 @@
 use crate::{
   models::{
-    _entities::{user_business_informations, users},
-    my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
+    _entities::{sea_orm_active_enums::Profession, users},
+    my_errors::{unexpected_error::UnexpectedError, MyErrors},
   },
-  services::invoice::patient_invoice::GenerateInvoiceResponse,
+  services::invoice::Invoice,
   workers::{
     mailer::{args::EmailArgs, attachment::EmailAttachment},
     WorkerJob, WorkerTransmitter,
   },
 };
 
-pub async fn send_invoice(
-  generated_invoice: &GenerateInvoiceResponse,
-  current_user: &users::Model,
-  user_business_informations: &user_business_informations::Model,
-) -> Result<(), MyErrors> {
-  if generated_invoice.patient_email.is_none() {
-    return Err(ApplicationError::UnprocessableEntity.into());
-  }
+#[allow(unreachable_code)]
+pub async fn send_company_invoice() -> Result<(), MyErrors> {
+  todo!("to_be_implemented");
+  Ok(())
+}
 
+pub async fn send_patient_invoice(
+  to: &str,
+  generated_invoice: &Invoice,
+  current_user: &users::Model,
+  profession: &Profession,
+) -> Result<(), MyErrors> {
   let attachment = EmailAttachment::from_bytes(
     generated_invoice.filename.to_string(),
     "application/pdf",
-    &generated_invoice.pdf_data,
+    &generated_invoice.data,
   );
 
-  let invoice_date = generated_invoice
-    .invoice_date
-    .format("%d/%m/%Y")
-    .to_string();
+  let invoice_date = generated_invoice.date.format("%d/%m/%Y").to_string();
 
   let args = EmailArgs::new_text(
-    generated_invoice
-      .patient_email
-      .clone()
-      .expect("checked ahead"),
+    to.to_string(),
     format!("Note d'honoraires {}", invoice_date),
     format!(
       "Vous trouverez ci-joint votre facture pour la consultation du {}\n\n{} {}\n{}\n{}",
       invoice_date,
       current_user.last_name,
       current_user.first_name,
-      user_business_informations.profession.to_french(),
+      profession.to_french(),
       current_user.phone_number
     ),
   )
