@@ -26,6 +26,7 @@ pub struct GenerateCompanyInvoiceParams {
   pub unit_price_ht: f32,
   pub vat_rate: String,
   pub practitioner_office_id: i32,
+  pub should_be_sent_by_email: bool,
 }
 
 #[debug_handler]
@@ -161,19 +162,12 @@ pub async fn generate_invoice(
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
-  let pdf_data =
+  let invoice =
     services::invoice::company_invoice::generate(&intervention, &current_user, practitioner_office)
       .await?;
 
-  let filename = format!(
-    "{} Facture {} {}.pdf",
-    current_user.full_name(),
-    company.name,
-    intervention.issue_date.format("%d_%m_%Y"),
-  );
-
   Ok(Json(serde_json::json!({
-    "pdf_data": base64::prelude::BASE64_STANDARD.encode(&pdf_data),
-    "filename": filename,
+    "pdf_data": base64::prelude::BASE64_STANDARD.encode(invoice.data),
+    "filename": invoice.filename,
   })))
 }

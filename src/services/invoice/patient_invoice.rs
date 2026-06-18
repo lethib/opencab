@@ -5,11 +5,14 @@ use crate::{
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
   },
   services::{
-    invoice::pdf::patient::{PatientInvoiceGenerator, PatientPdfArgs},
+    invoice::{
+      pdf::patient::{PatientInvoiceGenerator, PatientPdfArgs},
+      Invoice, InvoiceKind,
+    },
     storage::StorageService,
   },
 };
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::EntityTrait;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -19,25 +22,12 @@ pub struct GenerateInvoiceParams {
   pub office_id: i32,
 }
 
-pub struct GenerateInvoiceResponse {
-  pub pdf_data: Vec<u8>,
-  pub filename: String,
-  pub patient_email: Option<String>,
-  pub(super) invoice_date: chrono::NaiveDate,
-}
-
 pub async fn generate(
-  patient_id: &i32,
+  patient: &patients::Model,
   params: &GenerateInvoiceParams,
   current_user: &users::Model,
   is_duplicate: bool,
-) -> Result<GenerateInvoiceResponse, MyErrors> {
-  let patient = patients::Entity::find_by_id(*patient_id)
-    .filter(patients::Column::UserId.eq(current_user.id))
-    .one(DB::get())
-    .await?
-    .ok_or(ApplicationError::NotFound)?;
-
+) -> Result<Invoice, MyErrors> {
   let invoice_date = chrono::NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
   let filename = format!(
@@ -56,7 +46,6 @@ pub async fn generate(
 
   let business_info = current_user.business_information(DB::get()).await?;
   let decrypted_patient_ssn = patient.decrypt_ssn()?;
-  let patient_email = patient.email.clone();
 
   let storage_service = match StorageService::new() {
     Ok(service) => Some(service),
@@ -99,10 +88,10 @@ pub async fn generate(
     pdf_generator = pdf_generator.with_duplicata()?;
   }
 
-  Ok(GenerateInvoiceResponse {
-    pdf_data: pdf_generator.to_bytes()?,
+  Ok(Invoice {
+    data: pdf_generator.to_bytes()?,
     filename,
-    patient_email,
-    invoice_date,
+    date: invoice_date,
+    kind: InvoiceKind::Patient,
   })
 }
