@@ -32,6 +32,7 @@ pub async fn create(
     &params.office,
     &ctx.current_user,
     params.revenue_share_percentage,
+    &ctx.db,
   )
   .await?;
 
@@ -65,6 +66,7 @@ pub async fn update(
     &params.office,
     &ctx.current_user,
     params.revenue_share_percentage,
+    &ctx.db,
   )
   .await?;
 

@@ -80,6 +80,7 @@ pub async fn generate_invoice(
     &invoice_generation_params,
     &ctx.current_user,
     true,
+    &ctx.db,
   )
   .await?;
 

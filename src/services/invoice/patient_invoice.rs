@@ -1,5 +1,4 @@
 use crate::{
-  db::DB,
   models::{
     _entities::{patients, practitioner_offices, users},
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
@@ -12,7 +11,7 @@ use crate::{
     storage::StorageService,
   },
 };
-use sea_orm::EntityTrait;
+use sea_orm::{DatabaseConnection, EntityTrait};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -27,6 +26,7 @@ pub async fn generate(
   params: &GenerateInvoiceParams,
   current_user: &users::Model,
   is_duplicate: bool,
+  db: &DatabaseConnection,
 ) -> Result<Invoice, MyErrors> {
   let invoice_date = chrono::NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
@@ -40,11 +40,11 @@ pub async fn generate(
   );
 
   let practitioner_office = practitioner_offices::Entity::find_by_id(params.office_id)
-    .one(DB::get())
+    .one(db)
     .await?
     .ok_or(UnexpectedError::ShouldNotHappen)?;
 
-  let business_info = current_user.business_information(DB::get()).await?;
+  let business_info = current_user.business_information(db).await?;
   let decrypted_patient_ssn = patient.decrypt_ssn()?;
 
   let storage_service = match StorageService::new() {

@@ -47,7 +47,7 @@ pub async fn create(
   ctx: Ctx,
   Json(create_patient_params): Json<CreatePatientParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
-  services::patients::create(&create_patient_params, &ctx.current_user).await?;
+  services::patients::create(&create_patient_params, &ctx.current_user, &ctx.db).await?;
 
   Ok(Json(serde_json::json!({ "success": true })))
 }
@@ -68,7 +68,7 @@ pub async fn update(
     .await
     .run_complete()?;
 
-  services::patients::update(&patient, &patient_params).await?;
+  services::patients::update(&patient, &patient_params, &ctx.db).await?;
 
   Ok(Json(serde_json::json!({ "success": true })))
 }
@@ -103,7 +103,7 @@ pub async fn search(
   };
 
   let (patients, total_pages) =
-    services::patients::search_paginated(query, page, &ctx.current_user).await?;
+    services::patients::search_paginated(query, page, &ctx.current_user, &ctx.db).await?;
 
   let patient_responses: Vec<PatientResponse> =
     patients.iter().map(PatientResponse::from_model).collect();
@@ -156,6 +156,7 @@ pub async fn generate_invoice(
     &params.invoice_params,
     &ctx.current_user,
     false,
+    &ctx.db,
   )
   .await?;
 

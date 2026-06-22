@@ -1,3 +1,4 @@
+use sea_orm::DatabaseConnection;
 use std::sync::OnceLock;
 use tokio::sync::mpsc;
 
@@ -24,8 +25,14 @@ impl WorkerTransmitter {
 #[derive(Debug, Clone)]
 pub enum WorkerJob {
   Email(mailer::args::EmailArgs),
-  AppointmentExport(appointments_export::AppointmentExtractorArgs),
-  AccountabilityGeneration(appointments_export::AccountabilityGenerationArgs),
+  AppointmentExport(
+    appointments_export::AppointmentExtractorArgs,
+    DatabaseConnection,
+  ),
+  AccountabilityGeneration(
+    appointments_export::AccountabilityGenerationArgs,
+    DatabaseConnection,
+  ),
 }
 
 pub fn create_worker_channel() -> (mpsc::Sender<WorkerJob>, mpsc::Receiver<WorkerJob>) {
@@ -43,11 +50,11 @@ pub async fn start_worker_pool(mut rx: mpsc::Receiver<WorkerJob>) {
 
         let result = match job {
           WorkerJob::Email(args) => mailer::worker::process_email(args).await,
-          WorkerJob::AppointmentExport(args) => {
-            appointments_export::process_appointment_extraction(args).await
+          WorkerJob::AppointmentExport(args, db) => {
+            appointments_export::process_appointment_extraction(args, &db).await
           }
-          WorkerJob::AccountabilityGeneration(args) => {
-            appointments_export::process_accountability_generation(args).await
+          WorkerJob::AccountabilityGeneration(args, db) => {
+            appointments_export::process_accountability_generation(args, &db).await
           }
         };
 

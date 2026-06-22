@@ -1,5 +1,4 @@
 use crate::{
-  db::DB,
   models::{
     my_errors::{unexpected_error::UnexpectedError, MyErrors},
     users::users,
@@ -10,6 +9,7 @@ use crate::{
 };
 use chrono::NaiveDate;
 use rust_xlsxwriter::Workbook;
+use sea_orm::DatabaseConnection;
 
 #[derive(Debug, Clone)]
 pub struct AppointmentExtractorArgs {
@@ -29,6 +29,7 @@ const EXCEL_CONTENT_TYPE: &str =
 
 pub async fn process_accountability_generation(
   args: AccountabilityGenerationArgs,
+  db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
   let start_date =
     NaiveDate::from_ymd_opt(args.year as i32, 1, 1).ok_or(UnexpectedError::ShouldNotHappen)?;
@@ -36,7 +37,7 @@ pub async fn process_accountability_generation(
     NaiveDate::from_ymd_opt(args.year as i32, 12, 31).ok_or(UnexpectedError::ShouldNotHappen)?;
 
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
-    .extract(DB::get(), start_date, end_date)
+    .extract(db, start_date, end_date)
     .await?
     .generate_accountability()?;
 
@@ -78,9 +79,10 @@ async fn send_accountability_by_mail(
 
 pub async fn process_appointment_extraction(
   args: AppointmentExtractorArgs,
+  db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
-    .extract(DB::get(), args.start_date, args.end_date)
+    .extract(db, args.start_date, args.end_date)
     .await?
     .export_appointments()?;
 

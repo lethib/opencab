@@ -1,4 +1,4 @@
-use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection};
 use serde::Deserialize;
 use validator::Validate;
 

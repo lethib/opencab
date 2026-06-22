@@ -156,6 +156,7 @@ pub async fn generate_invoice(
     &intervention,
     &ctx.current_user,
     practitioner_office,
+    &ctx.db,
   )
   .await?;
 

@@ -30,7 +30,8 @@ pub async fn save_business_info(
   ctx: Ctx,
   Json(business_information): Json<CreateBusinessInformation>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
-  services::user::save_business_information(&business_information, &ctx.current_user).await?;
+  services::user::save_business_information(&business_information, &ctx.current_user, &ctx.db)
+    .await?;
 
   Ok(Json(serde_json::json!({ "success": true })))
 }
@@ -61,7 +62,7 @@ pub async fn generate_accountability(
   };
 
   WorkerTransmitter::get()
-    .send(WorkerJob::AccountabilityGeneration(args))
+    .send(WorkerJob::AccountabilityGeneration(args, ctx.db))
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
@@ -85,7 +86,7 @@ pub async fn extract_medical_appointments(
   };
 
   WorkerTransmitter::get()
-    .send(WorkerJob::AppointmentExport(args))
+    .send(WorkerJob::AppointmentExport(args, ctx.db))
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
