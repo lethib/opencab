@@ -5,8 +5,6 @@ use crate::{
     jwt::{JwtService, TOKEN_TYPE_AUTH},
     statement::AuthStatement,
   },
-  config::Config,
-  db::DB,
   models::{
     _entities::user_business_informations,
     my_errors::{
@@ -16,32 +14,25 @@ use crate::{
   },
 };
 
-pub struct AuthContext {
-  pub current_user: Option<(users::Model, Option<user_business_informations::Model>)>,
+pub struct AuthContext<'user> {
+  pub current_user: &'user users::Model,
   authorized: bool,
   complete: bool,
   pub error: Option<MyErrors>,
 }
 
-impl AuthContext {
-  pub async fn new(auth_header: Option<&str>) -> Self {
-    let (current_user, error) = match auth_header {
-      Some(header) => {
-        Self::validate_auth_header(header, DB::get(), &Config::get().jwt.secret).await
-      }
-      None => (None, None),
-    };
-
+impl<'user> AuthContext<'user> {
+  pub fn for_user(user: &'user users::Model) -> Self {
     Self {
-      current_user,
+      current_user: user,
       authorized: false,
       complete: false,
-      error: error.map(|e| e.into()),
+      error: None,
     }
   }
 
-  pub fn authorize(self) -> AuthStatement {
-    AuthStatement::new(self)
+  pub fn authorize<'db>(self, db: &'db DatabaseConnection) -> AuthStatement<'user, 'db> {
+    AuthStatement::new(self, db)
   }
 
   pub(super) fn authorized(&mut self) -> Result<(), MyErrors> {
@@ -75,7 +66,7 @@ impl AuthContext {
     Ok(())
   }
 
-  pub(super) async fn validate_auth_header(
+  pub async fn validate_auth_header(
     auth_header: &str,
     db: &DatabaseConnection,
     jwt_secret: &str,

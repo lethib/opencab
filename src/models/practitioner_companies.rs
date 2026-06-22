@@ -120,7 +120,7 @@ fn validate_address_params(params: &CompanyParams) -> Result<(), MyErrors> {
 }
 
 impl Resource for practitioner_companies::Model {
-  async fn is_owned_by_user(&self, user_id: i32) -> bool {
+  async fn is_owned_by_user(&self, user_id: i32, _db: &DatabaseConnection) -> bool {
     self.user_id == user_id
   }
 

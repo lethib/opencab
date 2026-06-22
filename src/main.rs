@@ -1,6 +1,6 @@
 use opencab::{
   config::Config,
-  db::DB,
+  middleware::context::AppState,
   router,
   workers::{self, WorkerTransmitter},
 };
@@ -13,24 +13,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   let environment = std::env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string());
   let config = Config::load(&environment).expect("Failed to load configuration");
-  Config::init(config);
 
-  setup_logging(&Config::get().logger.level, &Config::get().logger.format);
+  setup_logging(&config.logger.level, &config.logger.format);
 
   tracing::info!(
     "Starting opencab application (environment: {})",
     environment
   );
 
-  let mut db_options = sea_orm::ConnectOptions::new(&Config::get().database.url);
-  db_options.sqlx_logging(Config::get().database.enable_logging);
+  let mut db_options = sea_orm::ConnectOptions::new(&config.database.url);
+  db_options.sqlx_logging(config.database.enable_logging);
 
   let db = sea_orm::Database::connect(db_options)
     .await
     .expect("Failed to connect to database");
   tracing::info!("Connected to database");
 
-  DB::init(db);
+  let addr = format!("{}:{}", config.server.binding, config.server.port);
+  let log_addr = format!("{}:{}", config.server.host, config.server.port);
+  let state = AppState { db, config };
 
   let (worker_transmitter, worker_receiver) = workers::create_worker_channel();
   WorkerTransmitter::init(worker_transmitter);
@@ -41,22 +42,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   tracing::info!("Worker pool started");
 
-  let app = router::create_router();
-
-  let addr = format!(
-    "{}:{}",
-    Config::get().server.binding,
-    Config::get().server.port
-  );
   let listener = tokio::net::TcpListener::bind(&addr)
     .await
     .unwrap_or_else(|_| panic!("Failed to bind to address: {}", addr));
 
-  tracing::info!(
-    "Server listening on {}:{}",
-    Config::get().server.host,
-    Config::get().server.port
-  );
+  tracing::info!("Server listening on {}", log_addr);
+
+  let app = router::create_router(state);
 
   axum::serve(listener, app)
     .with_graceful_shutdown(shutdown_signal())

@@ -1,13 +1,11 @@
-use axum::{debug_handler, extract::Path, http::status, Json};
+use axum::{extract::Path, http::status, Json};
 use chrono::NaiveDate;
 use reqwest::StatusCode;
 use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};
 use serde::Deserialize;
 
 use crate::{
-  auth::statement::AuthStatement,
-  db::DB,
-  middleware::auth::AuthenticatedUser,
+  middleware::context::Ctx,
   models::{
     _entities::{medical_appointments, patients, sea_orm_active_enums::PaymentMethod},
     medical_appointments::{CreateMedicalAppointmentParams, UpdateMedicalAppointmentParams},
@@ -25,71 +23,69 @@ pub struct MedicalAppointmentPayload {
 }
 
 pub async fn delete(
-  authorize: AuthStatement,
+  ctx: Ctx,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
 ) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
-    .one(DB::get())
+    .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
-  authorize
+  ctx
+    .authorize()
     .user_owning_resource(&medical_appointment)
     .await
     .run_complete()?;
 
-  medical_appointment.delete(DB::get()).await?;
+  medical_appointment.delete(&ctx.db).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
 
-#[debug_handler]
 pub async fn generate_invoice(
-  authorize: AuthStatement,
-  AuthenticatedUser(current_user, user_business_info): AuthenticatedUser,
+  ctx: Ctx,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
 ) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
-    .one(DB::get())
+    .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
   let patient = patients::Entity::find_by_id(patient_id)
-    .filter(patients::Column::UserId.eq(current_user.id))
-    .one(DB::get())
+    .filter(patients::Column::UserId.eq(ctx.current_user.id))
+    .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
-  authorize
+  ctx
+    .authorize()
     .user_owning_resource(&patient)
     .await
     .user_owning_resource(&medical_appointment)
     .await
     .run_complete()?;
 
-  let Some(business_info) = user_business_info else {
-    return Err(ApplicationError::UnprocessableEntity.into());
-  };
+  let business_info = ctx.current_user.business_information(&ctx.db).await?;
 
   let invoice_generation_params = GenerateInvoiceParams {
     amount: medical_appointment.price_in_cents as f32 / 100.0,
     date: medical_appointment.date.format("%Y-%m-%d").to_string(),
-    office_id: medical_appointment.practitioner_office(DB::get()).await?.id,
+    office_id: medical_appointment.practitioner_office(&ctx.db).await?.id,
   };
 
   let generated_invoice = services::invoice::patient_invoice::generate(
     &patient,
     &invoice_generation_params,
-    &current_user,
+    &ctx.current_user,
     true,
   )
   .await?;
 
   if let Some(email) = patient.email {
     generated_invoice
-      .send_to(&email, &current_user, &business_info.profession)
+      .send_to(&email, &ctx.current_user, &business_info.profession)
       .await?;
   } else {
     return Err(ApplicationError::new("no_email_set_on_patient").into());
@@ -98,19 +94,19 @@ pub async fn generate_invoice(
   Ok(StatusCode::NO_CONTENT)
 }
 
-#[debug_handler]
 pub async fn update(
-  authorize: AuthStatement,
+  ctx: Ctx,
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
   Json(params): Json<MedicalAppointmentPayload>,
 ) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
-    .one(DB::get())
+    .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
-  authorize
+  ctx
+    .authorize()
     .user_owning_resource(&medical_appointment)
     .await
     .run_complete()?;
@@ -127,20 +123,18 @@ pub async fn update(
 
   medical_appointment
     .into_active_model()
-    .update(DB::get(), &medical_appointments_params)
+    .update(&ctx.db, &medical_appointments_params)
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
 
-#[debug_handler]
 pub async fn create(
-  authorize: AuthStatement,
-  AuthenticatedUser(current_user, _): AuthenticatedUser,
+  ctx: Ctx,
   Path(patient_id): Path<i32>,
   Json(params): Json<MedicalAppointmentPayload>,
 ) -> Result<status::StatusCode, MyErrors> {
-  authorize.authenticated_user().run_complete()?;
+  ctx.authorize().authenticated_user().run_complete()?;
 
   // Parse date string in YYYY-MM-DD format
   let appointment_date = NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
@@ -149,12 +143,12 @@ pub async fn create(
     date: appointment_date,
     practitioner_office_id: params.practitioner_office_id,
     price_in_cents: params.price_in_cents,
-    user_id: current_user.id,
+    user_id: ctx.current_user.id,
     patient_id,
     payment_method: params.payment_method,
   };
 
-  medical_appointments::ActiveModel::create(DB::get(), &medical_appointments_params).await?;
+  medical_appointments::ActiveModel::create(&ctx.db, &medical_appointments_params).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }

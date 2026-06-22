@@ -1,11 +1,9 @@
-use axum::{debug_handler, extract::Path, Json};
+use axum::{extract::Path, Json};
 use sea_orm::{prelude::Decimal, EntityTrait, IntoActiveModel, ModelTrait};
 use serde::Deserialize;
 
 use crate::{
-  auth::statement::AuthStatement,
-  db::DB,
-  middleware::auth::AuthenticatedUser,
+  middleware::context::Ctx,
   models::{
     _entities::practitioner_offices,
     my_errors::{application_error::ApplicationError, MyErrors},
@@ -20,9 +18,8 @@ pub struct OfficeParams {
   pub revenue_share_percentage: Decimal,
 }
 
-#[debug_handler]
 pub async fn create(
-  AuthenticatedUser(current_user, _): AuthenticatedUser,
+  ctx: Ctx,
   Json(params): Json<OfficeParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   if params.revenue_share_percentage < Decimal::ZERO
@@ -33,7 +30,7 @@ pub async fn create(
 
   services::practitioner_office::create(
     &params.office,
-    &current_user,
+    &ctx.current_user,
     params.revenue_share_percentage,
   )
   .await?;
@@ -41,19 +38,18 @@ pub async fn create(
   Ok(Json(serde_json::json!({ "success": true })))
 }
 
-#[debug_handler]
 pub async fn update(
-  authorize: AuthStatement,
-  AuthenticatedUser(current_user, _): AuthenticatedUser,
+  ctx: Ctx,
   Path(office_id): Path<i32>,
   Json(params): Json<OfficeParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   let office = practitioner_offices::Entity::find_by_id(office_id)
-    .one(DB::get())
+    .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
-  authorize
+  ctx
+    .authorize()
     .user_owning_resource(&office)
     .await
     .run_complete()?;
@@ -67,7 +63,7 @@ pub async fn update(
   services::practitioner_office::update(
     office.into_active_model(),
     &params.office,
-    &current_user,
+    &ctx.current_user,
     params.revenue_share_percentage,
   )
   .await?;
@@ -75,22 +71,22 @@ pub async fn update(
   Ok(Json(serde_json::json!({ "success": true })))
 }
 
-#[debug_handler]
 pub async fn destroy(
-  authorize: AuthStatement,
+  ctx: Ctx,
   Path(office_id): Path<i32>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   let office = practitioner_offices::Entity::find_by_id(office_id)
-    .one(DB::get())
+    .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::NotFound)?;
 
-  authorize
+  ctx
+    .authorize()
     .user_owning_resource(&office)
     .await
     .run_complete()?;
 
-  office.clone().delete(DB::get()).await?;
+  office.clone().delete(&ctx.db).await?;
 
   Ok(Json(serde_json::json!({ "success": true })))
 }

@@ -1,7 +1,6 @@
 pub use super::_entities::practitioner_offices::{ActiveModel, Entity, Model};
 use crate::{
   auth::resource::Resource,
-  db::DB,
   models::{
     _entities::{practitioner_offices, user_practitioner_offices},
     my_errors::{application_error::ApplicationError, MyErrors},
@@ -67,11 +66,11 @@ impl ActiveModel {
 impl Entity {}
 
 impl Resource for Model {
-  async fn is_owned_by_user(&self, user_id: i32) -> bool {
+  async fn is_owned_by_user(&self, user_id: i32, db: &DatabaseConnection) -> bool {
     let result = user_practitioner_offices::Entity::find()
       .filter(user_practitioner_offices::Column::PractitionerOfficeId.eq(self.id))
       .filter(user_practitioner_offices::Column::UserId.eq(user_id))
-      .one(DB::get())
+      .one(db)
       .await;
 
     match result {
