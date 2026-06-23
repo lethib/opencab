@@ -8,7 +8,7 @@ use crate::{
     patients, practitioner_offices,
     users::users,
   },
-  services::invoice::pdf::{embed_signature_image, mm},
+  services::invoice::pdf::{embed_signature_image, format_french_phone_number, mm},
 };
 
 pub(in crate::services::invoice) struct PatientPdfArgs<'a> {
@@ -145,7 +145,10 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .text()
       .set_font(Font::Helvetica, 10.0)
       .at(self.margin, self.y_position)
-      .write(&format!("Tel : {}", &self.args.user.phone_number))
+      .write(&format!(
+        "Tel : {}",
+        &format_french_phone_number(&self.args.user.phone_number)
+      ))
       .map_err(|e| UnexpectedError::new(e.to_string()))?;
     self.y_position -= mm(8.0);
 

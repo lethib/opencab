@@ -11,6 +11,23 @@ pub(super) fn mm(value: f64) -> f64 {
   value * MM_TO_POINTS
 }
 
+pub(super) fn format_french_phone_number(phone_number: &str) -> String {
+  let formatted = phone_number.replace("+33", "0");
+  let digits: String = formatted.chars().filter(|c| c.is_ascii_digit()).collect();
+  if digits.len() == 10 {
+    format!(
+      "{} {} {} {} {}",
+      &digits[0..2],
+      &digits[2..4],
+      &digits[4..6],
+      &digits[6..8],
+      &digits[8..10]
+    )
+  } else {
+    formatted
+  }
+}
+
 pub(super) fn embed_signature_image(
   page: &mut Page,
   image_bytes: Vec<u8>,

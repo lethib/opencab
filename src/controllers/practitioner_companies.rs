@@ -24,7 +24,6 @@ pub struct GenerateCompanyInvoiceParams {
   pub unit_price_ht: f32,
   pub vat_rate: String,
   pub practitioner_office_id: i32,
-  pub should_be_sent_by_email: bool,
 }
 
 pub async fn index(ctx: Ctx) -> Result<Json<Vec<practitioner_companies::Model>>, MyErrors> {
