@@ -39,7 +39,7 @@ impl FromRequestParts<AppState> for Ctx {
     };
 
     let current_user = user
-      .ok_or_else(|| error.unwrap_or(AuthenticationError::InvalidClaims.into()))?
+      .ok_or_else(|| error.unwrap_or(AuthenticationError::InvalidClaims))?
       .0;
 
     Ok(Ctx {

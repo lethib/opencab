@@ -1,7 +1,9 @@
 pub mod user_factory;
 
 use migration::{Migrator, MigratorTrait};
-use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DatabaseTransaction, TransactionTrait};
+use sea_orm::{
+  ConnectionTrait, Database, DatabaseConnection, DatabaseTransaction, TransactionTrait,
+};
 
 const DEFAULT_TEST_DATABASE_URL: &str = "postgres://loco:loco@localhost:5431/opencab_test";
 

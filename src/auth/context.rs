@@ -141,7 +141,7 @@ mod tests {
   }
 
   fn a_fresh_context() -> AuthContext<'static> {
-    AuthContext::for_user(&*DUMMY_USER)
+    AuthContext::for_user(&DUMMY_USER)
   }
 
   fn a_completed_context() -> AuthContext<'static> {
