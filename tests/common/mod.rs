@@ -2,8 +2,13 @@ use axum::Router;
 use migration::{Migrator, MigratorTrait};
 use opencab::{config::Config, middleware::context::AppState, router::create_router};
 use sea_orm::{Database, DatabaseConnection, DatabaseTransaction, TransactionTrait};
+use tokio::sync::OnceCell;
 
 const DEFAULT_TEST_DATABASE_URL: &str = "postgres://loco:loco@localhost:5431/opencab_test";
+
+// Run migrations exactly once per test process: concurrent `Migrator::up` calls
+// race on creating the `seaql_migrations` table (pg_type unique violation).
+static MIGRATED: OnceCell<()> = OnceCell::const_new();
 
 pub struct TestApp {
   pub router: Router,
@@ -20,7 +25,9 @@ async fn connect_and_migrate() -> DatabaseConnection {
   let db_url =
     std::env::var("TEST_DATABASE_URL").unwrap_or_else(|_| DEFAULT_TEST_DATABASE_URL.to_string());
   let db = Database::connect(&db_url).await.unwrap();
-  Migrator::up(&db, None).await.unwrap();
+  MIGRATED
+    .get_or_init(|| async { Migrator::up(&db, None).await.unwrap() })
+    .await;
   db
 }
 
