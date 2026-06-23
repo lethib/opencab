@@ -24,7 +24,7 @@ pub(super) fn format_french_phone_number(phone_number: &str) -> String {
       &digits[8..10]
     )
   } else {
-    formatted
+    phone_number.to_string()
   }
 }
 
