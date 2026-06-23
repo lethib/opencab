@@ -5,23 +5,22 @@ use opencab::models::{
 };
 use opencab::services::appointments::MedicalAppointmentExtractor;
 use sea_orm::{EntityTrait, IntoActiveModel};
-use serial_test::serial;
 
-use crate::common::setup_db;
+use crate::common::setup_tx;
 use crate::factories::{
   medical_appointment::AppointmentFactory, office::OfficeFactory, patient::PatientFactory,
   user::UserFactory,
 };
 
 struct Background {
-  db: sea_orm::DatabaseConnection,
+  db: sea_orm::DatabaseTransaction,
   user: opencab::models::_entities::users::Model,
   office: opencab::models::_entities::practitioner_offices::Model,
   patient: opencab::models::_entities::patients::Model,
 }
 
 async fn background() -> Background {
-  let db = setup_db().await;
+  let db = setup_tx().await;
   let user = UserFactory::new().create(&db).await;
   let office = OfficeFactory::new()
     .name("Cabinet Central")
@@ -46,7 +45,6 @@ mod create_an_appointment {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_it_is_saved_with_the_correct_date() {
     // Given
     let bg = background().await;
@@ -63,6 +61,8 @@ mod create_an_appointment {
       appointment.date,
       NaiveDate::parse_from_str("2026-03-15", "%Y-%m-%d").unwrap()
     );
+
+    bg.db.rollback().await.unwrap();
   }
 }
 
@@ -72,7 +72,6 @@ mod create_an_appointment_with_a_payment_method {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_the_payment_method_is_saved() {
     // Given
     let bg = background().await;
@@ -87,6 +86,8 @@ mod create_an_appointment_with_a_payment_method {
 
     // Then
     assert_eq!(appointment.payment_method, Some(PaymentMethod::Cash));
+
+    bg.db.rollback().await.unwrap();
   }
 }
 
@@ -96,7 +97,6 @@ mod update_an_appointment_date {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_the_new_date_is_saved() {
     // Given
     let bg = background().await;
@@ -130,6 +130,8 @@ mod update_an_appointment_date {
       .unwrap()
       .unwrap();
     assert_eq!(updated.date, new_date);
+
+    bg.db.rollback().await.unwrap();
   }
 }
 
@@ -139,7 +141,6 @@ mod extract_appointments_within_a_date_range {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_all_appointments_in_range_are_returned() {
     // Given
     let bg = background().await;
@@ -164,6 +165,8 @@ mod extract_appointments_within_a_date_range {
 
     // Then
     assert_eq!(results.len(), 2);
+
+    bg.db.rollback().await.unwrap();
   }
 }
 
@@ -173,7 +176,6 @@ mod extract_appointments_outside_the_date_range {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_no_appointments_are_returned() {
     // Given
     let bg = background().await;
@@ -193,6 +195,8 @@ mod extract_appointments_outside_the_date_range {
 
     // Then
     assert_eq!(results.len(), 0);
+
+    bg.db.rollback().await.unwrap();
   }
 }
 
@@ -202,7 +206,6 @@ mod extract_appointments_with_revenue_share {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_the_revenue_share_percentage_is_included() {
     // Given
     let bg = background().await;
@@ -222,6 +225,8 @@ mod extract_appointments_with_revenue_share {
 
     // Then
     assert_eq!(results[0].revenue_share_percentage, 70.0);
+
+    bg.db.rollback().await.unwrap();
   }
 }
 
@@ -231,7 +236,6 @@ mod extract_appointments_with_multiple_offices {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_each_office_has_its_own_revenue_share() {
     // Given
     let bg = background().await;
@@ -270,5 +274,7 @@ mod extract_appointments_with_multiple_offices {
       .unwrap();
     assert_eq!(central.revenue_share_percentage, 70.0);
     assert_eq!(sud.revenue_share_percentage, 50.0);
+
+    bg.db.rollback().await.unwrap();
   }
 }

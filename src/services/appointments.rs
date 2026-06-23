@@ -1,6 +1,6 @@
 use chrono::{Datelike, NaiveDate};
 use rust_xlsxwriter::*;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder};
+use sea_orm::{ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter, QueryOrder};
 use std::collections::HashMap;
 
 use crate::models::{
@@ -319,7 +319,7 @@ impl<'user> MedicalAppointmentExtractor<'user> {
 
   pub async fn extract(
     &self,
-    db: &DatabaseConnection,
+    db: &impl ConnectionTrait,
     start_date: NaiveDate,
     end_date: NaiveDate,
   ) -> Result<Vec<MedicalAppointmentDetail>, MyErrors> {

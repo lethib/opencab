@@ -1,7 +1,4 @@
-use sea_orm::{
-  prelude::*, ActiveValue, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter,
-  TransactionTrait,
-};
+use sea_orm::{prelude::*, ActiveValue, ConnectionTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
@@ -112,7 +109,7 @@ impl Model {
   ///
   /// When could not find user  or DB query error
   pub async fn find_by_pid(
-    db: &DatabaseConnection,
+    db: &impl ConnectionTrait,
     pid: &str,
   ) -> ModelResult<(Self, Option<user_business_informations::Model>)> {
     let parse_uuid = Uuid::parse_str(pid).map_err(|e| ModelError::Any(e.into()))?;
@@ -141,14 +138,12 @@ impl Model {
   ///
   /// When could not save the user into the DB
   pub async fn create_with_password(
-    db: &DatabaseConnection,
+    db: &impl ConnectionTrait,
     params: &RegisterParams,
   ) -> ModelResult<Self> {
-    let txn = db.begin().await?;
-
     if users::Entity::find()
       .filter(users::Column::Email.eq(&params.email))
-      .one(&txn)
+      .one(db)
       .await?
       .is_some()
     {
@@ -169,10 +164,8 @@ impl Model {
       access_key: ActiveValue::set(Some(access_key)),
       ..Default::default()
     }
-    .insert(&txn)
+    .insert(db)
     .await?;
-
-    txn.commit().await?;
 
     Ok(user)
   }
