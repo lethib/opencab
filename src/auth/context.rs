@@ -6,7 +6,6 @@ use crate::{
     statement::AuthStatement,
   },
   models::{
-    _entities::user_business_informations,
     my_errors::{
       authentication_error::AuthenticationError, unexpected_error::UnexpectedError, MyErrors,
     },
@@ -70,10 +69,7 @@ impl<'user> AuthContext<'user> {
     auth_header: &str,
     db: &impl ConnectionTrait,
     jwt_secret: &str,
-  ) -> (
-    Option<(users::Model, Option<user_business_informations::Model>)>,
-    Option<AuthenticationError>,
-  ) {
+  ) -> (Option<users::Model>, Option<AuthenticationError>) {
     let token = match auth_header.strip_prefix("Bearer ") {
       Some(t) => t,
       None => return (None, Some(AuthenticationError::MissingToken)),
@@ -94,7 +90,7 @@ impl<'user> AuthContext<'user> {
       Err(_) => return (None, Some(AuthenticationError::InvalidClaims)),
     };
 
-    if !user_result.0.is_access_key_verified {
+    if !user_result.is_access_key_verified {
       return (None, Some(AuthenticationError::AccessKeyNotVerified));
     }
 
@@ -458,7 +454,7 @@ mod tests {
 
         // Then
         assert!(error.is_none());
-        let (returned_user, _) = returned_user.expect("should return the authenticated user");
+        let returned_user = returned_user.expect("should return the authenticated user");
         assert_eq!(returned_user.pid, user.pid);
       }
     }

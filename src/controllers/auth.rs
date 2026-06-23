@@ -93,7 +93,6 @@ pub async fn reset(
     .map_err(|_| AuthenticationError::InvalidClaims)?;
 
   user
-    .0
     .into_active_model()
     .update_password(&state.db, &params.password)
     .await?;

@@ -38,9 +38,7 @@ impl FromRequestParts<AppState> for Ctx {
       None => (None, Some(AuthenticationError::MissingToken)),
     };
 
-    let current_user = user
-      .ok_or_else(|| error.unwrap_or(AuthenticationError::InvalidClaims))?
-      .0;
+    let current_user = user.ok_or_else(|| error.unwrap_or(AuthenticationError::InvalidClaims))?;
 
     Ok(Ctx {
       db: state.db.clone(),

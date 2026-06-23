@@ -160,9 +160,8 @@ pub async fn generate_invoice(
   )
   .await?;
 
-  let user_bi = ctx.current_user.business_information(&ctx.db).await?;
-
   if params.should_be_sent_by_email {
+    let user_bi = ctx.current_user.business_information(&ctx.db).await?;
     if let Some(email) = patient.email {
       generated_invoice
         .send_to(&email, &ctx.current_user, &user_bi.profession)
