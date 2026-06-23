@@ -11,7 +11,7 @@ use crate::{
     my_errors::{unexpected_error::UnexpectedError, MyErrors},
     users::users,
   },
-  services::invoice::pdf::{embed_signature_image, mm},
+  services::invoice::pdf::{embed_signature_image, format_french_phone_number, mm},
 };
 
 pub(in crate::services::invoice) struct CompanyPdfArgs {
@@ -169,7 +169,7 @@ impl CompanyInvoiceGenerator {
       .set_font(Font::Helvetica, 9.0)
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
-      .write(&self.args.user.phone_number)
+      .write(&format_french_phone_number(&self.args.user.phone_number))
       .map_err(|e| UnexpectedError::new(e.to_string()))?;
 
     self.y_position -= mm(4.0);
@@ -304,7 +304,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
       .write(&format!(
-        "SIRET {}",
+        "SIRET : {}",
         format_siret(&self.args.business_info.siret_number)
       ))
       .map_err(|e| UnexpectedError::new(e.to_string()))?;
@@ -316,7 +316,7 @@ impl CompanyInvoiceGenerator {
           .set_font(Font::Helvetica, 10.0)
           .set_fill_color(Color::black())
           .at(col_right, company_y)
-          .write(&format!("SIRET {}", format_siret(siret)))
+          .write(&format!("SIRET : {}", format_siret(siret)))
           .map_err(|e| UnexpectedError::new(e.to_string()))?;
       }
     }
@@ -329,8 +329,20 @@ impl CompanyInvoiceGenerator {
       .set_font(Font::Helvetica, 10.0)
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
-      .write(&format!("RPPS {}", &self.args.business_info.rpps_number))
+      .write(&format!("RPPS : {}", &self.args.business_info.rpps_number))
       .map_err(|e| UnexpectedError::new(e.to_string()))?;
+
+    if let Some(adeli_number) = &self.args.business_info.adeli_number {
+      self.y_position -= mm(6.0);
+      self
+        .page
+        .text()
+        .set_font(Font::Helvetica, 10.0)
+        .set_fill_color(Color::black())
+        .at(self.margin_l, self.y_position)
+        .write(&format!("ADELI : {}", adeli_number))
+        .map_err(|e| UnexpectedError::new(e.to_string()))?;
+    }
 
     Ok(())
   }
@@ -338,6 +350,7 @@ impl CompanyInvoiceGenerator {
   fn build_date_box(&mut self) -> Result<(), MyErrors> {
     let due_date = self.args.emission_date + Duration::days(30);
     let box_h = mm(20.0);
+    self.y_position -= mm(5.0);
 
     // Rounded rectangle — cubic Bézier approximation of quarter-circles (k ≈ 0.5523)
     let bx = self.margin_l;
@@ -435,6 +448,8 @@ impl CompanyInvoiceGenerator {
     let col_tva = mm(152.0);
     let col_total = mm(167.0);
 
+    self.y_position -= mm(5.0);
+
     // Headers
     for (col, label) in [
       (col_desc, "DESCRIPTION"),
@@ -527,7 +542,7 @@ impl CompanyInvoiceGenerator {
     let total_ttc = total_ht + vat_amount;
 
     // Signature is anchored to the Total HT baseline; save before cursor moves.
-    let y_sig = self.y_position - mm(15.0);
+    let y_sig = self.y_position - mm(25.0);
 
     let col_total = mm(167.0);
 
@@ -599,7 +614,7 @@ impl CompanyInvoiceGenerator {
       .map_err(|e| UnexpectedError::new(e.to_string()))?;
 
     if let Some(sig_bytes) = self.args.signature_data.take() {
-      match embed_signature_image(&mut self.page, sig_bytes, self.margin_l + mm(5.0), y_sig) {
+      match embed_signature_image(&mut self.page, sig_bytes, self.margin_l + mm(15.0), y_sig) {
         Ok(_) => tracing::info!("Embedded signature in company invoice"),
         Err(e) => tracing::warn!("Failed to embed signature in company invoice: {}", e),
       }

@@ -20,8 +20,6 @@ pub async fn generate(
   let business_info = current_user.business_information(db).await?;
   let company = company_intervention.company(db).await?;
 
-  let emission_date = chrono::Utc::now().date_naive();
-
   let signature_data = match StorageService::new() {
     Ok(service) => {
       if let Some(ref sig_name) = business_info.signature_file_name {
@@ -60,7 +58,7 @@ pub async fn generate(
     user: current_user.clone(),
     business_info,
     company,
-    emission_date,
+    emission_date: company_intervention.issue_date,
     practitioner_office,
     signature_data,
   };
