@@ -135,8 +135,6 @@ pub async fn create(
   Path(patient_id): Path<i32>,
   Json(params): Json<MedicalAppointmentPayload>,
 ) -> Result<status::StatusCode, MyErrors> {
-  ctx.authorize().authenticated_user().run_complete()?;
-
   // Parse date string in YYYY-MM-DD format
   let appointment_date = NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 

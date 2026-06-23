@@ -47,7 +47,6 @@ pub async fn get(
 
   ctx
     .authorize()
-    .authenticated_user()
     .user_owning_resource(&company)
     .await
     .run_complete()?;
@@ -76,7 +75,6 @@ pub async fn update(
 
   ctx
     .authorize()
-    .authenticated_user()
     .user_owning_resource(&company)
     .await
     .run_complete()?;
@@ -97,7 +95,6 @@ pub async fn list_interventions(
 
   ctx
     .authorize()
-    .authenticated_user()
     .user_owning_resource(&company)
     .await
     .run_complete()?;

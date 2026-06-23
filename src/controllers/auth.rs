@@ -139,10 +139,10 @@ pub async fn login(
 }
 
 pub async fn me(ctx: Ctx) -> Result<Json<CurrentResponse>, MyErrors> {
-  let business_info = ctx.current_user.business_information(&ctx.db).await?;
+  let business_info = ctx.current_user.business_information(&ctx.db).await.ok();
   Ok(Json(CurrentResponse::new(&(
     ctx.current_user,
-    Some(business_info),
+    business_info,
   ))))
 }
 

@@ -1,5 +1,5 @@
 use opencab::models::{_entities::users, users::RegisterParams};
-use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, IntoActiveModel};
+use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, IntoActiveModel, TransactionTrait};
 use uuid::Uuid;
 
 pub struct UserFactory {
@@ -29,7 +29,7 @@ impl UserFactory {
     Self::default()
   }
 
-  pub async fn create(self, db: &impl ConnectionTrait) -> users::Model {
+  pub async fn create(self, db: &(impl ConnectionTrait + TransactionTrait)) -> users::Model {
     let is_verified = self.is_access_key_verified;
 
     let created = users::Model::create_with_password(

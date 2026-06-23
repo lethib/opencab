@@ -1,4 +1,4 @@
-use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, IntoActiveModel};
+use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, IntoActiveModel, TransactionTrait};
 use uuid::Uuid;
 
 use crate::models::{_entities::users, users::RegisterParams};
@@ -41,7 +41,7 @@ impl UserFactory {
   }
 
   /// Creates a user in the real database. Verified by default; call `.unverified()` to skip.
-  pub async fn create(self, db: &impl ConnectionTrait) -> users::Model {
+  pub async fn create(self, db: &(impl ConnectionTrait + TransactionTrait)) -> users::Model {
     let is_verified = self.is_access_key_verified;
 
     let created = users::Model::create_with_password(

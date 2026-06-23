@@ -40,14 +40,6 @@ impl<'user, 'db> AuthStatement<'user, 'db> {
     self.auth_context.complete()
   }
 
-  pub fn non_authenticated_user(self) -> Self {
-    self.check(|_| true, None)
-  }
-
-  pub fn authenticated_user(self) -> Self {
-    self.check(|_| true, Some(AuthenticationError::InvalidToken.into()))
-  }
-
   pub async fn user_owning_resource<T: Resource>(self, resource: &T) -> Self {
     let is_owned = resource
       .is_owned_by_user(self.auth_context.current_user.id, self.db)

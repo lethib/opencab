@@ -1,5 +1,6 @@
 use sea_orm::{
   prelude::*, ActiveValue, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter,
+  TransactionTrait,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -140,12 +141,14 @@ impl Model {
   ///
   /// When could not save the user into the DB
   pub async fn create_with_password(
-    db: &impl ConnectionTrait,
+    db: &(impl ConnectionTrait + TransactionTrait),
     params: &RegisterParams,
   ) -> ModelResult<Self> {
+    let txn = db.begin().await?;
+
     if users::Entity::find()
       .filter(users::Column::Email.eq(&params.email))
-      .one(db)
+      .one(&txn)
       .await?
       .is_some()
     {
@@ -166,8 +169,10 @@ impl Model {
       access_key: ActiveValue::set(Some(access_key)),
       ..Default::default()
     }
-    .insert(db)
+    .insert(&txn)
     .await?;
+
+    txn.commit().await?;
 
     Ok(user)
   }

@@ -1,7 +1,6 @@
 pub mod auth;
 pub mod config;
 pub mod controllers;
-pub mod db;
 pub mod middleware;
 pub mod models;
 pub mod router;

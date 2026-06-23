@@ -160,17 +160,6 @@ pub async fn generate_invoice(
   )
   .await?;
 
-  let medical_appointment_params = CreateMedicalAppointmentParams {
-    user_id: ctx.current_user.id,
-    patient_id,
-    practitioner_office_id: params.invoice_params.office_id,
-    payment_method: params.payment_method.clone(),
-    date: NaiveDate::parse_from_str(&params.invoice_params.date, "%Y-%m-%d")?,
-    price_in_cents: (params.invoice_params.amount * 100.0).round() as i32,
-  };
-
-  MedicalAppointments::create(&ctx.db, &medical_appointment_params).await?;
-
   let user_bi = ctx.current_user.business_information(&ctx.db).await?;
 
   if params.should_be_sent_by_email {
@@ -182,6 +171,17 @@ pub async fn generate_invoice(
       return Err(ApplicationError::UnprocessableEntity.into());
     }
   }
+
+  let medical_appointment_params = CreateMedicalAppointmentParams {
+    user_id: ctx.current_user.id,
+    patient_id,
+    practitioner_office_id: params.invoice_params.office_id,
+    payment_method: params.payment_method.clone(),
+    date: NaiveDate::parse_from_str(&params.invoice_params.date, "%Y-%m-%d")?,
+    price_in_cents: (params.invoice_params.amount * 100.0).round() as i32,
+  };
+
+  MedicalAppointments::create(&ctx.db, &medical_appointment_params).await?;
 
   Ok(Json(serde_json::json!({
     "pdf_data": base64::prelude::BASE64_STANDARD.encode(&generated_invoice.data),
