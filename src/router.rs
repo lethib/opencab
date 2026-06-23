@@ -1,7 +1,6 @@
-use crate::{config::Config, controllers, middleware::auth::authenticated_request};
+use crate::{controllers, middleware::context::AppState};
 use axum::{
   http::{HeaderName, Method},
-  middleware,
   routing::{delete, get, post, put},
   Router,
 };
@@ -11,7 +10,7 @@ use tower_http::{
   trace::TraceLayer,
 };
 
-pub fn create_router() -> Router<()> {
+pub fn create_router(state: AppState) -> Router {
   // Public routes (no authentication required)
   let public_routes = Router::new()
     .route("/api/auth/register", post(controllers::auth::register))
@@ -110,12 +109,10 @@ pub fn create_router() -> Router<()> {
     .route(
       "/api/companies/{company_id}/_generate_invoice",
       post(controllers::practitioner_companies::generate_invoice),
-    )
-    // Apply auth middleware to all protected routes
-    .layer(middleware::from_fn(authenticated_request));
+    );
 
   // Build CORS layer from configuration
-  let cors_config = &Config::get().cors;
+  let cors_config = &state.config.cors;
   let mut cors_layer = CorsLayer::new();
 
   if cors_config.allow_origins.contains(&"*".to_string()) {
@@ -154,4 +151,5 @@ pub fn create_router() -> Router<()> {
     // HTTP request tracing middleware
     .layer(TraceLayer::new_for_http())
     .layer(cors_layer)
+    .with_state(state)
 }

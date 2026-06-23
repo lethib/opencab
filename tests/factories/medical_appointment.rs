@@ -6,7 +6,7 @@ use opencab::models::{
     Model as AppointmentModel,
   },
 };
-use sea_orm::DatabaseConnection;
+use sea_orm::ConnectionTrait;
 
 pub struct AppointmentFactory {
   date: NaiveDate,
@@ -46,7 +46,7 @@ impl AppointmentFactory {
 
   pub async fn create(
     self,
-    db: &DatabaseConnection,
+    db: &impl ConnectionTrait,
     user_id: i32,
     patient_id: i32,
     office_id: i32,

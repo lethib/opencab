@@ -1,14 +1,11 @@
-use sea_orm::DatabaseConnection;
+use sea_orm::{ConnectionTrait, DatabaseConnection};
 
 use crate::{
   auth::{
     jwt::{JwtService, TOKEN_TYPE_AUTH},
     statement::AuthStatement,
   },
-  config::Config,
-  db::DB,
   models::{
-    _entities::user_business_informations,
     my_errors::{
       authentication_error::AuthenticationError, unexpected_error::UnexpectedError, MyErrors,
     },
@@ -16,32 +13,25 @@ use crate::{
   },
 };
 
-pub struct AuthContext {
-  pub current_user: Option<(users::Model, Option<user_business_informations::Model>)>,
+pub struct AuthContext<'user> {
+  pub current_user: &'user users::Model,
   authorized: bool,
   complete: bool,
   pub error: Option<MyErrors>,
 }
 
-impl AuthContext {
-  pub async fn new(auth_header: Option<&str>) -> Self {
-    let (current_user, error) = match auth_header {
-      Some(header) => {
-        Self::validate_auth_header(header, DB::get(), &Config::get().jwt.secret).await
-      }
-      None => (None, None),
-    };
-
+impl<'user> AuthContext<'user> {
+  pub fn for_user(user: &'user users::Model) -> Self {
     Self {
-      current_user,
+      current_user: user,
       authorized: false,
       complete: false,
-      error: error.map(|e| e.into()),
+      error: None,
     }
   }
 
-  pub fn authorize(self) -> AuthStatement {
-    AuthStatement::new(self)
+  pub fn authorize<'db>(self, db: &'db DatabaseConnection) -> AuthStatement<'user, 'db> {
+    AuthStatement::new(self, db)
   }
 
   pub(super) fn authorized(&mut self) -> Result<(), MyErrors> {
@@ -75,14 +65,11 @@ impl AuthContext {
     Ok(())
   }
 
-  pub(super) async fn validate_auth_header(
+  pub async fn validate_auth_header(
     auth_header: &str,
-    db: &DatabaseConnection,
+    db: &impl ConnectionTrait,
     jwt_secret: &str,
-  ) -> (
-    Option<(users::Model, Option<user_business_informations::Model>)>,
-    Option<AuthenticationError>,
-  ) {
+  ) -> (Option<users::Model>, Option<AuthenticationError>) {
     let token = match auth_header.strip_prefix("Bearer ") {
       Some(t) => t,
       None => return (None, Some(AuthenticationError::MissingToken)),
@@ -103,7 +90,7 @@ impl AuthContext {
       Err(_) => return (None, Some(AuthenticationError::InvalidClaims)),
     };
 
-    if !user_result.0.is_access_key_verified {
+    if !user_result.is_access_key_verified {
       return (None, Some(AuthenticationError::AccessKeyNotVerified));
     }
 
@@ -120,14 +107,28 @@ impl AuthContext {
 
 #[cfg(test)]
 mod tests {
-  use serial_test::serial;
+  use std::sync::LazyLock;
   use uuid::Uuid;
 
   use super::*;
   use crate::auth::jwt::{JwtService, TOKEN_TYPE_AUTH, TOKEN_TYPE_PASSWORD_RESET};
-  use crate::auth::testing::{setup_db, user_factory::UserFactory};
+  use crate::auth::testing::{setup_tx, user_factory::UserFactory};
 
   const TEST_SECRET: &str = "test_secret_for_auth_context";
+
+  static DUMMY_USER: LazyLock<users::Model> = LazyLock::new(|| users::Model {
+    id: 0,
+    pid: Uuid::nil(),
+    email: "dummy@test.com".to_string(),
+    password: "hash".to_string(),
+    phone_number: "0000000000".to_string(),
+    first_name: "Dummy".to_string(),
+    last_name: "User".to_string(),
+    access_key: None,
+    is_access_key_verified: false,
+    created_at: chrono::DateTime::parse_from_rfc3339("2020-01-01T00:00:00+00:00").unwrap(),
+    updated_at: chrono::DateTime::parse_from_rfc3339("2020-01-01T00:00:00+00:00").unwrap(),
+  });
 
   fn a_token(pid: &str, token_type: &str) -> String {
     JwtService::new(TEST_SECRET)
@@ -135,39 +136,14 @@ mod tests {
       .unwrap()
   }
 
-  fn a_fresh_context() -> AuthContext {
-    AuthContext {
-      current_user: None,
-      authorized: false,
-      complete: false,
-      error: None,
-    }
+  fn a_fresh_context() -> AuthContext<'static> {
+    AuthContext::for_user(&DUMMY_USER)
   }
 
-  fn a_completed_context() -> AuthContext {
+  fn a_completed_context() -> AuthContext<'static> {
     AuthContext {
       complete: true,
       ..a_fresh_context()
-    }
-  }
-
-  // =========================================================================
-
-  mod new {
-    use super::*;
-
-    mod when_no_auth_header_is_provided {
-      use super::*;
-
-      #[tokio::test]
-      async fn then_context_has_no_user_and_no_error() {
-        // When
-        let ctx = AuthContext::new(None).await;
-
-        // Then
-        assert!(ctx.current_user.is_none());
-        assert!(ctx.error.is_none());
-      }
     }
   }
 
@@ -365,10 +341,9 @@ mod tests {
       use super::*;
 
       #[tokio::test]
-      #[serial]
       async fn then_a_missing_token_error_is_returned() {
         // Given
-        let db = setup_db().await;
+        let db = setup_tx().await;
         let header = "Basic c29tZS1jcmVkZW50aWFscw==";
 
         // When
@@ -384,10 +359,9 @@ mod tests {
       use super::*;
 
       #[tokio::test]
-      #[serial]
       async fn then_an_invalid_token_error_is_returned() {
         // Given
-        let db = setup_db().await;
+        let db = setup_tx().await;
         let header = "Bearer not.a.real.jwt";
 
         // When
@@ -403,10 +377,9 @@ mod tests {
       use super::*;
 
       #[tokio::test]
-      #[serial]
       async fn then_an_invalid_token_error_is_returned() {
         // Given
-        let db = setup_db().await;
+        let db = setup_tx().await;
         let pid = Uuid::new_v4().to_string();
         let token = a_token(&pid, TOKEN_TYPE_PASSWORD_RESET);
         let header = format!("Bearer {token}");
@@ -424,10 +397,9 @@ mod tests {
       use super::*;
 
       #[tokio::test]
-      #[serial]
       async fn then_an_invalid_claims_error_is_returned() {
-        // Given — DB is empty after setup_db() truncation
-        let db = setup_db().await;
+        // Given — empty transaction, no users exist
+        let db = setup_tx().await;
         let pid = Uuid::new_v4().to_string();
         let token = a_token(&pid, TOKEN_TYPE_AUTH);
         let header = format!("Bearer {token}");
@@ -445,10 +417,9 @@ mod tests {
       use super::*;
 
       #[tokio::test]
-      #[serial]
       async fn then_an_access_key_not_verified_error_is_returned() {
         // Given
-        let db = setup_db().await;
+        let db = setup_tx().await;
         let user = UserFactory::new().unverified().create(&db).await;
         let token = a_token(&user.pid.to_string(), TOKEN_TYPE_AUTH);
         let header = format!("Bearer {token}");
@@ -470,10 +441,9 @@ mod tests {
       use super::*;
 
       #[tokio::test]
-      #[serial]
       async fn then_the_user_is_returned_with_no_error() {
         // Given
-        let db = setup_db().await;
+        let db = setup_tx().await;
         let user = UserFactory::new().create(&db).await;
         let token = a_token(&user.pid.to_string(), TOKEN_TYPE_AUTH);
         let header = format!("Bearer {token}");
@@ -484,7 +454,7 @@ mod tests {
 
         // Then
         assert!(error.is_none());
-        let (returned_user, _) = returned_user.expect("should return the authenticated user");
+        let returned_user = returned_user.expect("should return the authenticated user");
         assert_eq!(returned_user.pid, user.pid);
       }
     }

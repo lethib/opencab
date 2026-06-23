@@ -1,7 +1,7 @@
 use opencab::models::patients::{
   ActiveModel as PatientActiveModel, CreatePatientParams, Model as PatientModel,
 };
-use sea_orm::DatabaseConnection;
+use sea_orm::ConnectionTrait;
 
 pub struct PatientFactory {
   first_name: String,
@@ -42,7 +42,7 @@ impl PatientFactory {
     self
   }
 
-  pub async fn create(self, db: &DatabaseConnection, user_id: i32) -> PatientModel {
+  pub async fn create(self, db: &impl ConnectionTrait, user_id: i32) -> PatientModel {
     PatientActiveModel::create(
       db,
       &CreatePatientParams {

@@ -7,10 +7,9 @@ use sea_orm::ActiveValue::Set;
 use sea_orm::{
   prelude::Decimal, ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter,
 };
-use serial_test::serial;
 use std::str::FromStr;
 
-use crate::common::setup_db;
+use crate::common::setup_tx;
 use crate::factories::{office::OfficeFactory, user::UserFactory};
 
 // ============================================================
@@ -19,10 +18,9 @@ mod create_an_office_linked_to_a_practitioner {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_it_is_linked_with_the_correct_revenue_share() {
     // Given
-    let db = setup_db().await;
+    let db = setup_tx().await;
     let user = UserFactory::new().create(&db).await;
 
     // When
@@ -43,6 +41,8 @@ mod create_an_office_linked_to_a_practitioner {
       link.revenue_share_percentage,
       Decimal::from_str("30").unwrap()
     );
+
+    db.rollback().await.unwrap();
   }
 }
 
@@ -52,10 +52,9 @@ mod create_an_office_with_an_invalid_zip_code {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_the_creation_fails_with_unprocessable_entity() {
     // Given
-    let db = setup_db().await;
+    let db = setup_tx().await;
 
     // When
     let result = practitioner_offices::ActiveModel::create(
@@ -72,6 +71,8 @@ mod create_an_office_with_an_invalid_zip_code {
     // Then
     let err = result.expect_err("creation should have failed");
     assert_eq!(err.code, StatusCode::UNPROCESSABLE_ENTITY);
+
+    db.rollback().await.unwrap();
   }
 }
 
@@ -81,10 +82,9 @@ mod update_an_office_revenue_share {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_the_new_revenue_share_is_saved() {
     // Given
-    let db = setup_db().await;
+    let db = setup_tx().await;
     let user = UserFactory::new().create(&db).await;
     let office = OfficeFactory::new()
       .name("Cabinet du Nord")
@@ -115,6 +115,8 @@ mod update_an_office_revenue_share {
       updated_link.revenue_share_percentage,
       Decimal::from_str("45").unwrap()
     );
+
+    db.rollback().await.unwrap();
   }
 }
 
@@ -124,10 +126,9 @@ mod update_an_office_name {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_the_new_name_is_saved() {
     // Given
-    let db = setup_db().await;
+    let db = setup_tx().await;
     let user = UserFactory::new().create(&db).await;
     let office = OfficeFactory::new()
       .name("Old Name")
@@ -141,6 +142,8 @@ mod update_an_office_name {
 
     // Then
     assert_eq!(updated.name, "New Name");
+
+    db.rollback().await.unwrap();
   }
 }
 
@@ -150,10 +153,9 @@ mod update_an_office_name_with_extra_whitespace {
   use super::*;
 
   #[tokio::test]
-  #[serial]
   async fn then_the_name_is_trimmed() {
     // Given
-    let db = setup_db().await;
+    let db = setup_tx().await;
     let user = UserFactory::new().create(&db).await;
     let office = OfficeFactory::new()
       .name("My Office")
@@ -167,5 +169,7 @@ mod update_an_office_name_with_extra_whitespace {
 
     // Then
     assert_eq!(updated.name, "Trimmed Name");
+
+    db.rollback().await.unwrap();
   }
 }

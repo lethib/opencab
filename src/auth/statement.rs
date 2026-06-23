@@ -1,3 +1,5 @@
+use sea_orm::DatabaseConnection;
+
 use crate::{
   auth::{context::AuthContext, resource::Resource},
   models::my_errors::{
@@ -5,17 +7,19 @@ use crate::{
   },
 };
 
-pub struct AuthStatement {
-  auth_context: AuthContext,
+pub struct AuthStatement<'user, 'db> {
+  auth_context: AuthContext<'user>,
+  db: &'db DatabaseConnection,
   is_empty: bool,
   ok_so_far: bool,
   error: Option<MyErrors>,
 }
 
-impl AuthStatement {
-  pub(super) fn new(auth_context: AuthContext) -> Self {
+impl<'user, 'db> AuthStatement<'user, 'db> {
+  pub(super) fn new(auth_context: AuthContext<'user>, db: &'db DatabaseConnection) -> Self {
     Self {
       auth_context,
+      db,
       is_empty: true,
       ok_so_far: true,
       error: None,
@@ -36,22 +40,10 @@ impl AuthStatement {
     self.auth_context.complete()
   }
 
-  pub fn non_authenticated_user(self) -> Self {
-    self.check(|_| true, None)
-  }
-
-  pub fn authenticated_user(self) -> Self {
-    self.check(
-      |s| s.auth_context.current_user.is_some(),
-      Some(AuthenticationError::InvalidToken.into()),
-    )
-  }
-
   pub async fn user_owning_resource<T: Resource>(self, resource: &T) -> Self {
-    let is_owned = match &self.auth_context.current_user {
-      Some(user) => resource.is_owned_by_user(user.0.id).await,
-      None => false,
-    };
+    let is_owned = resource
+      .is_owned_by_user(self.auth_context.current_user.id, self.db)
+      .await;
 
     self.check(
       |_| is_owned,

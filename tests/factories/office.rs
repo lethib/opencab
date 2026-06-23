@@ -5,7 +5,7 @@ use opencab::models::{
   },
   user_practitioner_offices::CreateLinkParams,
 };
-use sea_orm::{prelude::Decimal, DatabaseConnection};
+use sea_orm::{prelude::Decimal, ConnectionTrait};
 
 pub struct OfficeFactory {
   name: String,
@@ -35,7 +35,7 @@ impl OfficeFactory {
     self
   }
 
-  pub async fn create(self, db: &DatabaseConnection) -> OfficeModel {
+  pub async fn create(self, db: &impl ConnectionTrait) -> OfficeModel {
     OfficeActiveModel::create(
       db,
       &PractitionerOfficeParams {
@@ -51,7 +51,7 @@ impl OfficeFactory {
 
   pub async fn create_for_user(
     self,
-    db: &DatabaseConnection,
+    db: &impl ConnectionTrait,
     user_id: i32,
     revenue_share: i64,
   ) -> OfficeModel {

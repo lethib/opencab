@@ -1,5 +1,3 @@
-use std::sync::OnceLock;
-
 use config::{Config as ConfigLoader, ConfigError, Environment, File};
 use serde::Deserialize;
 
@@ -96,15 +94,7 @@ fn default_cors_allow_methods() -> Vec<String> {
   ]
 }
 
-static LOCK: OnceLock<Config> = OnceLock::new();
-
 impl Config {
-  pub fn init(config: Config) {
-    let _ = LOCK.set(config);
-  }
-  pub fn get() -> &'static Self {
-    LOCK.get().expect("Config not initialized")
-  }
   /// Load configuration from a YAML file based on the environment
   /// Environment can be: "development", "production", or "test"
   pub fn load(environment: &str) -> Result<Self, ConfigError> {

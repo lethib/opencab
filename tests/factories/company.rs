@@ -1,5 +1,5 @@
 use opencab::models::{_entities::practitioner_companies, practitioner_companies::CompanyParams};
-use sea_orm::DatabaseConnection;
+use sea_orm::ConnectionTrait;
 
 pub struct CompanyFactory {
   name: String,
@@ -24,7 +24,7 @@ impl CompanyFactory {
 
   pub async fn create_for_user(
     self,
-    db: &DatabaseConnection,
+    db: &impl ConnectionTrait,
     user_id: i32,
   ) -> practitioner_companies::Model {
     practitioner_companies::ActiveModel::create(

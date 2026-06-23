@@ -1,17 +1,14 @@
 use sea_orm::{
-  prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, EntityTrait, IntoActiveModel,
-  QueryFilter, TransactionTrait,
+  prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection,
+  EntityTrait, IntoActiveModel, QueryFilter, TransactionTrait,
 };
 
-use crate::{
-  db::DB,
-  models::{
-    _entities::{practitioner_offices, user_practitioner_offices},
-    my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
-    practitioner_offices::PractitionerOfficeParams,
-    user_practitioner_offices::CreateLinkParams,
-    users::users,
-  },
+use crate::models::{
+  _entities::{practitioner_offices, user_practitioner_offices},
+  my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
+  practitioner_offices::PractitionerOfficeParams,
+  user_practitioner_offices::CreateLinkParams,
+  users::users,
 };
 
 pub async fn update(
@@ -19,6 +16,7 @@ pub async fn update(
   params: &PractitionerOfficeParams,
   linked_practitioner: &users::Model,
   revenue_share_percentage: Decimal,
+  db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
   let office_id = office
     .id
@@ -29,7 +27,7 @@ pub async fn update(
   let mut user_practitioner_office = user_practitioner_offices::Entity::find()
     .filter(user_practitioner_offices::Column::PractitionerOfficeId.eq(office_id))
     .filter(user_practitioner_offices::Column::UserId.eq(linked_practitioner.id))
-    .one(DB::get())
+    .one(db)
     .await?
     .ok_or(ApplicationError::NotFound)?
     .into_active_model();
@@ -41,7 +39,7 @@ pub async fn update(
 
   user_practitioner_office.revenue_share_percentage = Set(revenue_share_percentage);
 
-  let db_transaction = DB::get().begin().await?;
+  let db_transaction = db.begin().await?;
 
   office.update(&db_transaction).await?;
   user_practitioner_office.update(&db_transaction).await?;
@@ -55,8 +53,9 @@ pub async fn create(
   params: &PractitionerOfficeParams,
   linked_practitioner: &users::Model,
   revenue_share_percentage: Decimal,
+  db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
-  let db_transaction = DB::get().begin().await?;
+  let db_transaction = db.begin().await?;
 
   let created_practitioner_office =
     practitioner_offices::ActiveModel::create(&db_transaction, params).await?;

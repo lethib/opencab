@@ -111,14 +111,10 @@ impl Model {
   /// # Errors
   ///
   /// When could not find user  or DB query error
-  pub async fn find_by_pid(
-    db: &DatabaseConnection,
-    pid: &str,
-  ) -> ModelResult<(Self, Option<user_business_informations::Model>)> {
+  pub async fn find_by_pid(db: &impl ConnectionTrait, pid: &str) -> ModelResult<Self> {
     let parse_uuid = Uuid::parse_str(pid).map_err(|e| ModelError::Any(e.into()))?;
     let user = users::Entity::find()
       .filter(users::Column::Pid.eq(parse_uuid))
-      .find_also_related(UserBusinessInformations)
       .one(db)
       .await?;
     user.ok_or_else(|| ModelError::EntityNotFound)
@@ -141,7 +137,7 @@ impl Model {
   ///
   /// When could not save the user into the DB
   pub async fn create_with_password(
-    db: &DatabaseConnection,
+    db: &(impl ConnectionTrait + TransactionTrait),
     params: &RegisterParams,
   ) -> ModelResult<Self> {
     let txn = db.begin().await?;

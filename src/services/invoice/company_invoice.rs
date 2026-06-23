@@ -1,5 +1,6 @@
+use sea_orm::DatabaseConnection;
+
 use crate::{
-  db::DB,
   models::{_entities::company_interventions, my_errors::MyErrors, practitioner_offices, users},
   services::{
     invoice::{
@@ -14,9 +15,10 @@ pub async fn generate(
   company_intervention: &company_interventions::Model,
   current_user: &users::Model,
   practitioner_office: practitioner_offices::Model,
+  db: &DatabaseConnection,
 ) -> Result<Invoice, MyErrors> {
-  let business_info = current_user.business_information(DB::get()).await?;
-  let company = company_intervention.company(DB::get()).await?;
+  let business_info = current_user.business_information(db).await?;
+  let company = company_intervention.company(db).await?;
 
   let emission_date = chrono::Utc::now().date_naive();
 

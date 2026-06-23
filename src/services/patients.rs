@@ -1,19 +1,19 @@
-use crate::db::DB;
 use crate::models::_entities::patients;
 use crate::models::{
   my_errors::MyErrors,
   patients::{CreatePatientParams, Model as PatientModel},
   users,
 };
-use sea_orm::{ColumnTrait, Condition, QueryFilter};
+use sea_orm::{ColumnTrait, Condition, DatabaseConnection, QueryFilter};
 use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 
 pub async fn create(
   patient_params: &CreatePatientParams,
   linked_to_user: &users::Model,
+  db: &DatabaseConnection,
 ) -> Result<PatientModel, MyErrors> {
   let created_patient =
-    patients::ActiveModel::create(DB::get(), patient_params, linked_to_user.id).await?;
+    patients::ActiveModel::create(db, patient_params, linked_to_user.id).await?;
 
   Ok(created_patient)
 }
@@ -21,8 +21,9 @@ pub async fn create(
 pub async fn update(
   patient: &patients::Model,
   patient_params: &CreatePatientParams,
+  db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
-  patients::ActiveModel::update(DB::get(), patient.id, patient_params).await?;
+  patients::ActiveModel::update(db, patient.id, patient_params).await?;
 
   Ok(())
 }
@@ -31,9 +32,8 @@ pub async fn search_paginated(
   query: &str,
   page: u64,
   user: &users::Model,
+  db: &DatabaseConnection,
 ) -> Result<(Vec<PatientModel>, u64), MyErrors> {
-  let db = DB::get();
-
   // Build search condition for first_name and last_name (case-insensitive)
   let search_condition = Condition::any()
     .add(sea_orm::sea_query::Expr::cust_with_values(
