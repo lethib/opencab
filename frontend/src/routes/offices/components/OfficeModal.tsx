@@ -111,7 +111,7 @@ export const OfficeModal = ({
         setIsOpen(false);
         officeForm.reset();
       })
-      .catch((error) => alert((error as Error).message));
+      .catch(() => {});
   });
 
   const { revenue_share_percentage } = officeForm.watch();

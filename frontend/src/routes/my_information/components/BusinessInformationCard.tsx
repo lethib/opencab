@@ -4,6 +4,7 @@ import { Building2, FileText, Users } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import z from "zod";
 import { queryClient } from "@/api/api";
 import { APIHooks } from "@/api/hooks";
@@ -61,7 +62,7 @@ export const BusinessInformationCard = () => {
   const onSubmit = businessForm.handleSubmit(async (values) => {
     saveBusinessInformationMutation.mutateAsync(values).then(() => {
       queryClient.invalidateQueries({ queryKey: ["/auth/me"] });
-      alert(t("businessInfo.successMessage"));
+      toast.success(t("businessInfo.successMessage"));
       navigate({ to: "/patients" });
     });
   });

@@ -127,7 +127,7 @@ export const PatientModal = ({
         });
         handleOnClose();
       })
-      .catch((error) => alert(error.message));
+      .catch(() => {});
   });
 
   const handleSSNChange = (e: ChangeEvent<HTMLInputElement>) => {

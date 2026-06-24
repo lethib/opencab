@@ -59,7 +59,6 @@ function Login() {
           loginForm.setError("password", { message: "invalid credentials" });
           return;
         }
-        alert(`${t("auth.login.error")}: ${error.message}`);
       },
     });
   };

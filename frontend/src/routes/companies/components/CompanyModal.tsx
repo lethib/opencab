@@ -105,7 +105,7 @@ export const CompanyModal = ({ open, setIsOpen, company }: Props) => {
         invalidateQueries();
         handleClose();
       })
-      .catch((error) => alert((error as Error).message));
+      .catch(() => {});
   });
 
   return (
