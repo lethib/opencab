@@ -8,7 +8,7 @@ pub struct UnexpectedError {
 }
 
 #[derive(Debug)]
-pub enum Kind {
+enum Kind {
   ShouldNotHappen,
   Custom(Box<dyn Error + Send + Sync>),
 }
