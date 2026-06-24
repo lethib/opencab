@@ -32,9 +32,9 @@ pub async fn process_accountability_generation(
   db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
   let start_date =
-    NaiveDate::from_ymd_opt(args.year as i32, 1, 1).ok_or(UnexpectedError::ShouldNotHappen)?;
+    NaiveDate::from_ymd_opt(args.year as i32, 1, 1).ok_or(UnexpectedError::should_not_happen())?;
   let end_date =
-    NaiveDate::from_ymd_opt(args.year as i32, 12, 31).ok_or(UnexpectedError::ShouldNotHappen)?;
+    NaiveDate::from_ymd_opt(args.year as i32, 12, 31).ok_or(UnexpectedError::should_not_happen())?;
 
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
     .extract(db, start_date, end_date)
@@ -72,7 +72,7 @@ async fn send_accountability_by_mail(
   WorkerTransmitter::get()
     .send(WorkerJob::Email(email_args))
     .await
-    .map_err(|_| UnexpectedError::ShouldNotHappen)?;
+    .map_err(|_| UnexpectedError::should_not_happen())?;
 
   Ok(())
 }
@@ -125,7 +125,7 @@ async fn send_appointment_export_by_mail(
   WorkerTransmitter::get()
     .send(WorkerJob::Email(email_args))
     .await
-    .map_err(|_| UnexpectedError::ShouldNotHappen)?;
+    .map_err(|_| UnexpectedError::should_not_happen())?;
 
   Ok(())
 }

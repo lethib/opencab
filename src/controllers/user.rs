@@ -96,7 +96,7 @@ pub async fn get_signature_url(ctx: Ctx) -> Result<String, MyErrors> {
   let user_bi = ctx.current_user.business_information(&ctx.db).await?;
   let signature_filename = user_bi
     .signature_file_name
-    .ok_or(UnexpectedError::ShouldNotHappen)?;
+    .ok_or(UnexpectedError::should_not_happen())?;
 
   Ok(storage.signature_url(&signature_filename))
 }
@@ -109,7 +109,7 @@ pub async fn upload_signature(
     .next_field()
     .await
     .map_err(ApplicationError::bad_request)?
-    .ok_or(UnexpectedError::ShouldNotHappen)?;
+    .ok_or(UnexpectedError::should_not_happen())?;
 
   let field_name = field
     .name()

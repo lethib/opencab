@@ -203,7 +203,7 @@ pub async fn get_medical_appointments(
     .map(|appointment| {
       Ok(MedicalAppointmentResponse::new(
         &appointment.0,
-        &appointment.1.ok_or(UnexpectedError::ShouldNotHappen)?,
+        &appointment.1.ok_or(UnexpectedError::should_not_happen())?,
       ))
     })
     .collect::<Result<Vec<_>, MyErrors>>()?;

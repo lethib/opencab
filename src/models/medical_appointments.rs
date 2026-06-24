@@ -53,7 +53,7 @@ impl Model {
       .find_related(practitioner_offices::Entity)
       .one(db)
       .await?
-      .ok_or(UnexpectedError::ShouldNotHappen.into())
+      .ok_or(UnexpectedError::should_not_happen().into())
   }
 }
 

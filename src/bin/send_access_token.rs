@@ -20,7 +20,7 @@ async fn main() -> Result<(), MyErrors> {
   let args: Vec<String> = env::args().collect();
   let user_id: i32 = args
     .get(1)
-    .ok_or(UnexpectedError::new("user_id must be provided".to_string()))?
+    .ok_or(UnexpectedError::new("user_id must be provided"))?
     .parse()?;
 
   let db = Database::connect(&config.database.url).await?;
@@ -28,7 +28,7 @@ async fn main() -> Result<(), MyErrors> {
   let user_to_invite = Users::find_by_id(user_id)
     .one(&db)
     .await?
-    .ok_or(UnexpectedError::new("user_not_found".to_string()))?;
+    .ok_or(UnexpectedError::new("user_not_found"))?;
 
   match user_to_invite.access_key {
     Some(access_key) => {

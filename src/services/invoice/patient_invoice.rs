@@ -42,7 +42,7 @@ pub async fn generate(
   let practitioner_office = practitioner_offices::Entity::find_by_id(params.office_id)
     .one(db)
     .await?
-    .ok_or(UnexpectedError::ShouldNotHappen)?;
+    .ok_or(UnexpectedError::should_not_happen())?;
 
   let business_info = current_user.business_information(db).await?;
   let decrypted_patient_ssn = patient.decrypt_ssn()?;

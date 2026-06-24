@@ -53,7 +53,7 @@ pub async fn send_patient_invoice(
   WorkerTransmitter::get()
     .send(WorkerJob::Email(args))
     .await
-    .map_err(|_| UnexpectedError::ShouldNotHappen)?;
+    .map_err(|_| UnexpectedError::should_not_happen())?;
 
   Ok(())
 }

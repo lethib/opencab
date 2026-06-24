@@ -22,7 +22,7 @@ pub async fn update(
     .id
     .clone()
     .take()
-    .ok_or(UnexpectedError::ShouldNotHappen)?;
+    .ok_or(UnexpectedError::should_not_happen())?;
 
   let mut user_practitioner_office = user_practitioner_offices::Entity::find()
     .filter(user_practitioner_offices::Column::PractitionerOfficeId.eq(office_id))

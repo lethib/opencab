@@ -42,7 +42,7 @@ impl company_interventions::ActiveModel {
     let unit_price_in_cents = (params.unit_price * 100.0)
       .round()
       .to_i32()
-      .ok_or(UnexpectedError::ShouldNotHappen)?;
+      .ok_or(UnexpectedError::should_not_happen())?;
 
     Ok(
       Self {
@@ -70,7 +70,7 @@ impl company_interventions::ActiveModel {
     let unit_price_in_cents = (params.unit_price * 100.0)
       .round()
       .to_i32()
-      .ok_or(UnexpectedError::ShouldNotHappen)?;
+      .ok_or(UnexpectedError::should_not_happen())?;
 
     self.quantity = ActiveValue::Set(params.quantity);
     self.unit_price_in_cents = ActiveValue::Set(unit_price_in_cents);
@@ -85,7 +85,9 @@ impl company_interventions::ActiveModel {
 }
 
 fn validate_vat_values(vat_rate: &Decimal) -> Result<(), MyErrors> {
-  let vat_rate = vat_rate.to_f32().ok_or(UnexpectedError::ShouldNotHappen)?;
+  let vat_rate = vat_rate
+    .to_f32()
+    .ok_or(UnexpectedError::should_not_happen())?;
 
   if !ALLOWED_VAT_VALUES.contains(&vat_rate) {
     return Err(ApplicationError::unprocessable_entity("invalid_vat_values").into());

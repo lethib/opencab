@@ -40,7 +40,7 @@ impl MonthToString for u32 {
       10 => "Octobre",
       11 => "Novembre",
       12 => "Décembre",
-      _ => return Err(UnexpectedError::new("number_outside_months_range".to_string()).into()),
+      _ => return Err(UnexpectedError::new("number_outside_months_range").into()),
     };
 
     Ok(french_translation)
@@ -351,18 +351,16 @@ impl<'user> MedicalAppointmentExtractor<'user> {
     let results = appointments
       .into_iter()
       .map(|(appointment, patient, office)| -> Result<_, MyErrors> {
-        let office = office.ok_or(UnexpectedError::new("office_should_be_defined".to_string()))?;
+        let office = office.ok_or(UnexpectedError::new("office_should_be_defined"))?;
         let revenue_share_percentage =
           *revenue_share_by_office
             .get(&office.id)
             .ok_or(UnexpectedError::new(
-              "revenue_share_percentage_should_be_defined".to_string(),
+              "revenue_share_percentage_should_be_defined",
             ))?;
         Ok(MedicalAppointmentDetail {
           appointment,
-          patient: patient.ok_or(UnexpectedError::new(
-            "patient_should_be_defined".to_string(),
-          ))?,
+          patient: patient.ok_or(UnexpectedError::new("patient_should_be_defined"))?,
           office,
           revenue_share_percentage,
         })
