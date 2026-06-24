@@ -32,7 +32,7 @@ pub async fn get(ctx: Ctx, Path(patient_id): Path<i32>) -> Result<Json<PatientRe
   let patient = patients::Entity::find_by_id(patient_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -60,7 +60,7 @@ pub async fn update(
   let patient = patients::Entity::find_by_id(patient_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -77,7 +77,7 @@ pub async fn delete(ctx: Ctx, Path(patient_id): Path<i32>) -> Result<status::Sta
   let patient = patients::Entity::find_by_id(patient_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -135,7 +135,7 @@ pub async fn generate_invoice(
     .filter(patients::Column::UserId.eq(ctx.current_user.id))
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -144,11 +144,11 @@ pub async fn generate_invoice(
     .run_complete()?;
 
   if params.invoice_params.amount <= 0.0 {
-    return Err(ApplicationError::UnprocessableEntity.into());
+    return Err(ApplicationError::unprocessable_entity("amount_below_zero").into());
   }
 
   if params.invoice_params.amount > (i32::MAX as f32 / 100.0) {
-    return Err(ApplicationError::UnprocessableEntity.into());
+    return Err(ApplicationError::unprocessable_entity("max_amount_reached").into());
   }
 
   let generated_invoice = services::invoice::patient_invoice::generate(
@@ -167,7 +167,7 @@ pub async fn generate_invoice(
         .send_to(&email, &ctx.current_user, &user_bi.profession)
         .await?;
     } else {
-      return Err(ApplicationError::UnprocessableEntity.into());
+      return Err(ApplicationError::unprocessable_entity("cannot_send_email").into());
     }
   }
 

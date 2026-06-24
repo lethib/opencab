@@ -29,7 +29,7 @@ pub async fn update(
     .filter(user_practitioner_offices::Column::UserId.eq(linked_practitioner.id))
     .one(db)
     .await?
-    .ok_or(ApplicationError::NotFound)?
+    .ok_or(ApplicationError::not_found())?
     .into_active_model();
 
   office.name = Set(params.name.trim().to_string());

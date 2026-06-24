@@ -174,5 +174,5 @@ pub async fn check_access_key(
     return Ok(Json(serde_json::json!({ "token": token })));
   }
 
-  Err(ApplicationError::new("access_key_not_recognized").into())
+  Err(ApplicationError::bad_request("access_key_not_recognized").into())
 }

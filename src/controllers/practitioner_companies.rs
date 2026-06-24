@@ -42,7 +42,7 @@ pub async fn get(
   let company = practitioner_companies::Entity::find_by_id(company_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -70,7 +70,7 @@ pub async fn update(
   let company = practitioner_companies::Entity::find_by_id(company_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -90,7 +90,7 @@ pub async fn list_interventions(
   let company = practitioner_companies::Entity::find_by_id(company_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -115,7 +115,7 @@ pub async fn generate_invoice(
   let company = practitioner_companies::Entity::find_by_id(company_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -125,7 +125,7 @@ pub async fn generate_invoice(
 
   let issue_date = chrono::NaiveDate::parse_from_str(&params.invoice_date, "%Y-%m-%d")?;
   let vat_rate =
-    Decimal::from_str(&params.vat_rate).map_err(|_| ApplicationError::UnprocessableEntity)?;
+    Decimal::from_str(&params.vat_rate).map_err(ApplicationError::unprocessable_entity)?;
 
   let intervention_params = InterventionParams {
     quantity: params.quantity,
@@ -146,7 +146,7 @@ pub async fn generate_invoice(
   let practitioner_office = practitioner_offices::Entity::find_by_id(params.practitioner_office_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   let invoice = services::invoice::company_invoice::generate(
     &intervention,

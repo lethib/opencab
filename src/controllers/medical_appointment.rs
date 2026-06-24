@@ -30,7 +30,7 @@ pub async fn delete(
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -51,13 +51,13 @@ pub async fn generate_invoice(
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   let patient = patients::Entity::find_by_id(patient_id)
     .filter(patients::Column::UserId.eq(ctx.current_user.id))
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -89,7 +89,7 @@ pub async fn generate_invoice(
       .send_to(&email, &ctx.current_user, &business_info.profession)
       .await?;
   } else {
-    return Err(ApplicationError::new("no_email_set_on_patient").into());
+    return Err(ApplicationError::bad_request("no_email_set_on_patient").into());
   }
 
   Ok(StatusCode::NO_CONTENT)
@@ -104,7 +104,7 @@ pub async fn update(
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()

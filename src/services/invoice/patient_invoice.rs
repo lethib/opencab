@@ -60,12 +60,9 @@ pub async fn generate(
 
   let signature_data = match &storage_service {
     Some(service) => (service
-      .fetch_signature(
-        business_info
-          .signature_file_name
-          .as_ref()
-          .ok_or(ApplicationError::UnprocessableEntity)?,
-      )
+      .fetch_signature(business_info.signature_file_name.as_ref().ok_or(
+        ApplicationError::unprocessable_entity("no_signature_filename"),
+      )?)
       .await)
       .ok(),
     None => None,

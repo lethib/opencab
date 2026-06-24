@@ -4,7 +4,7 @@ use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection
 
 use crate::models::{
   _entities::{company_interventions, practitioner_companies, prelude},
-  my_errors::{application_error::ApplicationError, MyErrors},
+  my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
 };
 
 pub struct InterventionParams {
@@ -26,7 +26,7 @@ impl company_interventions::Model {
       .find_related(prelude::PractitionerCompanies)
       .one(db)
       .await?
-      .ok_or(ApplicationError::NotFound.into())
+      .ok_or(ApplicationError::not_found().into())
   }
 }
 
@@ -42,7 +42,7 @@ impl company_interventions::ActiveModel {
     let unit_price_in_cents = (params.unit_price * 100.0)
       .round()
       .to_i32()
-      .ok_or(ApplicationError::UnprocessableEntity)?;
+      .ok_or(UnexpectedError::ShouldNotHappen)?;
 
     Ok(
       Self {
@@ -70,7 +70,7 @@ impl company_interventions::ActiveModel {
     let unit_price_in_cents = (params.unit_price * 100.0)
       .round()
       .to_i32()
-      .ok_or(ApplicationError::UnprocessableEntity)?;
+      .ok_or(UnexpectedError::ShouldNotHappen)?;
 
     self.quantity = ActiveValue::Set(params.quantity);
     self.unit_price_in_cents = ActiveValue::Set(unit_price_in_cents);
@@ -85,12 +85,10 @@ impl company_interventions::ActiveModel {
 }
 
 fn validate_vat_values(vat_rate: &Decimal) -> Result<(), MyErrors> {
-  let vat_rate = vat_rate
-    .to_f32()
-    .ok_or(ApplicationError::UnprocessableEntity)?;
+  let vat_rate = vat_rate.to_f32().ok_or(UnexpectedError::ShouldNotHappen)?;
 
   if !ALLOWED_VAT_VALUES.contains(&vat_rate) {
-    return Err(ApplicationError::UnprocessableEntity.into());
+    return Err(ApplicationError::unprocessable_entity("invalid_vat_values").into());
   }
 
   Ok(())

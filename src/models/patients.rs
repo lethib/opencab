@@ -69,7 +69,7 @@ impl ActiveModel {
     linked_to_user_id: i32,
   ) -> Result<Model, MyErrors> {
     if !is_address_valid(&params.address_line_1, &params.address_zip_code) {
-      return Err(ApplicationError::UnprocessableEntity.into());
+      return Err(ApplicationError::unprocessable_entity("invalid_address").into());
     }
 
     let (ssn_encrypted, ssn_hashed) = match &params.ssn {
@@ -104,11 +104,11 @@ impl ActiveModel {
     let mut patient = Entity::find_by_id(patient_id)
       .one(db)
       .await?
-      .ok_or(ApplicationError::NotFound)?
+      .ok_or(ApplicationError::not_found())?
       .into_active_model();
 
     if !is_address_valid(&params.address_line_1, &params.address_zip_code) {
-      return Err(ApplicationError::UnprocessableEntity.into());
+      return Err(ApplicationError::unprocessable_entity("invalid_address").into());
     }
 
     let (ssn_encrypted, ssn_hashed) = match &params.ssn {
