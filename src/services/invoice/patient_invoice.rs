@@ -42,7 +42,7 @@ pub async fn generate(
   let practitioner_office = practitioner_offices::Entity::find_by_id(params.office_id)
     .one(db)
     .await?
-    .ok_or(UnexpectedError::ShouldNotHappen)?;
+    .ok_or(UnexpectedError::should_not_happen())?;
 
   let business_info = current_user.business_information(db).await?;
   let decrypted_patient_ssn = patient.decrypt_ssn()?;
@@ -60,12 +60,9 @@ pub async fn generate(
 
   let signature_data = match &storage_service {
     Some(service) => (service
-      .fetch_signature(
-        business_info
-          .signature_file_name
-          .as_ref()
-          .ok_or(ApplicationError::UnprocessableEntity)?,
-      )
+      .fetch_signature(business_info.signature_file_name.as_ref().ok_or(
+        ApplicationError::unprocessable_entity("no_signature_filename"),
+      )?)
       .await)
       .ok(),
     None => None,

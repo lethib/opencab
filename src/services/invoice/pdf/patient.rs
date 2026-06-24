@@ -55,7 +55,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::HelveticaBold, 20.0)
       .at(mm(60.0), self.y_position)
       .write(title)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self.y_position -= mm(30.0);
 
     self.build_patient_information()?;
@@ -81,7 +81,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::HelveticaBold, 14.0)
       .at(self.margin, self.y_position)
       .write(&full_name)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self.y_position -= mm(12.0);
 
     // Professional numbers with consistent formatting
@@ -92,7 +92,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
         .set_font(Font::Helvetica, 10.0)
         .at(self.margin, self.y_position)
         .write(&format!("N° Adeli : {}", adeli))
-        .map_err(|e| UnexpectedError::new(e.to_string()))?;
+        .map_err(UnexpectedError::new)?;
       self.y_position -= mm(5.0);
     }
 
@@ -102,7 +102,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 10.0)
       .at(self.margin, self.y_position)
       .write(&format!("N°RPPS : {}", self.args.business_info.rpps_number))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self.y_position -= mm(5.0);
 
     self
@@ -114,7 +114,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
         "N°SIRET : {}",
         self.args.business_info.siret_number
       ))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self.y_position -= mm(12.0);
 
     // Address
@@ -124,7 +124,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 10.0)
       .at(self.margin, self.y_position)
       .write(&self.args.office.address_line_1)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self.y_position -= mm(5.0);
 
     self
@@ -136,7 +136,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
         "{} {}",
         self.args.office.address_zip_code, self.args.office.address_city,
       ))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self.y_position -= mm(8.0);
 
     // Contact info
@@ -149,7 +149,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
         "Tel : {}",
         &format_french_phone_number(&self.args.user.phone_number)
       ))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self.y_position -= mm(8.0);
 
     self
@@ -158,7 +158,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 10.0)
       .at(self.margin, self.y_position)
       .write(&self.args.user.email)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     Ok(())
   }
 
@@ -175,7 +175,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 11.0)
       .at(self.margin, self.y_position)
       .write(&full_text)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // Draw underline only for "Reçu de :"
     let underline_y = self.y_position - mm(1.0);
@@ -199,7 +199,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
         .set_font(Font::Helvetica, 11.0)
         .at(self.margin, self.y_position)
         .write(&format!("Numéro de sécurité sociale : {}", patient_ssn))
-        .map_err(|e| UnexpectedError::new(e.to_string()))?;
+        .map_err(UnexpectedError::new)?;
 
       // Draw box around SSN field
       let box_x = self.margin - mm(2.0);
@@ -232,7 +232,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 11.0)
       .at(self.margin, self.y_position)
       .write(&address_text)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // Draw box around address field
     let addr_box_x = self.margin - mm(2.0);
@@ -259,7 +259,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 11.0)
       .at(self.margin, self.y_position)
       .write(&full_text)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // Draw underline only for "Honoraire :"
     let underline_text = "Honoraire :";
@@ -292,7 +292,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 11.0)
       .at(date_x, self.y_position)
       .write(&date_location)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // Try to embed signature image if available
     if let Some(sig_bytes) = self.args.signature_data.take() {
@@ -318,7 +318,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 11.0)
       .at(date_x + mm(20.0), self.y_position)
       .write(&self.args.user.full_name())
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     Ok(())
   }
 
@@ -331,7 +331,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .set_character_spacing(mm(2.5))
       .at(mm(22.0), mm(148.5))
       .write("DUPLICATA")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     Ok(self)
   }
@@ -342,7 +342,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
     self
       .doc
       .to_bytes()
-      .map_err(|e| UnexpectedError::new(e.to_string()).into())
+      .map_err(|e| UnexpectedError::new(e).into())
   }
 
   fn setup_document() -> (Document, Page, f64, f64) {

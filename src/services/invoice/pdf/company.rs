@@ -90,7 +90,7 @@ impl CompanyInvoiceGenerator {
     self
       .doc
       .to_bytes()
-      .map_err(|e| UnexpectedError::new(e.to_string()).into())
+      .map_err(|e| UnexpectedError::new(e).into())
   }
 
   fn build_header(&mut self) -> Result<(), MyErrors> {
@@ -113,7 +113,7 @@ impl CompanyInvoiceGenerator {
         mm(7.0),
         mm(7.0),
       )
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     let green = Color::hex("1B5E38");
     self
@@ -123,7 +123,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(green)
       .at(self.margin_l + mm(9.5), self.y_position)
       .write(&self.args.user.full_name())
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // "FACTURE" — right-aligned, top flush with icon top
     // Icon top = y_position - mm(2) + mm(7) = y_position + mm(5)
@@ -138,7 +138,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_r - facture_w, y_facture)
       .write("FACTURE")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     self
       .page
@@ -147,7 +147,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position - mm(6.0))
       .write(self.args.business_info.profession.to_french())
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     let text_gray = Color::gray(0.45);
     let invoice_label = format!("N°  {}", invoice_number);
@@ -160,7 +160,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(text_gray)
       .at(self.margin_r - invoice_label_w, y_facture - mm(8.0))
       .write(&invoice_label)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     self.y_position -= mm(11.0);
     self
@@ -170,7 +170,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
       .write(&format_french_phone_number(&self.args.user.phone_number))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     self.y_position -= mm(4.0);
     self
@@ -180,7 +180,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
       .write(&self.args.user.email)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     self.y_position -= mm(6.0);
     self
@@ -207,7 +207,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(text_gray)
       .at(self.margin_l, self.y_position)
       .write("ÉMETTEUR")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -215,7 +215,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(text_gray)
       .at(col_right, self.y_position)
       .write("FACTURÉ À")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // Names — both columns share the same row
     self.y_position -= mm(7.0);
@@ -226,7 +226,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
       .write(&self.args.user.full_name())
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -234,7 +234,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_right, self.y_position)
       .write(&self.args.company.name)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // Address line 1 — right column is optional and tracked separately
     self.y_position -= mm(6.0);
@@ -246,7 +246,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
       .write(&self.args.practitioner_office.address_line_1)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     if let Some(ref addr) = self.args.company.address_line_1 {
       if !addr.is_empty() {
         self
@@ -256,7 +256,7 @@ impl CompanyInvoiceGenerator {
           .set_fill_color(Color::black())
           .at(col_right, company_y)
           .write(addr)
-          .map_err(|e| UnexpectedError::new(e.to_string()))?;
+          .map_err(UnexpectedError::new)?;
         company_y -= mm(4.0);
       }
     }
@@ -273,7 +273,7 @@ impl CompanyInvoiceGenerator {
         "{} {}",
         self.args.practitioner_office.address_zip_code, self.args.practitioner_office.address_city
       ))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     let city_line = match (
       &self.args.company.address_zip_code,
       &self.args.company.address_city,
@@ -291,7 +291,7 @@ impl CompanyInvoiceGenerator {
         .set_fill_color(Color::black())
         .at(col_right, company_y)
         .write(&city_line)
-        .map_err(|e| UnexpectedError::new(e.to_string()))?;
+        .map_err(UnexpectedError::new)?;
       company_y -= mm(6.0);
     }
 
@@ -307,7 +307,7 @@ impl CompanyInvoiceGenerator {
         "SIRET : {}",
         format_siret(&self.args.business_info.siret_number)
       ))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     if let Some(ref siret) = self.args.company.siret {
       if !siret.is_empty() {
         self
@@ -317,7 +317,7 @@ impl CompanyInvoiceGenerator {
           .set_fill_color(Color::black())
           .at(col_right, company_y)
           .write(&format!("SIRET : {}", format_siret(siret)))
-          .map_err(|e| UnexpectedError::new(e.to_string()))?;
+          .map_err(UnexpectedError::new)?;
       }
     }
 
@@ -330,7 +330,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
       .write(&format!("RPPS : {}", &self.args.business_info.rpps_number))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     if let Some(adeli_number) = &self.args.business_info.adeli_number {
       self.y_position -= mm(6.0);
@@ -341,7 +341,7 @@ impl CompanyInvoiceGenerator {
         .set_fill_color(Color::black())
         .at(self.margin_l, self.y_position)
         .write(&format!("ADELI : {}", adeli_number))
-        .map_err(|e| UnexpectedError::new(e.to_string()))?;
+        .map_err(UnexpectedError::new)?;
     }
 
     Ok(())
@@ -404,7 +404,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::gray(0.45))
       .at(self.margin_l + mm(5.0), self.y_position - mm(4.5))
       .write("DATE D'ÉMISSION")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -412,7 +412,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(self.margin_l + mm(5.0), self.y_position - mm(13.0))
       .write(&self.args.emission_date.format("%d/%m/%Y").to_string())
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -420,7 +420,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::gray(0.45))
       .at(mm(128.0), self.y_position - mm(4.5))
       .write("ÉCHÉANCE")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -428,7 +428,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(mm(128.0), self.y_position - mm(13.0))
       .write(&due_date.format("%d/%m/%Y").to_string())
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     self.y_position -= box_h;
     Ok(())
@@ -465,7 +465,7 @@ impl CompanyInvoiceGenerator {
         .set_fill_color(Color::gray(0.45))
         .at(col, self.y_position)
         .write(label)
-        .map_err(|e| UnexpectedError::new(e.to_string()))?;
+        .map_err(UnexpectedError::new)?;
     }
 
     // Separator under headers
@@ -488,7 +488,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_desc, self.y_position)
       .write(&self.args.intervention.object)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -496,7 +496,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_qty, self.y_position)
       .write(&quantity.to_string())
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -504,7 +504,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_pu, self.y_position)
       .write(&format_euro(unit_price))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -512,7 +512,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_tva, self.y_position)
       .write(&vat_display)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -520,7 +520,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_total, self.y_position)
       .write(&format_euro(total_ht))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // Separator after item
     self.y_position -= mm(11.0);
@@ -554,7 +554,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(mm(118.0), self.y_position)
       .write("Total HT")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -562,7 +562,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_total, self.y_position)
       .write(&format_euro(total_ht))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // TVA
     self.y_position -= mm(6.0);
@@ -573,7 +573,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(mm(118.0), self.y_position)
       .write("TVA")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -581,7 +581,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_total, self.y_position)
       .write(&format_euro(vat_amount))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     // Divider above TTC
     self.y_position -= mm(7.0);
@@ -603,7 +603,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(mm(118.0), self.y_position)
       .write("Total TTC")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
     self
       .page
       .text()
@@ -611,7 +611,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::black())
       .at(col_total, self.y_position)
       .write(&format_euro(total_ttc))
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     if let Some(sig_bytes) = self.args.signature_data.take() {
       match embed_signature_image(&mut self.page, sig_bytes, self.margin_l + mm(15.0), y_sig) {
@@ -643,7 +643,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::gray(0.45))
       .at(self.margin_l, y_footer - mm(5.0))
       .write("TVA non applicable — art. 261 4° 1° du CGI")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     self
       .page
@@ -652,7 +652,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::gray(0.45))
       .at(mm(118.0), y_footer - mm(5.0))
       .write("Paiement par virement — 30 jours")
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     Ok(())
   }
@@ -678,16 +678,15 @@ impl CompanyInvoiceGenerator {
 
     const FAVICON_PNG: &[u8] =
       include_bytes!("../../../../frontend/public/favicon/apple-touch-icon.png");
-    let img =
-      ::image::load_from_memory(FAVICON_PNG).map_err(|e| UnexpectedError::new(e.to_string()))?;
+    let img = ::image::load_from_memory(FAVICON_PNG).map_err(UnexpectedError::new)?;
     let rgb = img.to_rgb8();
     let (w, h) = rgb.dimensions();
     let mut jpg = Vec::new();
     JpegEncoder::new_with_quality(&mut jpg, 95)
       .write_image(rgb.as_raw(), w, h, image::ExtendedColorType::Rgb8)
-      .map_err(|e| UnexpectedError::new(e.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
-    Image::from_jpeg_data(jpg).map_err(|e| UnexpectedError::new(e.to_string()).into())
+    Image::from_jpeg_data(jpg).map_err(|e| UnexpectedError::new(e).into())
   }
 
   fn setup_document() -> (Document, Page, f64, f64, f64) {

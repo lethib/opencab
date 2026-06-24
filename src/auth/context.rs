@@ -99,7 +99,7 @@ impl<'user> AuthContext<'user> {
 
   fn ensure_not_completed(&self) -> Result<(), MyErrors> {
     if self.complete {
-      return Err(UnexpectedError::ShouldNotHappen.into());
+      return Err(UnexpectedError::should_not_happen().into());
     }
     Ok(())
   }
@@ -181,7 +181,10 @@ mod tests {
         let result = ctx.authorized();
 
         // Then
-        assert_eq!(result.unwrap_err(), UnexpectedError::ShouldNotHappen.into());
+        assert_eq!(
+          result.unwrap_err(),
+          UnexpectedError::should_not_happen().into()
+        );
       }
     }
   }
@@ -244,7 +247,10 @@ mod tests {
         let result = ctx.not_authorized(None);
 
         // Then
-        assert_eq!(result.unwrap_err(), UnexpectedError::ShouldNotHappen.into());
+        assert_eq!(
+          result.unwrap_err(),
+          UnexpectedError::should_not_happen().into()
+        );
       }
     }
   }
@@ -326,7 +332,10 @@ mod tests {
         let result = ctx.complete();
 
         // Then
-        assert_eq!(result.unwrap_err(), UnexpectedError::ShouldNotHappen.into());
+        assert_eq!(
+          result.unwrap_err(),
+          UnexpectedError::should_not_happen().into()
+        );
       }
     }
   }

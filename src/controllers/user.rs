@@ -1,7 +1,6 @@
 use crate::{
   middleware::context::Ctx,
   models::{
-    _entities::prelude::UserBusinessInformations,
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
     user_business_informations::CreateBusinessInformation,
   },
@@ -12,7 +11,7 @@ use crate::{
 use axum::{extract::Multipart, http::status, Json};
 use chrono::{Datelike, NaiveDate, Utc};
 use image::{imageops::FilterType, ImageFormat};
-use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel, ModelTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue, IntoActiveModel};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -53,7 +52,7 @@ pub async fn generate_accountability(
 ) -> Result<status::StatusCode, MyErrors> {
   let current_year = Utc::now().year() as u16;
   if params.year < 2025 || params.year > current_year {
-    return Err(ApplicationError::BadRequest.into());
+    return Err(ApplicationError::bad_request("year_outside_window").into());
   }
 
   let args = appointments_export::AccountabilityGenerationArgs {
@@ -76,7 +75,7 @@ pub async fn extract_medical_appointments(
   let end_date = NaiveDate::parse_from_str(params.end_date.as_str(), "%Y-%m-%d")?;
 
   if start_date >= end_date {
-    return Err(ApplicationError::new("start_date_before_end_date").into());
+    return Err(ApplicationError::bad_request("start_date_before_end_date").into());
   }
 
   let args = appointments_export::AppointmentExtractorArgs {
@@ -97,7 +96,7 @@ pub async fn get_signature_url(ctx: Ctx) -> Result<String, MyErrors> {
   let user_bi = ctx.current_user.business_information(&ctx.db).await?;
   let signature_filename = user_bi
     .signature_file_name
-    .ok_or(UnexpectedError::ShouldNotHappen)?;
+    .ok_or(UnexpectedError::should_not_happen())?;
 
   Ok(storage.signature_url(&signature_filename))
 }
@@ -109,22 +108,24 @@ pub async fn upload_signature(
   let field = multipart
     .next_field()
     .await
-    .map_err(|_| ApplicationError::BadRequest)?
-    .ok_or(ApplicationError::BadRequest)?;
+    .map_err(ApplicationError::bad_request)?
+    .ok_or(UnexpectedError::should_not_happen())?;
 
-  let field_name = field.name().ok_or(ApplicationError::BadRequest)?;
+  let field_name = field
+    .name()
+    .ok_or(ApplicationError::bad_request("missing_name_field"))?;
   if field_name != "signature" {
-    return Err(ApplicationError::BadRequest.into());
+    return Err(ApplicationError::bad_request("no_signature_field").into());
   }
 
   let signature_data = field
     .bytes()
     .await
-    .map_err(|_| ApplicationError::UnprocessableEntity)?;
+    .map_err(ApplicationError::unprocessable_entity)?;
 
   let img = image::load_from_memory(&signature_data).map_err(|e| {
     tracing::error!("Failed to load image: {}", e);
-    ApplicationError::UnprocessableEntity
+    ApplicationError::unprocessable_entity(e)
   })?;
 
   let resized = img.resize_exact(314, 156, FilterType::Lanczos3);
@@ -134,7 +135,7 @@ pub async fn upload_signature(
     .write_to(&mut std::io::Cursor::new(&mut png_bytes), ImageFormat::Png)
     .map_err(|e| {
       tracing::error!("Failed to encode image: {}", e);
-      ApplicationError::UnprocessableEntity
+      ApplicationError::unprocessable_entity(e)
     })?;
 
   let filename = format!(
@@ -151,10 +152,8 @@ pub async fn upload_signature(
 
   let mut business_information = ctx
     .current_user
-    .find_related(UserBusinessInformations)
-    .one(&ctx.db)
+    .business_information(&ctx.db)
     .await?
-    .ok_or(ApplicationError::UnprocessableEntity)?
     .into_active_model();
 
   business_information.signature_file_name = ActiveValue::Set(Some(filename));

@@ -19,7 +19,7 @@ impl Crypto {
     let key_string = std::env::var("SSN_ENCRYPTION_KEY")?;
 
     if key_string.len() != 32 {
-      return Err(UnexpectedError::ShouldNotHappen.into());
+      return Err(UnexpectedError::should_not_happen().into());
     }
 
     Ok(Crypto {
@@ -48,10 +48,10 @@ impl Crypto {
 
     let encrypted_data = Base64Engine::STANDARD
       .decode(encrypted_str)
-      .map_err(|err| UnexpectedError::new(err.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     if encrypted_data.len() < 12 {
-      return Err(UnexpectedError::ShouldNotHappen.into());
+      return Err(UnexpectedError::should_not_happen().into());
     }
 
     let (nonce_bytes, encrypted_data) = encrypted_data.split_at(12);

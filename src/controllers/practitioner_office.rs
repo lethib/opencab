@@ -18,15 +18,19 @@ pub struct OfficeParams {
   pub revenue_share_percentage: Decimal,
 }
 
+fn validate_revenue_share(revenue_share: &Decimal) -> Result<(), MyErrors> {
+  if revenue_share < &Decimal::ZERO || revenue_share > &Decimal::ONE_HUNDRED {
+    return Err(ApplicationError::bad_request("revenue_share_outside_window").into());
+  }
+
+  Ok(())
+}
+
 pub async fn create(
   ctx: Ctx,
   Json(params): Json<OfficeParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
-  if params.revenue_share_percentage < Decimal::ZERO
-    || params.revenue_share_percentage > Decimal::ONE_HUNDRED
-  {
-    return Err(ApplicationError::BadRequest.into());
-  }
+  validate_revenue_share(&params.revenue_share_percentage)?;
 
   services::practitioner_office::create(
     &params.office,
@@ -47,7 +51,7 @@ pub async fn update(
   let office = practitioner_offices::Entity::find_by_id(office_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()
@@ -55,11 +59,7 @@ pub async fn update(
     .await
     .run_complete()?;
 
-  if params.revenue_share_percentage < Decimal::ZERO
-    || params.revenue_share_percentage > Decimal::ONE_HUNDRED
-  {
-    return Err(ApplicationError::BadRequest.into());
-  }
+  validate_revenue_share(&params.revenue_share_percentage)?;
 
   services::practitioner_office::update(
     office.into_active_model(),
@@ -80,7 +80,7 @@ pub async fn destroy(
   let office = practitioner_offices::Entity::find_by_id(office_id)
     .one(&ctx.db)
     .await?
-    .ok_or(ApplicationError::NotFound)?;
+    .ok_or(ApplicationError::not_found())?;
 
   ctx
     .authorize()

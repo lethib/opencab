@@ -44,7 +44,7 @@ impl ActiveModel {
     params: &PractitionerOfficeParams,
   ) -> Result<Model, MyErrors> {
     if !is_address_valid(&params.address_line_1, &params.address_zip_code) {
-      return Err(ApplicationError::UnprocessableEntity.into());
+      return Err(ApplicationError::unprocessable_entity("invalid_address").into());
     }
 
     return Ok(

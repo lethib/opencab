@@ -28,7 +28,7 @@ impl<'user, 'db> AuthStatement<'user, 'db> {
 
   pub fn run_complete(mut self) -> Result<(), MyErrors> {
     if self.is_empty {
-      return Err(UnexpectedError::ShouldNotHappen.into());
+      return Err(UnexpectedError::should_not_happen().into());
     }
 
     if self.ok_so_far {

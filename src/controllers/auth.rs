@@ -52,7 +52,7 @@ pub async fn forgot(
   let jwt_service = JwtService::new(&state.config.jwt.secret);
   let secured_token = jwt_service
     .generate_token(&user.pid.to_string(), TOKEN_TYPE_PASSWORD_RESET, 900)
-    .map_err(|_| UnexpectedError::ShouldNotHappen)?;
+    .map_err(|_| UnexpectedError::should_not_happen())?;
 
   let secured_url = format!(
     "{}/reset_password?access_token={}",
@@ -157,7 +157,7 @@ pub async fn check_access_key(
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   let user = users::Model::find_by_email(&state.db, &params.user_email)
     .await
-    .map_err(|_| UnexpectedError::ShouldNotHappen)?;
+    .map_err(|_| UnexpectedError::should_not_happen())?;
 
   if services::user::check_access_key(&user, params.access_key) {
     users::ActiveModel::enable_access(&mut user.clone().into_active_model(), &state.db).await?;
@@ -169,10 +169,10 @@ pub async fn check_access_key(
         TOKEN_TYPE_AUTH,
         state.config.jwt.expiration,
       )
-      .map_err(|error| UnexpectedError::new(error.to_string()))?;
+      .map_err(UnexpectedError::new)?;
 
     return Ok(Json(serde_json::json!({ "token": token })));
   }
 
-  Err(ApplicationError::new("access_key_not_recognized").into())
+  Err(ApplicationError::bad_request("access_key_not_recognized").into())
 }

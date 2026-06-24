@@ -1,23 +1,42 @@
-use crate::models::my_errors::MyErrors;
+use std::error::Error;
+
+use crate::models::my_errors::{unexpected_error::Kind::Custom, MyErrors};
 use axum::http::StatusCode;
 
+pub struct UnexpectedError {
+  kind: Kind,
+}
+
 #[derive(Debug)]
-pub enum UnexpectedError {
+enum Kind {
   ShouldNotHappen,
-  #[allow(non_camel_case_types)]
-  new(String),
+  Custom(Box<dyn Error + Send + Sync>),
+}
+
+impl UnexpectedError {
+  pub fn should_not_happen() -> Self {
+    UnexpectedError {
+      kind: Kind::ShouldNotHappen,
+    }
+  }
+
+  pub fn new(err: impl Into<Box<dyn Error + Send + Sync>>) -> Self {
+    UnexpectedError {
+      kind: Custom(err.into()),
+    }
+  }
 }
 
 impl From<UnexpectedError> for MyErrors {
   fn from(err: UnexpectedError) -> Self {
-    match err {
-      UnexpectedError::ShouldNotHappen => MyErrors {
+    match err.kind {
+      Kind::ShouldNotHappen => MyErrors {
         code: StatusCode::INTERNAL_SERVER_ERROR,
         msg: "should_not_happen".to_string(),
       },
-      UnexpectedError::new(msg) => MyErrors {
+      Kind::Custom(error) => MyErrors {
         code: StatusCode::INTERNAL_SERVER_ERROR,
-        msg,
+        msg: error.to_string(),
       },
     }
   }

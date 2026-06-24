@@ -22,14 +22,14 @@ pub async fn update(
     .id
     .clone()
     .take()
-    .ok_or(UnexpectedError::ShouldNotHappen)?;
+    .ok_or(UnexpectedError::should_not_happen())?;
 
   let mut user_practitioner_office = user_practitioner_offices::Entity::find()
     .filter(user_practitioner_offices::Column::PractitionerOfficeId.eq(office_id))
     .filter(user_practitioner_offices::Column::UserId.eq(linked_practitioner.id))
     .one(db)
     .await?
-    .ok_or(ApplicationError::NotFound)?
+    .ok_or(ApplicationError::not_found())?
     .into_active_model();
 
   office.name = Set(params.name.trim().to_string());
