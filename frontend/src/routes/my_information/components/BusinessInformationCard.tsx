@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@tanstack/react-router";
 import { Building2, FileText, Users } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -25,7 +24,6 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export const BusinessInformationCard = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { currentUser } = useCurrentUser();
 
   const saveBusinessInformationMutation =
@@ -63,7 +61,6 @@ export const BusinessInformationCard = () => {
     saveBusinessInformationMutation.mutateAsync(values).then(() => {
       queryClient.invalidateQueries({ queryKey: ["/auth/me"] });
       toast.success(t("businessInfo.successMessage"));
-      navigate({ to: "/patients" });
     });
   });
   return (
