@@ -228,6 +228,14 @@
       "officeMustBeSelected": "Un cabinet doit être sélectionné."
     }
   },
+  "myInformation": {
+    "title": "Mon profil",
+    "subtitle": "Gérez vos informations professionnelles et votre signature",
+    "tabs": {
+      "pro": "Professionnel",
+      "signature": "Signature"
+    }
+  },
   "businessInfo": {
     "title": "Informations professionnelles",
     "subtitle": "Saisissez vos numéros d'identification professionnels",

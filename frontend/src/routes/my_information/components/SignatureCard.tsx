@@ -73,7 +73,7 @@ export const SignatureCard = () => {
   };
 
   return (
-    <Card className="mt-6">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <PenTool className="h-5 w-5" />
