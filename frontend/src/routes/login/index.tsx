@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import * as z from "zod";
-import { APIClient } from "@/api/api";
+import { APIClient, showGlobalErrorToast } from "@/api/api";
 import { FormInput } from "@/components/form/FormInput";
 import { FormProvider } from "@/components/form/FormProvider";
 import { Button, Label } from "@/components/ui";
@@ -30,10 +30,12 @@ function Login() {
     useState(false);
   const [userEmail, setUserEmail] = useState("");
 
-  const loginMutation = APIClient.hooks.auth.login.useMutation();
+  const loginMutation = APIClient.hooks.auth.login.useMutation(undefined, {
+    meta: { skipGlobalErrorToast: true },
+  });
 
   const loginFormSchema = z.object({
-    email: z.string().email(t("auth.login.validation.invalidEmail")),
+    email: z.email(t("auth.login.validation.invalidEmail")),
     password: z.string().min(1, t("auth.login.validation.passwordRequired")),
   });
 
@@ -59,6 +61,8 @@ function Login() {
           loginForm.setError("password", { message: "invalid credentials" });
           return;
         }
+
+        showGlobalErrorToast(error);
       },
     });
   };

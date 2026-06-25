@@ -1,4 +1,5 @@
 import {
+  type UseMutationOptions,
   type UseQueryOptions,
   useMutation,
   useQuery,
@@ -28,7 +29,13 @@ export type Paginated<D> = {
 
 // Generic hook generators
 function createMutation<P, R>(endpoint: EndpointConfig<P, R>) {
-  return (pathParams?: Record<string, number>) => {
+  return (
+    pathParams?: Record<string, number>,
+    options?: Omit<
+      UseMutationOptions<R, AxiosError<APIError>, P>,
+      "mutationFn"
+    >,
+  ) => {
     let finalRoute = endpoint.path;
 
     if (pathParams) {
@@ -50,6 +57,7 @@ function createMutation<P, R>(endpoint: EndpointConfig<P, R>) {
             throw new Error("Type not implemented");
         }
       },
+      ...options,
     });
   };
 }
