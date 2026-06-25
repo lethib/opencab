@@ -22,19 +22,20 @@ declare module "@tanstack/react-query" {
 }
 
 export function showGlobalErrorToast(error: unknown) {
-  const apiError = error as AxiosError<APIError>;
+  if (!axios.isAxiosError<APIError>(error)) {
+    toast.error(t("errors.global"));
+    return;
+  }
 
-  // A 401 (other than bad credentials) triggers a forced logout in the
-  // interceptor; no error toast in that case.
   if (
-    apiError.response?.status === 401 &&
-    apiError.response.data?.msg !== "invalid_credentials"
+    error.response?.status === 401 &&
+    error.response.data?.msg !== "invalid_credentials"
   ) {
     return;
   }
 
   toast.error(t("errors.global"), {
-    description: apiError.response?.data?.msg,
+    description: error.response?.data?.msg,
   });
 }
 
@@ -62,7 +63,7 @@ class MyPatientsAPI {
       (error: AxiosError<APIError>) => {
         if (
           error.response?.status === 401 &&
-          error.response.data.msg !== "invalid_credentials"
+          error.response.data?.msg !== "invalid_credentials"
         ) {
           logout();
         }
