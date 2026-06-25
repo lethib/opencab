@@ -99,13 +99,10 @@ export const CompanyModal = ({ open, setIsOpen, company }: Props) => {
 
   const onSubmit = form.handleSubmit(async (values) => {
     const mutation = isEditing ? updateMutation : createMutation;
-    await mutation
-      .mutateAsync(values)
-      .then(async () => {
-        invalidateQueries();
-        handleClose();
-      })
-      .catch(() => {});
+    await mutation.mutateAsync(values).then(async () => {
+      invalidateQueries();
+      handleClose();
+    });
   });
 
   return (
