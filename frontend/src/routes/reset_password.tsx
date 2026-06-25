@@ -75,8 +75,6 @@ function ResetPassword() {
             resetForm.setError("password", {
               message: t("auth.resetPassword.invalidToken"),
             });
-          } else {
-            alert(`Error: ${error.message}`);
           }
         },
       },

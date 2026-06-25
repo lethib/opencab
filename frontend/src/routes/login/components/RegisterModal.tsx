@@ -3,6 +3,7 @@ import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import z from "zod";
 import { APIClient } from "@/api/api";
 import { FormInput } from "@/components/form/FormInput";
@@ -76,12 +77,9 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
       },
       {
         onSuccess: () => {
-          alert(t("auth.register.successMessage"));
+          toast.success(t("auth.register.successMessage"));
           onOpenChange(false);
           registerForm.reset();
-        },
-        onError: (error) => {
-          alert(`${t("auth.register.error")}: ${error.message}`);
         },
       },
     );

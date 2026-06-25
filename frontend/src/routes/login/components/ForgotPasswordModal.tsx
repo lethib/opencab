@@ -46,9 +46,6 @@ export const ForgotPasswordModal = ({
       onSuccess: () => {
         setEmailSent(true);
       },
-      onError: (error) => {
-        alert(`Error: ${error.message}`);
-      },
     });
   });
 

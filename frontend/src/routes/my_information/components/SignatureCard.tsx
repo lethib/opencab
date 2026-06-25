@@ -1,6 +1,7 @@
 import { PenTool, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { queryClient } from "@/api/api";
 import { APIHooks } from "@/api/hooks";
 import {
@@ -31,14 +32,14 @@ export const SignatureCard = () => {
     if (file) {
       const validTypes = ["image/png", "image/jpeg", "image/jpg"];
       if (!validTypes.includes(file.type)) {
-        alert(t("signature.invalidFileType"));
+        toast.error(t("signature.invalidFileType"));
         return;
       }
 
       // Validate file size (max 200KB)
       const maxSize = 200 * 1024;
       if (file.size > maxSize) {
-        alert(t("signature.fileTooLarge"));
+        toast.error(t("signature.fileTooLarge"));
         return;
       }
 

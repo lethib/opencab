@@ -105,13 +105,11 @@ export const OfficeModal = ({
         address_city: values.address_city,
       },
       revenue_share_percentage: values.revenue_share_percentage,
-    })
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: ["/user/my_offices"] });
-        setIsOpen(false);
-        officeForm.reset();
-      })
-      .catch((error) => alert((error as Error).message));
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ["/user/my_offices"] });
+      setIsOpen(false);
+      officeForm.reset();
+    });
   });
 
   const { revenue_share_percentage } = officeForm.watch();

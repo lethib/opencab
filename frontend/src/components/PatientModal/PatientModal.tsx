@@ -119,15 +119,13 @@ export const PatientModal = ({
   const onSubmit = addPatientForm.handleSubmit(async (values) => {
     asyncMutation({
       ...values,
-    })
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: ["/patient/_search"] });
-        queryClient.invalidateQueries({
-          queryKey: [`/patient/${currentPatient?.id}`, null],
-        });
-        handleOnClose();
-      })
-      .catch((error) => alert(error.message));
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ["/patient/_search"] });
+      queryClient.invalidateQueries({
+        queryKey: [`/patient/${currentPatient?.id}`, null],
+      });
+      handleOnClose();
+    });
   });
 
   const handleSSNChange = (e: ChangeEvent<HTMLInputElement>) => {
