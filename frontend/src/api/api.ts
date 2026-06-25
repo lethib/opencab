@@ -1,4 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import axios, {
   AxiosError,
   type AxiosInstance,
@@ -13,6 +13,31 @@ export type APIError = {
   code: number;
   msg: string;
 };
+
+declare module "@tanstack/react-query" {
+  interface Register {
+    mutationMeta: { skipGlobalErrorToast?: boolean };
+    queryMeta: { skipGlobalErrorToast?: boolean };
+  }
+}
+
+export function showGlobalErrorToast(error: unknown) {
+  if (!axios.isAxiosError<APIError>(error)) {
+    toast.error(t("errors.global"));
+    return;
+  }
+
+  if (
+    error.response?.status === 401 &&
+    error.response.data?.msg !== "invalid_credentials"
+  ) {
+    return;
+  }
+
+  toast.error(t("errors.global"), {
+    description: error.response?.data?.msg,
+  });
+}
 
 class MyPatientsAPI {
   client: AxiosInstance;
@@ -36,18 +61,14 @@ class MyPatientsAPI {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError<APIError>) => {
-        if (error.response?.status === 401) {
-          if (error.response.data.msg !== "invalid_credentials") {
-            logout();
-            return;
-          }
+        if (
+          error.response?.status === 401 &&
+          error.response.data?.msg !== "invalid_credentials"
+        ) {
+          logout();
         }
 
-        toast.error(t("errors.global"), {
-          description: error.response?.data.msg,
-        });
-
-        throw error;
+        return Promise.reject(error);
       },
     );
   }
@@ -90,4 +111,14 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
     },
   },
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      if (!query.meta?.skipGlobalErrorToast) showGlobalErrorToast(error);
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _context, mutation) => {
+      if (!mutation.meta?.skipGlobalErrorToast) showGlobalErrorToast(error);
+    },
+  }),
 });
