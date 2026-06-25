@@ -46,9 +46,7 @@ impl Crypto {
     let decryption_key = Self::new()?.encryption_key;
     let cipher = Aes256Gcm::new(&decryption_key);
 
-    let encrypted_data = Base64Engine::STANDARD
-      .decode(encrypted_str)
-      .map_err(UnexpectedError::new)?;
+    let encrypted_data = Base64Engine::STANDARD.decode(encrypted_str).map_err(UnexpectedError::new)?;
 
     if encrypted_data.len() < 12 {
       return Err(UnexpectedError::should_not_happen().into());
@@ -65,14 +63,9 @@ impl Crypto {
   }
 
   pub fn hash(value: &str, salt: &String) -> Result<String, MyErrors> {
-    let arg2 = Argon2::new(
-      argon2::Algorithm::Argon2id,
-      argon2::Version::V0x13,
-      Params::default(),
-    );
+    let arg2 = Argon2::new(argon2::Algorithm::Argon2id, argon2::Version::V0x13, Params::default());
 
-    let salt_string = SaltString::encode_b64(salt.as_bytes())
-      .map_err(|err| UnexpectedError::new(err.to_string()))?;
+    let salt_string = SaltString::encode_b64(salt.as_bytes()).map_err(|err| UnexpectedError::new(err.to_string()))?;
 
     Ok(
       arg2

@@ -29,8 +29,7 @@ pub async fn save_business_info(
   ctx: Ctx,
   Json(business_information): Json<CreateBusinessInformation>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
-  services::user::save_business_information(&business_information, &ctx.current_user, &ctx.db)
-    .await?;
+  services::user::save_business_information(&business_information, &ctx.current_user, &ctx.db).await?;
 
   Ok(Json(serde_json::json!({ "success": true })))
 }
@@ -94,34 +93,24 @@ pub async fn extract_medical_appointments(
 pub async fn get_signature_url(ctx: Ctx) -> Result<String, MyErrors> {
   let storage = StorageService::new()?;
   let user_bi = ctx.current_user.business_information(&ctx.db).await?;
-  let signature_filename = user_bi
-    .signature_file_name
-    .ok_or(UnexpectedError::should_not_happen())?;
+  let signature_filename = user_bi.signature_file_name.ok_or(UnexpectedError::should_not_happen())?;
 
   Ok(storage.signature_url(&signature_filename))
 }
 
-pub async fn upload_signature(
-  ctx: Ctx,
-  mut multipart: Multipart,
-) -> Result<status::StatusCode, MyErrors> {
+pub async fn upload_signature(ctx: Ctx, mut multipart: Multipart) -> Result<status::StatusCode, MyErrors> {
   let field = multipart
     .next_field()
     .await
     .map_err(ApplicationError::bad_request)?
     .ok_or(UnexpectedError::should_not_happen())?;
 
-  let field_name = field
-    .name()
-    .ok_or(ApplicationError::bad_request("missing_name_field"))?;
+  let field_name = field.name().ok_or(ApplicationError::bad_request("missing_name_field"))?;
   if field_name != "signature" {
     return Err(ApplicationError::bad_request("no_signature_field").into());
   }
 
-  let signature_data = field
-    .bytes()
-    .await
-    .map_err(ApplicationError::unprocessable_entity)?;
+  let signature_data = field.bytes().await.map_err(ApplicationError::unprocessable_entity)?;
 
   let img = image::load_from_memory(&signature_data).map_err(|e| {
     tracing::error!("Failed to load image: {}", e);
@@ -146,15 +135,9 @@ pub async fn upload_signature(
   );
 
   let storage_service = services::storage::StorageService::new()?;
-  storage_service
-    .upload_signature(&png_bytes, &filename, "image/png")
-    .await?;
+  storage_service.upload_signature(&png_bytes, &filename, "image/png").await?;
 
-  let mut business_information = ctx
-    .current_user
-    .business_information(&ctx.db)
-    .await?
-    .into_active_model();
+  let mut business_information = ctx.current_user.business_information(&ctx.db).await?.into_active_model();
 
   business_information.signature_file_name = ActiveValue::Set(Some(filename));
   business_information.update(&ctx.db).await?;

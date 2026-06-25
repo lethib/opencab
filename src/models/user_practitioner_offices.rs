@@ -30,10 +30,7 @@ impl Model {}
 
 // implement your write-oriented logic here
 impl ActiveModel {
-  pub async fn create<T: ConnectionTrait>(
-    db: &T,
-    params: &CreateLinkParams,
-  ) -> Result<Model, MyErrors> {
+  pub async fn create<T: ConnectionTrait>(db: &T, params: &CreateLinkParams) -> Result<Model, MyErrors> {
     return Ok(
       user_practitioner_offices::ActiveModel {
         user_id: ActiveValue::Set(params.user_id),

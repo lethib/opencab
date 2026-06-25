@@ -65,9 +65,7 @@ impl MigratorTrait for Migrator {
       Box::new(m20260113_223518_add_pricing_to_medical_appointments::Migration),
       Box::new(m20260304_201910_add_payment_method_to_medical_appointment::Migration),
       Box::new(m20260308_000001_fix_schema_drift::Migration),
-      Box::new(
-        m20260310_175025_add_revenue_share_percentage_to_user_practitioner_office::Migration,
-      ),
+      Box::new(m20260310_175025_add_revenue_share_percentage_to_user_practitioner_office::Migration),
       Box::new(m20260317_220127_make_patient_email_nullable::Migration),
       Box::new(m20260412_074522_make_patient_ssn_nullable::Migration),
       Box::new(m20260508_155536_create_companies_table::Migration),

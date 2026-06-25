@@ -36,11 +36,7 @@ impl Model {
   }
 
   pub fn decrypt_ssn(&self) -> Result<Option<String>, MyErrors> {
-    self
-      .ssn
-      .as_ref()
-      .map(|ssn| Crypto::decrypt(ssn))
-      .transpose()
+    self.ssn.as_ref().map(|ssn| Crypto::decrypt(ssn)).transpose()
   }
 }
 
@@ -95,11 +91,7 @@ impl ActiveModel {
     );
   }
 
-  pub async fn update<T: ConnectionTrait>(
-    db: &T,
-    patient_id: i32,
-    params: &CreatePatientParams,
-  ) -> Result<(), MyErrors> {
+  pub async fn update<T: ConnectionTrait>(db: &T, patient_id: i32, params: &CreatePatientParams) -> Result<(), MyErrors> {
     let mut patient = Entity::find_by_id(patient_id)
       .one(db)
       .await?

@@ -25,8 +25,7 @@ impl StorageService {
       msg: "SUPABASE_SERVICE_ROLE_KEY environment variable not set".to_string(),
     })?;
 
-    let bucket_name =
-      env::var("SUPABASE_SIGNATURE_BUCKET").unwrap_or_else(|_| "signatures".to_string());
+    let bucket_name = env::var("SUPABASE_SIGNATURE_BUCKET").unwrap_or_else(|_| "signatures".to_string());
 
     let client = Client::new();
 
@@ -98,10 +97,7 @@ impl StorageService {
       }
     })?;
 
-    info!(
-      "Successfully fetched signature: {} bytes",
-      image_bytes.len()
-    );
+    info!("Successfully fetched signature: {} bytes", image_bytes.len());
     Ok(image_bytes.to_vec())
   }
 
@@ -114,16 +110,8 @@ impl StorageService {
   ///
   /// # Returns
   /// * `Result<(), MyErrors>` - Success or an error
-  pub async fn upload_signature(
-    &self,
-    signature_data: &[u8],
-    filename: &str,
-    content_type: &str,
-  ) -> Result<(), MyErrors> {
-    let url = format!(
-      "{}/storage/v1/object/{}/{}",
-      self.supabase_url, self.bucket_name, filename
-    );
+  pub async fn upload_signature(&self, signature_data: &[u8], filename: &str, content_type: &str) -> Result<(), MyErrors> {
+    let url = format!("{}/storage/v1/object/{}/{}", self.supabase_url, self.bucket_name, filename);
 
     info!(
       "Uploading signature to: /storage/v1/object/{}/{}, size: {} bytes, content_type: {}",
@@ -152,17 +140,8 @@ impl StorageService {
     } else {
       let status = response.status();
       let error_text = response.text().await.unwrap_or_default();
-      error!(
-        "Failed to upload to Supabase storage ({}): {}",
-        status, error_text
-      );
-      Err(
-        UnexpectedError::new(format!(
-          "Storage upload failed: {} - {}",
-          status, error_text
-        ))
-        .into(),
-      )
+      error!("Failed to upload to Supabase storage ({}): {}", status, error_text);
+      Err(UnexpectedError::new(format!("Storage upload failed: {} - {}", status, error_text)).into())
     }
   }
 }

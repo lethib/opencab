@@ -4,10 +4,7 @@ use rust_decimal::prelude::ToPrimitive;
 
 use crate::{
   models::{
-    _entities::{
-      company_interventions, practitioner_companies, practitioner_offices,
-      user_business_informations,
-    },
+    _entities::{company_interventions, practitioner_companies, practitioner_offices, user_business_informations},
     my_errors::{unexpected_error::UnexpectedError, MyErrors},
     users::users,
   },
@@ -40,13 +37,7 @@ fn format_euro(amount: f64) -> String {
 fn format_siret(siret: &str) -> String {
   let digits: String = siret.chars().filter(|c| c.is_ascii_digit()).collect();
   if digits.len() == 14 {
-    format!(
-      "{} {} {} {}",
-      &digits[0..3],
-      &digits[3..6],
-      &digits[6..9],
-      &digits[9..14]
-    )
+    format!("{} {} {} {}", &digits[0..3], &digits[3..6], &digits[6..9], &digits[9..14])
   } else {
     siret.to_string()
   }
@@ -87,18 +78,11 @@ impl CompanyInvoiceGenerator {
   #[allow(clippy::wrong_self_convention)]
   pub(in crate::services::invoice) fn to_bytes(mut self) -> Result<Vec<u8>, MyErrors> {
     self.doc.add_page(self.page);
-    self
-      .doc
-      .to_bytes()
-      .map_err(|e| UnexpectedError::new(e).into())
+    self.doc.to_bytes().map_err(|e| UnexpectedError::new(e).into())
   }
 
   fn build_header(&mut self) -> Result<(), MyErrors> {
-    let invoice_number = format!(
-      "FAC-{}-{:03}",
-      self.args.emission_date.year(),
-      self.args.intervention.id
-    );
+    let invoice_number = format!("FAC-{}-{:03}", self.args.emission_date.year(), self.args.intervention.id);
 
     // Favicon, name, "FACTURE", profession, and invoice number are all anchored
     // to the name baseline (self.y_position); the cursor only advances afterwards.
@@ -106,13 +90,7 @@ impl CompanyInvoiceGenerator {
     self.page.add_image("favicon", favicon);
     self
       .page
-      .draw_image(
-        "favicon",
-        self.margin_l,
-        self.y_position - mm(2.0),
-        mm(7.0),
-        mm(7.0),
-      )
+      .draw_image("favicon", self.margin_l, self.y_position - mm(2.0), mm(7.0), mm(7.0))
       .map_err(UnexpectedError::new)?;
 
     let green = Color::hex("1B5E38");
@@ -151,8 +129,7 @@ impl CompanyInvoiceGenerator {
 
     let text_gray = Color::gray(0.45);
     let invoice_label = format!("N°  {}", invoice_number);
-    let invoice_label_w =
-      oxidize_pdf::text::metrics::measure_text(&invoice_label, Font::Helvetica, 10.0);
+    let invoice_label_w = oxidize_pdf::text::metrics::measure_text(&invoice_label, Font::Helvetica, 10.0);
     self
       .page
       .text()
@@ -274,10 +251,7 @@ impl CompanyInvoiceGenerator {
         self.args.practitioner_office.address_zip_code, self.args.practitioner_office.address_city
       ))
       .map_err(UnexpectedError::new)?;
-    let city_line = match (
-      &self.args.company.address_zip_code,
-      &self.args.company.address_city,
-    ) {
+    let city_line = match (&self.args.company.address_zip_code, &self.args.company.address_city) {
       (Some(zip), Some(city)) => format!("{} {}", zip, city),
       (None, Some(city)) => city.clone(),
       (Some(zip), None) => zip.clone(),
@@ -303,10 +277,7 @@ impl CompanyInvoiceGenerator {
       .set_font(Font::Helvetica, 10.0)
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
-      .write(&format!(
-        "SIRET : {}",
-        format_siret(&self.args.business_info.siret_number)
-      ))
+      .write(&format!("SIRET : {}", format_siret(&self.args.business_info.siret_number)))
       .map_err(UnexpectedError::new)?;
     if let Some(ref siret) = self.args.company.siret {
       if !siret.is_empty() {
@@ -365,14 +336,7 @@ impl CompanyInvoiceGenerator {
       .set_fill_color(Color::gray(0.95))
       .move_to(bx + br, by)
       .line_to(bx + bw - br, by)
-      .curve_to(
-        bx + bw - br + bk * br,
-        by,
-        bx + bw,
-        by + br - bk * br,
-        bx + bw,
-        by + br,
-      )
+      .curve_to(bx + bw - br + bk * br, by, bx + bw, by + br - bk * br, bx + bw, by + br)
       .line_to(bx + bw, by + bh - br)
       .curve_to(
         bx + bw,
@@ -383,14 +347,7 @@ impl CompanyInvoiceGenerator {
         by + bh,
       )
       .line_to(bx + br, by + bh)
-      .curve_to(
-        bx + br - bk * br,
-        by + bh,
-        bx,
-        by + bh - br + bk * br,
-        bx,
-        by + bh - br,
-      )
+      .curve_to(bx + br - bk * br, by + bh, bx, by + bh - br + bk * br, bx, by + bh - br)
       .line_to(bx, by + br)
       .curve_to(bx, by + br - bk * br, bx + br - bk * br, by, bx + br, by)
       .close_path()
@@ -661,12 +618,7 @@ impl CompanyInvoiceGenerator {
     let unit_price = self.args.intervention.unit_price_in_cents as f64 / 100.0;
     let quantity = self.args.intervention.quantity;
     let total_ht = unit_price * quantity as f64;
-    let vat_rate = self
-      .args
-      .intervention
-      .vat_rate_in_percent
-      .to_f32()
-      .unwrap_or(0.0);
+    let vat_rate = self.args.intervention.vat_rate_in_percent.to_f32().unwrap_or(0.0);
 
     (unit_price, quantity, total_ht, vat_rate)
   }
@@ -676,8 +628,7 @@ impl CompanyInvoiceGenerator {
     use image::ImageEncoder;
     use oxidize_pdf::graphics::Image;
 
-    const FAVICON_PNG: &[u8] =
-      include_bytes!("../../../../frontend/public/favicon/apple-touch-icon.png");
+    const FAVICON_PNG: &[u8] = include_bytes!("../../../../frontend/public/favicon/apple-touch-icon.png");
     let img = ::image::load_from_memory(FAVICON_PNG).map_err(UnexpectedError::new)?;
     let rgb = img.to_rgb8();
     let (w, h) = rgb.dimensions();

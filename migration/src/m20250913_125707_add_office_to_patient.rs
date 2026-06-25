@@ -32,12 +32,7 @@ impl MigrationTrait for Migration {
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
     // Drop the office column from the patients table
     manager
-      .alter_table(
-        Table::alter()
-          .table(Patients::Table)
-          .drop_column(Patients::Office)
-          .to_owned(),
-      )
+      .alter_table(Table::alter().table(Patients::Table).drop_column(Patients::Office).to_owned())
       .await?;
 
     // Drop the office enum type using raw SQL

@@ -17,10 +17,7 @@ pub fn create_router(state: AppState) -> Router {
     .route("/api/auth/login", post(controllers::auth::login))
     .route("/api/auth/forgot", post(controllers::auth::forgot))
     .route("/api/auth/reset", post(controllers::auth::reset))
-    .route(
-      "/api/auth/_check_access_key",
-      post(controllers::auth::check_access_key),
-    );
+    .route("/api/auth/_check_access_key", post(controllers::auth::check_access_key));
 
   // Protected routes (require authentication)
   let protected_routes = Router::new()
@@ -29,14 +26,8 @@ pub fn create_router(state: AppState) -> Router {
     // Patient routes
     .route("/api/patient/create", post(controllers::patient::create))
     .route("/api/patient/{patient_id}", get(controllers::patient::get))
-    .route(
-      "/api/patient/{patient_id}",
-      put(controllers::patient::update),
-    )
-    .route(
-      "/api/patient/{patient_id}",
-      delete(controllers::patient::delete),
-    )
+    .route("/api/patient/{patient_id}", put(controllers::patient::update))
+    .route("/api/patient/{patient_id}", delete(controllers::patient::delete))
     .route("/api/patient/_search", get(controllers::patient::search))
     .route(
       "/api/patient/{patient_id}/_generate_invoice",
@@ -44,13 +35,11 @@ pub fn create_router(state: AppState) -> Router {
     )
     .route(
       "/api/patient/{patient_id}/medical_appointments",
-      get(controllers::patient::get_medical_appointments)
-        .post(controllers::medical_appointment::create),
+      get(controllers::patient::get_medical_appointments).post(controllers::medical_appointment::create),
     )
     .route(
       "/api/patient/{patient_id}/medical_appointments/{appointment_id}",
-      put(controllers::medical_appointment::update)
-        .delete(controllers::medical_appointment::delete),
+      put(controllers::medical_appointment::update).delete(controllers::medical_appointment::delete),
     )
     .route(
       "/api/patient/{patient_id}/medical_appointments/{appointment_id}/_generate_invoice",
@@ -70,14 +59,8 @@ pub fn create_router(state: AppState) -> Router {
       post(controllers::user::generate_accountability),
     )
     .route("/api/user/my_offices", get(controllers::user::my_offices))
-    .route(
-      "/api/user/signature/_get_url",
-      post(controllers::user::get_signature_url),
-    )
-    .route(
-      "/api/user/signature/_upload",
-      post(controllers::user::upload_signature),
-    )
+    .route("/api/user/signature/_get_url", post(controllers::user::get_signature_url))
+    .route("/api/user/signature/_upload", post(controllers::user::upload_signature))
     // Practitioner office routes
     .route(
       "/api/practitioner_office/create",
@@ -94,13 +77,11 @@ pub fn create_router(state: AppState) -> Router {
     // Companies routes
     .route(
       "/api/companies",
-      post(controllers::practitioner_companies::create)
-        .get(controllers::practitioner_companies::index),
+      post(controllers::practitioner_companies::create).get(controllers::practitioner_companies::index),
     )
     .route(
       "/api/companies/{company_id}",
-      put(controllers::practitioner_companies::update)
-        .get(controllers::practitioner_companies::get),
+      put(controllers::practitioner_companies::update).get(controllers::practitioner_companies::get),
     )
     .route(
       "/api/companies/{company_id}/interventions",
@@ -145,9 +126,7 @@ pub fn create_router(state: AppState) -> Router {
     .merge(public_routes)
     .merge(protected_routes)
     // Serve static files for frontend
-    .fallback_service(
-      ServeDir::new("frontend/dist").fallback(ServeFile::new("frontend/dist/index.html")),
-    )
+    .fallback_service(ServeDir::new("frontend/dist").fallback(ServeFile::new("frontend/dist/index.html")))
     // HTTP request tracing middleware
     .layer(TraceLayer::new_for_http())
     .layer(cors_layer)

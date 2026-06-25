@@ -2,8 +2,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 /// French postal code validation regex
-static FR_ZIP_CODE_REGEX: Lazy<Regex> =
-  Lazy::new(|| Regex::new(r"^(?:0[1-9]|[1-8]\d|9[0-8])\d{3}$").unwrap());
+static FR_ZIP_CODE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(?:0[1-9]|[1-8]\d|9[0-8])\d{3}$").unwrap());
 
 fn validate_postal_code(zip_code: &str) -> bool {
   !zip_code.is_empty() && FR_ZIP_CODE_REGEX.is_match(zip_code)

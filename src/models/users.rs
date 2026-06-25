@@ -1,7 +1,4 @@
-use sea_orm::{
-  prelude::*, ActiveValue, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter,
-  TransactionTrait,
-};
+use sea_orm::{prelude::*, ActiveValue, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter, TransactionTrait};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
@@ -9,9 +6,7 @@ use validator::Validate;
 use crate::{
   auth::password,
   models::{
-    _entities::{
-      prelude::UserBusinessInformations, user_business_informations, user_practitioner_offices,
-    },
+    _entities::{prelude::UserBusinessInformations, user_business_informations, user_practitioner_offices},
     practitioner_offices, ModelError, ModelResult,
   },
   services,
@@ -75,12 +70,7 @@ impl Model {
   pub async fn get_my_offices(
     &self,
     db: &DatabaseConnection,
-  ) -> ModelResult<
-    Vec<(
-      practitioner_offices::Model,
-      user_practitioner_offices::Model,
-    )>,
-  > {
+  ) -> ModelResult<Vec<(practitioner_offices::Model, user_practitioner_offices::Model)>> {
     let offices = user_practitioner_offices::Entity::find()
       .filter(user_practitioner_offices::Column::UserId.eq(self.id))
       .find_also_related(practitioner_offices::Entity)
@@ -99,10 +89,7 @@ impl Model {
   ///
   /// When could not find user by the given token or DB query error
   pub async fn find_by_email(db: &DatabaseConnection, email: &str) -> ModelResult<Self> {
-    let user = users::Entity::find()
-      .filter(users::Column::Email.eq(email))
-      .one(db)
-      .await?;
+    let user = users::Entity::find().filter(users::Column::Email.eq(email)).one(db).await?;
     user.ok_or_else(|| ModelError::EntityNotFound)
   }
 
@@ -151,8 +138,8 @@ impl Model {
       return Err(ModelError::EntityAlreadyExists {});
     }
 
-    let password_hash = password::hash_password(&params.password)
-      .map_err(|e| ModelError::Any(format!("Password hash error: {}", e).into()))?;
+    let password_hash =
+      password::hash_password(&params.password).map_err(|e| ModelError::Any(format!("Password hash error: {}", e).into()))?;
 
     let access_key = services::user::generate_access_key();
 
@@ -173,10 +160,7 @@ impl Model {
     Ok(user)
   }
 
-  pub async fn business_information(
-    &self,
-    db: &DatabaseConnection,
-  ) -> ModelResult<user_business_informations::Model> {
+  pub async fn business_information(&self, db: &DatabaseConnection) -> ModelResult<user_business_informations::Model> {
     self
       .find_related(UserBusinessInformations)
       .one(db)
@@ -193,13 +177,9 @@ impl ActiveModel {
     Ok(())
   }
 
-  pub async fn update_password(
-    mut self,
-    db: &DatabaseConnection,
-    new_password: &str,
-  ) -> ModelResult<Model> {
-    let password_hash = password::hash_password(new_password)
-      .map_err(|e| ModelError::Any(format!("Password hash error: {}", e).into()))?;
+  pub async fn update_password(mut self, db: &DatabaseConnection, new_password: &str) -> ModelResult<Model> {
+    let password_hash =
+      password::hash_password(new_password).map_err(|e| ModelError::Any(format!("Password hash error: {}", e).into()))?;
 
     self.password = ActiveValue::Set(password_hash);
     let updated_user = self.update(db).await?;

@@ -43,25 +43,18 @@ fn build_email(args: &EmailArgs) -> Result<Message, MyErrors> {
   Ok(message)
 }
 
-fn build_simple_body(
-  builder: lettre::message::MessageBuilder,
-  args: &EmailArgs,
-) -> Result<Message, MyErrors> {
+fn build_simple_body(builder: lettre::message::MessageBuilder, args: &EmailArgs) -> Result<Message, MyErrors> {
   Ok(builder.body(args.text_body.clone())?)
 }
 
-fn build_multipart_body(
-  builder: lettre::message::MessageBuilder,
-  args: &EmailArgs,
-) -> Result<Message, MyErrors> {
+fn build_multipart_body(builder: lettre::message::MessageBuilder, args: &EmailArgs) -> Result<Message, MyErrors> {
   let mut multipart = MultiPart::mixed().singlepart(SinglePart::plain(args.text_body.clone()));
 
   for attachment in &args.attachments {
     let data = attachment.decode_data()?;
     let content_type: ContentType = attachment.content_type.parse()?;
 
-    multipart =
-      multipart.singlepart(Attachment::new(attachment.filename.clone()).body(data, content_type));
+    multipart = multipart.singlepart(Attachment::new(attachment.filename.clone()).body(data, content_type));
   }
 
   Ok(builder.multipart(multipart)?)

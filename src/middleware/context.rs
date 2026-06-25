@@ -24,14 +24,8 @@ pub struct Ctx {
 impl FromRequestParts<AppState> for Ctx {
   type Rejection = MyErrors;
 
-  async fn from_request_parts(
-    parts: &mut axum::http::request::Parts,
-    state: &AppState,
-  ) -> Result<Self, Self::Rejection> {
-    let header = parts
-      .headers
-      .get("Authorization")
-      .and_then(|h| h.to_str().ok());
+  async fn from_request_parts(parts: &mut axum::http::request::Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+    let header = parts.headers.get("Authorization").and_then(|h| h.to_str().ok());
 
     let (user, error) = match header {
       Some(h) => AuthContext::validate_auth_header(h, &state.db, &state.config.jwt.secret).await,

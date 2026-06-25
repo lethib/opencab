@@ -4,9 +4,7 @@ use opencab::models::{
   practitioner_offices::PractitionerOfficeParams,
 };
 use sea_orm::ActiveValue::Set;
-use sea_orm::{
-  prelude::Decimal, ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter,
-};
+use sea_orm::{prelude::Decimal, ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
 use std::str::FromStr;
 
 use crate::common::setup_tx;
@@ -37,10 +35,7 @@ mod create_an_office_linked_to_a_practitioner {
       .await
       .unwrap()
       .expect("link should exist");
-    assert_eq!(
-      link.revenue_share_percentage,
-      Decimal::from_str("30").unwrap()
-    );
+    assert_eq!(link.revenue_share_percentage, Decimal::from_str("30").unwrap());
 
     db.rollback().await.unwrap();
   }
@@ -111,10 +106,7 @@ mod update_an_office_revenue_share {
       .await
       .unwrap()
       .unwrap();
-    assert_eq!(
-      updated_link.revenue_share_percentage,
-      Decimal::from_str("45").unwrap()
-    );
+    assert_eq!(updated_link.revenue_share_percentage, Decimal::from_str("45").unwrap());
 
     db.rollback().await.unwrap();
   }
@@ -130,10 +122,7 @@ mod update_an_office_name {
     // Given
     let db = setup_tx().await;
     let user = UserFactory::new().create(&db).await;
-    let office = OfficeFactory::new()
-      .name("Old Name")
-      .create_for_user(&db, user.id, 25)
-      .await;
+    let office = OfficeFactory::new().name("Old Name").create_for_user(&db, user.id, 25).await;
 
     // When
     let mut active = office.into_active_model();
@@ -157,10 +146,7 @@ mod update_an_office_name_with_extra_whitespace {
     // Given
     let db = setup_tx().await;
     let user = UserFactory::new().create(&db).await;
-    let office = OfficeFactory::new()
-      .name("My Office")
-      .create_for_user(&db, user.id, 10)
-      .await;
+    let office = OfficeFactory::new().name("My Office").create_for_user(&db, user.id, 10).await;
 
     // When
     let mut active = office.into_active_model();

@@ -26,10 +26,7 @@ pub async fn generate(
         match service.fetch_signature(sig_name).await {
           Ok(data) => Some(data),
           Err(e) => {
-            tracing::warn!(
-              "Failed to fetch signature for company invoice: {}. Continuing without.",
-              e
-            );
+            tracing::warn!("Failed to fetch signature for company invoice: {}. Continuing without.", e);
             None
           }
         }

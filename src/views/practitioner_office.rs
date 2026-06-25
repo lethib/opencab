@@ -3,17 +3,9 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::models::_entities::{practitioner_offices, user_practitioner_offices};
 
-fn serialize_decimal_as_f64<S: Serializer>(
-  value: &Option<Decimal>,
-  s: S,
-) -> Result<S::Ok, S::Error> {
+fn serialize_decimal_as_f64<S: Serializer>(value: &Option<Decimal>, s: S) -> Result<S::Ok, S::Error> {
   match value {
-    Some(dec) => s.serialize_f64(
-      dec
-        .to_string()
-        .parse::<f64>()
-        .map_err(serde::ser::Error::custom)?,
-    ),
+    Some(dec) => s.serialize_f64(dec.to_string().parse::<f64>().map_err(serde::ser::Error::custom)?),
     None => s.serialize_none(),
   }
 }
@@ -25,10 +17,7 @@ pub struct PractitionerOffice {
   pub address_line_1: String,
   pub address_zip_code: String,
   pub address_city: String,
-  #[serde(
-    skip_serializing_if = "Option::is_none",
-    serialize_with = "serialize_decimal_as_f64"
-  )]
+  #[serde(skip_serializing_if = "Option::is_none", serialize_with = "serialize_decimal_as_f64")]
   pub revenue_share_percentage: Option<Decimal>,
 }
 
@@ -44,10 +33,7 @@ impl PractitionerOffice {
     }
   }
 
-  pub fn new_with_upo(
-    office: &practitioner_offices::Model,
-    upo: &user_practitioner_offices::Model,
-  ) -> Self {
+  pub fn new_with_upo(office: &practitioner_offices::Model, upo: &user_practitioner_offices::Model) -> Self {
     Self {
       revenue_share_percentage: Some(upo.revenue_share_percentage),
       ..Self::new(office)

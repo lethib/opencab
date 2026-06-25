@@ -24,17 +24,14 @@ pub struct AccountabilityGenerationArgs {
   pub year: u16,
 }
 
-const EXCEL_CONTENT_TYPE: &str =
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+const EXCEL_CONTENT_TYPE: &str = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
 pub async fn process_accountability_generation(
   args: AccountabilityGenerationArgs,
   db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
-  let start_date =
-    NaiveDate::from_ymd_opt(args.year as i32, 1, 1).ok_or(UnexpectedError::should_not_happen())?;
-  let end_date =
-    NaiveDate::from_ymd_opt(args.year as i32, 12, 31).ok_or(UnexpectedError::should_not_happen())?;
+  let start_date = NaiveDate::from_ymd_opt(args.year as i32, 1, 1).ok_or(UnexpectedError::should_not_happen())?;
+  let end_date = NaiveDate::from_ymd_opt(args.year as i32, 12, 31).ok_or(UnexpectedError::should_not_happen())?;
 
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
     .extract(db, start_date, end_date)
@@ -46,18 +43,10 @@ pub async fn process_accountability_generation(
   Ok(())
 }
 
-async fn send_accountability_by_mail(
-  mut workbook: Workbook,
-  to: String,
-  year: u16,
-) -> Result<(), MyErrors> {
+async fn send_accountability_by_mail(mut workbook: Workbook, to: String, year: u16) -> Result<(), MyErrors> {
   let wb_buffer = workbook.save_to_buffer()?;
 
-  let workbook_attachment = EmailAttachment::from_bytes(
-    format!("{}_accountability.xlsx", year),
-    EXCEL_CONTENT_TYPE,
-    &wb_buffer,
-  );
+  let workbook_attachment = EmailAttachment::from_bytes(format!("{}_accountability.xlsx", year), EXCEL_CONTENT_TYPE, &wb_buffer);
 
   let email_args = EmailArgs::new_text(
     to,
@@ -77,17 +66,13 @@ async fn send_accountability_by_mail(
   Ok(())
 }
 
-pub async fn process_appointment_extraction(
-  args: AppointmentExtractorArgs,
-  db: &DatabaseConnection,
-) -> Result<(), MyErrors> {
+pub async fn process_appointment_extraction(args: AppointmentExtractorArgs, db: &DatabaseConnection) -> Result<(), MyErrors> {
   let workbook = MedicalAppointmentExtractor::for_user(&args.user)
     .extract(db, args.start_date, args.end_date)
     .await?
     .export_appointments()?;
 
-  send_appointment_export_by_mail(workbook, args.user.email, args.start_date, args.end_date)
-    .await?;
+  send_appointment_export_by_mail(workbook, args.user.email, args.start_date, args.end_date).await?;
 
   Ok(())
 }
@@ -117,8 +102,7 @@ async fn send_appointment_export_by_mail(
       start_date.format("%d/%m/%Y"),
       end_date.format("%d/%m/%Y")
     ),
-    "Bonjour,\n\nVous trouverez tous vos rendez-vous de la période sélectionnée en pièce jointe"
-      .to_string(),
+    "Bonjour,\n\nVous trouverez tous vos rendez-vous de la période sélectionnée en pièce jointe".to_string(),
   )
   .with_attachment(workbook_attachment);
 

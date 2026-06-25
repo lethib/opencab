@@ -22,8 +22,7 @@ async fn connect_and_migrate() -> DatabaseConnection {
     std::env::set_var("SSN_SALT_KEY", "bdd_test_salt_key_for_patients!!");
   }
 
-  let db_url =
-    std::env::var("TEST_DATABASE_URL").unwrap_or_else(|_| DEFAULT_TEST_DATABASE_URL.to_string());
+  let db_url = std::env::var("TEST_DATABASE_URL").unwrap_or_else(|_| DEFAULT_TEST_DATABASE_URL.to_string());
   let db = Database::connect(&db_url).await.unwrap();
   MIGRATED
     .get_or_init(|| async { Migrator::up(&db, None).await.unwrap() })

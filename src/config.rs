@@ -77,11 +77,7 @@ fn default_log_format() -> String {
 }
 
 fn default_cors_allow_headers() -> Vec<String> {
-  vec![
-    "Authorization".to_string(),
-    "Content-Type".to_string(),
-    "Accept".to_string(),
-  ]
+  vec!["Authorization".to_string(), "Content-Type".to_string(), "Accept".to_string()]
 }
 
 fn default_cors_allow_methods() -> Vec<String> {

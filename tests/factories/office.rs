@@ -1,8 +1,6 @@
 use opencab::models::{
   _entities::user_practitioner_offices,
-  practitioner_offices::{
-    ActiveModel as OfficeActiveModel, Model as OfficeModel, PractitionerOfficeParams,
-  },
+  practitioner_offices::{ActiveModel as OfficeActiveModel, Model as OfficeModel, PractitionerOfficeParams},
   user_practitioner_offices::CreateLinkParams,
 };
 use sea_orm::{prelude::Decimal, ConnectionTrait};
@@ -49,12 +47,7 @@ impl OfficeFactory {
     .unwrap()
   }
 
-  pub async fn create_for_user(
-    self,
-    db: &impl ConnectionTrait,
-    user_id: i32,
-    revenue_share: i64,
-  ) -> OfficeModel {
+  pub async fn create_for_user(self, db: &impl ConnectionTrait, user_id: i32, revenue_share: i64) -> OfficeModel {
     let office = self.create(db).await;
     user_practitioner_offices::ActiveModel::create(
       db,

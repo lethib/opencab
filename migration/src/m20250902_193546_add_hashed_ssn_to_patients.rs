@@ -9,12 +9,7 @@ impl MigrationTrait for Migration {
     m.alter_table(
       Table::alter()
         .table(Alias::new("patients"))
-        .add_column(
-          ColumnDef::new(Alias::new("hashed_ssn"))
-            .string()
-            .unique_key()
-            .not_null(),
-        )
+        .add_column(ColumnDef::new(Alias::new("hashed_ssn")).string().unique_key().not_null())
         .to_owned(),
     )
     .await

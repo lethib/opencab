@@ -23,12 +23,7 @@ pub struct Invoice {
 }
 
 impl Invoice {
-  pub async fn send_to(
-    &self,
-    email: &str,
-    from: &users::Model,
-    profession: &Profession,
-  ) -> Result<(), MyErrors> {
+  pub async fn send_to(&self, email: &str, from: &users::Model, profession: &Profession) -> Result<(), MyErrors> {
     match self.kind {
       InvoiceKind::Patient => send_patient_invoice(email, self, from, profession).await,
       InvoiceKind::Company => send_company_invoice().await,

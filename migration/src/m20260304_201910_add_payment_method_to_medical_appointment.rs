@@ -52,9 +52,7 @@ impl MigrationTrait for Migration {
       )
       .await?;
 
-    manager
-      .drop_type(Type::drop().name(PaymentMethodEnum::Enum).to_owned())
-      .await
+    manager.drop_type(Type::drop().name(PaymentMethodEnum::Enum).to_owned()).await
   }
 }
 

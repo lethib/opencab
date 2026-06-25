@@ -78,10 +78,6 @@ impl Related<super::practitioner_offices::Entity> for Entity {
     super::user_practitioner_offices::Relation::PractitionerOffices.def()
   }
   fn via() -> Option<RelationDef> {
-    Some(
-      super::user_practitioner_offices::Relation::Users
-        .def()
-        .rev(),
-    )
+    Some(super::user_practitioner_offices::Relation::Users.def().rev())
   }
 }

@@ -41,24 +41,9 @@ impl practitioner_companies::ActiveModel {
         contact_name: ActiveValue::Set(params.contact_name.trim().to_string()),
         contact_email: ActiveValue::Set(params.contact_email.trim().to_string()),
         siret: ActiveValue::Set(params.siret.as_ref().map(|siret| siret.trim().to_string())),
-        address_line_1: ActiveValue::Set(
-          params
-            .address_line_1
-            .as_ref()
-            .map(|al1| al1.trim().to_string()),
-        ),
-        address_zip_code: ActiveValue::Set(
-          params
-            .address_zip_code
-            .as_ref()
-            .map(|zip_code| zip_code.trim().to_string()),
-        ),
-        address_city: ActiveValue::Set(
-          params
-            .address_city
-            .as_ref()
-            .map(|city| city.trim().to_string()),
-        ),
+        address_line_1: ActiveValue::Set(params.address_line_1.as_ref().map(|al1| al1.trim().to_string())),
+        address_zip_code: ActiveValue::Set(params.address_zip_code.as_ref().map(|zip_code| zip_code.trim().to_string())),
+        address_city: ActiveValue::Set(params.address_city.as_ref().map(|city| city.trim().to_string())),
         address_country: ActiveValue::Set(is_address_provided.then_some("FRANCE".to_string())),
         ..Default::default()
       }
@@ -67,11 +52,7 @@ impl practitioner_companies::ActiveModel {
     )
   }
 
-  pub async fn update<T: ConnectionTrait>(
-    mut self,
-    db: &T,
-    params: &CompanyParams,
-  ) -> Result<(), MyErrors> {
+  pub async fn update<T: ConnectionTrait>(mut self, db: &T, params: &CompanyParams) -> Result<(), MyErrors> {
     params.validate()?;
     validate_address_params(params)?;
     let is_address_provided = params.address_line_1.is_some();
@@ -80,24 +61,9 @@ impl practitioner_companies::ActiveModel {
     self.contact_name = ActiveValue::Set(params.contact_name.trim().to_string());
     self.contact_email = ActiveValue::Set(params.contact_email.trim().to_string());
     self.siret = ActiveValue::Set(params.siret.as_ref().map(|siret| siret.trim().to_string()));
-    self.address_line_1 = ActiveValue::Set(
-      params
-        .address_line_1
-        .as_ref()
-        .map(|al1| al1.trim().to_string()),
-    );
-    self.address_zip_code = ActiveValue::Set(
-      params
-        .address_zip_code
-        .as_ref()
-        .map(|zip_code| zip_code.trim().to_string()),
-    );
-    self.address_city = ActiveValue::Set(
-      params
-        .address_city
-        .as_ref()
-        .map(|city| city.trim().to_string()),
-    );
+    self.address_line_1 = ActiveValue::Set(params.address_line_1.as_ref().map(|al1| al1.trim().to_string()));
+    self.address_zip_code = ActiveValue::Set(params.address_zip_code.as_ref().map(|zip_code| zip_code.trim().to_string()));
+    self.address_city = ActiveValue::Set(params.address_city.as_ref().map(|city| city.trim().to_string()));
     self.address_country = ActiveValue::Set(is_address_provided.then_some("FRANCE".to_string()));
 
     self.save(db).await?;
@@ -107,10 +73,7 @@ impl practitioner_companies::ActiveModel {
 }
 
 fn validate_address_params(params: &CompanyParams) -> Result<(), MyErrors> {
-  if let (Some(address_line_1), Some(zip_code)) = (
-    params.address_line_1.as_ref(),
-    params.address_zip_code.as_ref(),
-  ) {
+  if let (Some(address_line_1), Some(zip_code)) = (params.address_line_1.as_ref(), params.address_zip_code.as_ref()) {
     if !is_address_valid(address_line_1, zip_code) {
       return Err(ApplicationError::unprocessable_entity("invalid_address").into());
     }

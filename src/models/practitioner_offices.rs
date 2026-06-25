@@ -39,10 +39,7 @@ impl Model {}
 
 // implement your write-oriented logic here
 impl ActiveModel {
-  pub async fn create<T: ConnectionTrait>(
-    db: &T,
-    params: &PractitionerOfficeParams,
-  ) -> Result<Model, MyErrors> {
+  pub async fn create<T: ConnectionTrait>(db: &T, params: &PractitionerOfficeParams) -> Result<Model, MyErrors> {
     if !is_address_valid(&params.address_line_1, &params.address_zip_code) {
       return Err(ApplicationError::unprocessable_entity("invalid_address").into());
     }

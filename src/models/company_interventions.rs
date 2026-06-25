@@ -18,10 +18,7 @@ pub struct InterventionParams {
 const ALLOWED_VAT_VALUES: [f32; 4] = [0.0, 5.5, 10.0, 20.0];
 
 impl company_interventions::Model {
-  pub async fn company(
-    &self,
-    db: &DatabaseConnection,
-  ) -> Result<practitioner_companies::Model, MyErrors> {
+  pub async fn company(&self, db: &DatabaseConnection) -> Result<practitioner_companies::Model, MyErrors> {
     self
       .find_related(prelude::PractitionerCompanies)
       .one(db)
@@ -60,11 +57,7 @@ impl company_interventions::ActiveModel {
     )
   }
 
-  pub async fn update<T: ConnectionTrait>(
-    mut self,
-    db: &T,
-    params: &InterventionParams,
-  ) -> Result<(), MyErrors> {
+  pub async fn update<T: ConnectionTrait>(mut self, db: &T, params: &InterventionParams) -> Result<(), MyErrors> {
     validate_vat_values(&params.vat_rate)?;
 
     let unit_price_in_cents = (params.unit_price * 100.0)
@@ -85,9 +78,7 @@ impl company_interventions::ActiveModel {
 }
 
 fn validate_vat_values(vat_rate: &Decimal) -> Result<(), MyErrors> {
-  let vat_rate = vat_rate
-    .to_f32()
-    .ok_or(UnexpectedError::should_not_happen())?;
+  let vat_rate = vat_rate.to_f32().ok_or(UnexpectedError::should_not_happen())?;
 
   if !ALLOWED_VAT_VALUES.contains(&vat_rate) {
     return Err(ApplicationError::unprocessable_entity("invalid_vat_values").into());

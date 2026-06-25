@@ -12,8 +12,7 @@ pub async fn create(
   linked_to_user: &users::Model,
   db: &DatabaseConnection,
 ) -> Result<PatientModel, MyErrors> {
-  let created_patient =
-    patients::ActiveModel::create(db, patient_params, linked_to_user.id).await?;
+  let created_patient = patients::ActiveModel::create(db, patient_params, linked_to_user.id).await?;
 
   Ok(created_patient)
 }

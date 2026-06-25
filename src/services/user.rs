@@ -1,12 +1,7 @@
 use crate::models::_entities::user_business_informations::ActiveModel;
-use sea_orm::{
-  ActiveModelTrait, ActiveValue::Set, DatabaseConnection, DbErr, IntoActiveModel, ModelTrait,
-};
+use sea_orm::{ActiveModelTrait, ActiveValue::Set, DatabaseConnection, DbErr, IntoActiveModel, ModelTrait};
 
-use crate::models::{
-  _entities::user_business_informations, user_business_informations::CreateBusinessInformation,
-  users,
-};
+use crate::models::{_entities::user_business_informations, user_business_informations::CreateBusinessInformation, users};
 
 pub async fn save_business_information(
   params: &CreateBusinessInformation,

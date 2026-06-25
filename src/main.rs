@@ -16,10 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   setup_logging(&config.logger.level, &config.logger.format);
 
-  tracing::info!(
-    "Starting opencab application (environment: {})",
-    environment
-  );
+  tracing::info!("Starting opencab application (environment: {})", environment);
 
   let mut db_options = sea_orm::ConnectOptions::new(&config.database.url);
   db_options.sqlx_logging(config.database.enable_logging);
@@ -65,9 +62,7 @@ fn setup_logging(level: &str, format: &str) {
   let registry = tracing_subscriber::registry().with(env_filter);
 
   if format == "json" {
-    registry
-      .with(tracing_subscriber::fmt::layer().json())
-      .init();
+    registry.with(tracing_subscriber::fmt::layer().json()).init();
   } else {
     registry.with(tracing_subscriber::fmt::layer()).init();
   }
@@ -75,9 +70,7 @@ fn setup_logging(level: &str, format: &str) {
 
 async fn shutdown_signal() {
   let ctrl_c = async {
-    signal::ctrl_c()
-      .await
-      .expect("Failed to install Ctrl+C handler");
+    signal::ctrl_c().await.expect("Failed to install Ctrl+C handler");
   };
 
   #[cfg(unix)]

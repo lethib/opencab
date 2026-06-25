@@ -22,11 +22,7 @@ impl CompanyFactory {
     Self::default()
   }
 
-  pub async fn create_for_user(
-    self,
-    db: &impl ConnectionTrait,
-    user_id: i32,
-  ) -> practitioner_companies::Model {
+  pub async fn create_for_user(self, db: &impl ConnectionTrait, user_id: i32) -> practitioner_companies::Model {
     practitioner_companies::ActiveModel::create(
       db,
       user_id,
