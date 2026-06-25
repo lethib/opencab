@@ -25,10 +25,23 @@ interface Props {
   currentUser: MeResponse;
 }
 
+const formatIBAN = (value: string) =>
+  value
+    .replace(/[^A-Z0-9]/gi, "")
+    .toUpperCase()
+    .match(/.{1,4}/g)
+    ?.join(" ") ?? "";
+
 const bankingInfoSchema = z.object({
   beneficiary_name: z.string().trim().min(1),
-  iban: z.string().trim().min(1),
-  bic: z.string().trim().min(1),
+  iban: z
+    .string()
+    .transform((v) => v.replace(/\s/g, "").toUpperCase())
+    .pipe(z.string().length(27)),
+  bic: z
+    .string()
+    .transform((v) => v.trim().toUpperCase())
+    .pipe(z.string().refine((v) => v.length === 8 || v.length === 11)),
 });
 
 export const BankingCard = ({ currentUser }: Props) => {
@@ -48,7 +61,7 @@ export const BankingCard = ({ currentUser }: Props) => {
       bankingForm.reset({
         beneficiary_name:
           currentUser.business_information.beneficiary_name || "",
-        iban: currentUser.business_information.iban || "",
+        iban: formatIBAN(currentUser.business_information.iban || ""),
         bic: currentUser.business_information.bic || "",
       });
     }
@@ -112,6 +125,9 @@ export const BankingCard = ({ currentUser }: Props) => {
               type="text"
               placeholder={t("bankingInfo.ibanPlaceholder")}
               className="pl-10 h-11 font-mono tracking-wide"
+              onChange={(e) =>
+                bankingForm.setValue("iban", formatIBAN(e.target.value))
+              }
               icon={
                 <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               }

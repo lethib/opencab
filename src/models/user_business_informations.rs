@@ -85,8 +85,8 @@ impl ActiveModel {
     params: BankingInformationParams,
   ) -> Result<(), DbErr> {
     self.beneficiary_name = ActiveValue::Set(Some(params.beneficiary_name));
-    self.iban = ActiveValue::Set(Some(params.iban));
-    self.bic = ActiveValue::Set(Some(params.bic));
+    self.iban = ActiveValue::Set(Some(params.iban.trim().to_string()));
+    self.bic = ActiveValue::Set(Some(params.bic.trim().to_string()));
 
     self.save(db).await?;
 
