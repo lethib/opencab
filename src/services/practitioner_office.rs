@@ -1,6 +1,6 @@
 use sea_orm::{
-  prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection,
-  EntityTrait, IntoActiveModel, QueryFilter, TransactionTrait,
+  prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel,
+  QueryFilter, TransactionTrait,
 };
 
 use crate::models::{
@@ -18,11 +18,7 @@ pub async fn update(
   revenue_share_percentage: Decimal,
   db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
-  let office_id = office
-    .id
-    .clone()
-    .take()
-    .ok_or(UnexpectedError::should_not_happen())?;
+  let office_id = office.id.clone().take().ok_or(UnexpectedError::should_not_happen())?;
 
   let mut user_practitioner_office = user_practitioner_offices::Entity::find()
     .filter(user_practitioner_offices::Column::PractitionerOfficeId.eq(office_id))
@@ -57,8 +53,7 @@ pub async fn create(
 ) -> Result<(), MyErrors> {
   let db_transaction = db.begin().await?;
 
-  let created_practitioner_office =
-    practitioner_offices::ActiveModel::create(&db_transaction, params).await?;
+  let created_practitioner_office = practitioner_offices::ActiveModel::create(&db_transaction, params).await?;
 
   user_practitioner_offices::ActiveModel::create(
     &db_transaction,

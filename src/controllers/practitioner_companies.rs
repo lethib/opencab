@@ -35,28 +35,18 @@ pub async fn index(ctx: Ctx) -> Result<Json<Vec<practitioner_companies::Model>>,
   Ok(Json(companies))
 }
 
-pub async fn get(
-  ctx: Ctx,
-  Path(company_id): Path<i32>,
-) -> Result<Json<practitioner_companies::Model>, MyErrors> {
+pub async fn get(ctx: Ctx, Path(company_id): Path<i32>) -> Result<Json<practitioner_companies::Model>, MyErrors> {
   let company = practitioner_companies::Entity::find_by_id(company_id)
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&company)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
   Ok(Json(company))
 }
 
-pub async fn create(
-  ctx: Ctx,
-  Json(params): Json<CompanyParams>,
-) -> Result<status::StatusCode, MyErrors> {
+pub async fn create(ctx: Ctx, Json(params): Json<CompanyParams>) -> Result<status::StatusCode, MyErrors> {
   practitioner_companies::ActiveModel::create(&ctx.db, ctx.current_user.id, &params).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
@@ -72,11 +62,7 @@ pub async fn update(
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&company)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
   company.into_active_model().update(&ctx.db, &params).await?;
 
@@ -92,11 +78,7 @@ pub async fn list_interventions(
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&company)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
   let interventions = company_interventions::Entity::find()
     .filter(company_interventions::Column::CompanyId.eq(company_id))
@@ -117,15 +99,10 @@ pub async fn generate_invoice(
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&company)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
   let issue_date = chrono::NaiveDate::parse_from_str(&params.invoice_date, "%Y-%m-%d")?;
-  let vat_rate =
-    Decimal::from_str(&params.vat_rate).map_err(ApplicationError::unprocessable_entity)?;
+  let vat_rate = Decimal::from_str(&params.vat_rate).map_err(ApplicationError::unprocessable_entity)?;
 
   let intervention_params = InterventionParams {
     quantity: params.quantity,
@@ -135,26 +112,16 @@ pub async fn generate_invoice(
     object: params.description,
   };
 
-  let intervention = company_interventions::ActiveModel::create(
-    &ctx.db,
-    ctx.current_user.id,
-    company_id,
-    &intervention_params,
-  )
-  .await?;
+  let intervention =
+    company_interventions::ActiveModel::create(&ctx.db, ctx.current_user.id, company_id, &intervention_params).await?;
 
   let practitioner_office = practitioner_offices::Entity::find_by_id(params.practitioner_office_id)
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  let invoice = services::invoice::company_invoice::generate(
-    &intervention,
-    &ctx.current_user,
-    practitioner_office,
-    &ctx.db,
-  )
-  .await?;
+  let invoice =
+    services::invoice::company_invoice::generate(&intervention, &ctx.current_user, practitioner_office, &ctx.db).await?;
 
   Ok(Json(serde_json::json!({
     "pdf_data": base64::prelude::BASE64_STANDARD.encode(invoice.data),

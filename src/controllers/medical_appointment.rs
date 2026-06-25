@@ -22,10 +22,7 @@ pub struct MedicalAppointmentPayload {
   payment_method: Option<PaymentMethod>,
 }
 
-pub async fn delete(
-  ctx: Ctx,
-  Path((patient_id, appointment_id)): Path<(i32, i32)>,
-) -> Result<status::StatusCode, MyErrors> {
+pub async fn delete(ctx: Ctx, Path((patient_id, appointment_id)): Path<(i32, i32)>) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
     .filter(medical_appointments::Column::PatientId.eq(patient_id))
     .one(&ctx.db)
@@ -75,14 +72,8 @@ pub async fn generate_invoice(
     office_id: medical_appointment.practitioner_office(&ctx.db).await?.id,
   };
 
-  let generated_invoice = services::invoice::patient_invoice::generate(
-    &patient,
-    &invoice_generation_params,
-    &ctx.current_user,
-    true,
-    &ctx.db,
-  )
-  .await?;
+  let generated_invoice =
+    services::invoice::patient_invoice::generate(&patient, &invoice_generation_params, &ctx.current_user, true, &ctx.db).await?;
 
   if let Some(email) = patient.email {
     generated_invoice

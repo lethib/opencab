@@ -37,10 +37,7 @@ impl MigrationTrait for Migration {
           .foreign_key(
             ForeignKey::create()
               .name("fk_medical_appointments_practitioner_office_id")
-              .from(
-                MedicalAppointments::Table,
-                MedicalAppointments::PractitionerOfficeId,
-              )
+              .from(MedicalAppointments::Table, MedicalAppointments::PractitionerOfficeId)
               .to(PractitionerOffices::Table, PractitionerOffices::Id)
               .on_delete(ForeignKeyAction::Cascade)
               .on_update(ForeignKeyAction::Cascade),
@@ -70,11 +67,7 @@ impl MigrationTrait for Migration {
       .alter_table(
         Table::alter()
           .table(MedicalAppointments::Table)
-          .modify_column(
-            ColumnDef::new(MedicalAppointments::UserId)
-              .integer()
-              .not_null(),
-          )
+          .modify_column(ColumnDef::new(MedicalAppointments::UserId).integer().not_null())
           .to_owned(),
       )
       .await?;
@@ -83,11 +76,7 @@ impl MigrationTrait for Migration {
       .alter_table(
         Table::alter()
           .table(MedicalAppointments::Table)
-          .modify_column(
-            ColumnDef::new(MedicalAppointments::PatientId)
-              .integer()
-              .not_null(),
-          )
+          .modify_column(ColumnDef::new(MedicalAppointments::PatientId).integer().not_null())
           .to_owned(),
       )
       .await?;
@@ -96,11 +85,7 @@ impl MigrationTrait for Migration {
       .alter_table(
         Table::alter()
           .table(MedicalAppointments::Table)
-          .modify_column(
-            ColumnDef::new(MedicalAppointments::PractitionerOfficeId)
-              .integer()
-              .not_null(),
-          )
+          .modify_column(ColumnDef::new(MedicalAppointments::PractitionerOfficeId).integer().not_null())
           .to_owned(),
       )
       .await?;

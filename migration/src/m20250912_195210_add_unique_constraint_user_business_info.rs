@@ -20,11 +20,7 @@ impl MigrationTrait for Migration {
 
   async fn down(&self, m: &SchemaManager) -> Result<(), DbErr> {
     // Drop the unique constraint
-    m.drop_index(
-      Index::drop()
-        .name("idx_user_business_informations_user_id_unique")
-        .to_owned(),
-    )
-    .await
+    m.drop_index(Index::drop().name("idx_user_business_informations_user_id_unique").to_owned())
+      .await
   }
 }

@@ -1,9 +1,7 @@
 pub mod user_factory;
 
 use migration::{Migrator, MigratorTrait};
-use sea_orm::{
-  ConnectionTrait, Database, DatabaseConnection, DatabaseTransaction, TransactionTrait,
-};
+use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DatabaseTransaction, TransactionTrait};
 use tokio::sync::OnceCell;
 
 const DEFAULT_TEST_DATABASE_URL: &str = "postgres://loco:loco@localhost:5431/opencab_test";
@@ -14,8 +12,7 @@ const DEFAULT_TEST_DATABASE_URL: &str = "postgres://loco:loco@localhost:5431/ope
 static MIGRATED: OnceCell<()> = OnceCell::const_new();
 
 async fn connect() -> DatabaseConnection {
-  let db_url =
-    std::env::var("TEST_DATABASE_URL").unwrap_or_else(|_| DEFAULT_TEST_DATABASE_URL.to_string());
+  let db_url = std::env::var("TEST_DATABASE_URL").unwrap_or_else(|_| DEFAULT_TEST_DATABASE_URL.to_string());
   Database::connect(&db_url).await.unwrap()
 }
 

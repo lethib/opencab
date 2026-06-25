@@ -17,9 +17,7 @@ pub struct SearchParams {
 use crate::{
   middleware::context::Ctx,
   models::{
-    _entities::{
-      medical_appointments, patients, practitioner_offices, sea_orm_active_enums::PaymentMethod,
-    },
+    _entities::{medical_appointments, patients, practitioner_offices, sea_orm_active_enums::PaymentMethod},
     medical_appointments::{ActiveModel as MedicalAppointments, CreateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
     patients::CreatePatientParams,
@@ -34,11 +32,7 @@ pub async fn get(ctx: Ctx, Path(patient_id): Path<i32>) -> Result<Json<PatientRe
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&patient)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&patient).await.run_complete()?;
 
   Ok(Json(PatientResponse::new(&patient)))
 }
@@ -62,11 +56,7 @@ pub async fn update(
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&patient)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&patient).await.run_complete()?;
 
   services::patients::update(&patient, &patient_params, &ctx.db).await?;
 
@@ -79,34 +69,21 @@ pub async fn delete(ctx: Ctx, Path(patient_id): Path<i32>) -> Result<status::Sta
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&patient)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&patient).await.run_complete()?;
 
   patient.delete(&ctx.db).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
 
-pub async fn search(
-  ctx: Ctx,
-  Query(params): Query<SearchParams>,
-) -> Result<Json<serde_json::Value>, MyErrors> {
+pub async fn search(ctx: Ctx, Query(params): Query<SearchParams>) -> Result<Json<serde_json::Value>, MyErrors> {
   let page = params.page.unwrap_or(1);
 
-  let query = if params.q.trim().is_empty() {
-    ""
-  } else {
-    &params.q
-  };
+  let query = if params.q.trim().is_empty() { "" } else { &params.q };
 
-  let (patients, total_pages) =
-    services::patients::search_paginated(query, page, &ctx.current_user, &ctx.db).await?;
+  let (patients, total_pages) = services::patients::search_paginated(query, page, &ctx.current_user, &ctx.db).await?;
 
-  let patient_responses: Vec<PatientResponse> =
-    patients.iter().map(PatientResponse::from_model).collect();
+  let patient_responses: Vec<PatientResponse> = patients.iter().map(PatientResponse::from_model).collect();
 
   Ok(Json(serde_json::json!({
     "paginated_data": patient_responses,
@@ -137,11 +114,7 @@ pub async fn generate_invoice(
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&patient)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&patient).await.run_complete()?;
 
   if params.invoice_params.amount <= 0.0 {
     return Err(ApplicationError::unprocessable_entity("amount_below_zero").into());
@@ -151,14 +124,8 @@ pub async fn generate_invoice(
     return Err(ApplicationError::unprocessable_entity("max_amount_reached").into());
   }
 
-  let generated_invoice = services::invoice::patient_invoice::generate(
-    &patient,
-    &params.invoice_params,
-    &ctx.current_user,
-    false,
-    &ctx.db,
-  )
-  .await?;
+  let generated_invoice =
+    services::invoice::patient_invoice::generate(&patient, &params.invoice_params, &ctx.current_user, false, &ctx.db).await?;
 
   if params.should_be_sent_by_email {
     let user_bi = ctx.current_user.business_information(&ctx.db).await?;

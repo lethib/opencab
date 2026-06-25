@@ -2,9 +2,7 @@ use sea_orm::DatabaseConnection;
 
 use crate::{
   auth::{context::AuthContext, resource::Resource},
-  models::my_errors::{
-    authentication_error::AuthenticationError, unexpected_error::UnexpectedError, MyErrors,
-  },
+  models::my_errors::{authentication_error::AuthenticationError, unexpected_error::UnexpectedError, MyErrors},
 };
 
 pub struct AuthStatement<'user, 'db> {
@@ -41,9 +39,7 @@ impl<'user, 'db> AuthStatement<'user, 'db> {
   }
 
   pub async fn user_owning_resource<T: Resource>(self, resource: &T) -> Self {
-    let is_owned = resource
-      .is_owned_by_user(self.auth_context.current_user.id, self.db)
-      .await;
+    let is_owned = resource.is_owned_by_user(self.auth_context.current_user.id, self.db).await;
 
     self.check(
       |_| is_owned,

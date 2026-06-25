@@ -24,12 +24,7 @@ impl MigrationTrait for Migration {
 
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
     manager
-      .alter_table(
-        Table::alter()
-          .table(Users::Table)
-          .drop_column(Users::PhoneNumber)
-          .to_owned(),
-      )
+      .alter_table(Table::alter().table(Users::Table).drop_column(Users::PhoneNumber).to_owned())
       .await
   }
 }

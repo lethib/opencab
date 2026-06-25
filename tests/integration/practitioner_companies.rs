@@ -214,9 +214,7 @@ mod update_a_company {
       // Given
       let app = setup_http().await;
       let user = UserFactory::new().create(&app.db).await;
-      let company = CompanyFactory::new()
-        .create_for_user(&app.db, user.id)
-        .await;
+      let company = CompanyFactory::new().create_for_user(&app.db, user.id).await;
 
       // When
       let response = app
@@ -298,9 +296,7 @@ mod update_a_company {
       let app = setup_http().await;
       let owner = UserFactory::new().create(&app.db).await;
       let other = UserFactory::new().create(&app.db).await;
-      let company = CompanyFactory::new()
-        .create_for_user(&app.db, owner.id)
-        .await;
+      let company = CompanyFactory::new().create_for_user(&app.db, owner.id).await;
       let token = token_for(&other, &app.config);
 
       // When
@@ -342,9 +338,7 @@ mod update_a_company {
       // Given
       let app = setup_http().await;
       let user = UserFactory::new().create(&app.db).await;
-      let company = CompanyFactory::new()
-        .create_for_user(&app.db, user.id)
-        .await;
+      let company = CompanyFactory::new().create_for_user(&app.db, user.id).await;
       let token = token_for(&user, &app.config);
 
       // When

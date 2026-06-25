@@ -1,10 +1,7 @@
 use chrono::NaiveDate;
 use opencab::models::{
   _entities::sea_orm_active_enums::PaymentMethod,
-  medical_appointments::{
-    ActiveModel as AppointmentActiveModel, CreateMedicalAppointmentParams,
-    Model as AppointmentModel,
-  },
+  medical_appointments::{ActiveModel as AppointmentActiveModel, CreateMedicalAppointmentParams, Model as AppointmentModel},
 };
 use sea_orm::ConnectionTrait;
 
@@ -44,13 +41,7 @@ impl AppointmentFactory {
     self
   }
 
-  pub async fn create(
-    self,
-    db: &impl ConnectionTrait,
-    user_id: i32,
-    patient_id: i32,
-    office_id: i32,
-  ) -> AppointmentModel {
+  pub async fn create(self, db: &impl ConnectionTrait, user_id: i32, patient_id: i32, office_id: i32) -> AppointmentModel {
     AppointmentActiveModel::create(
       db,
       &CreateMedicalAppointmentParams {

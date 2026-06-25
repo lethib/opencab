@@ -16,11 +16,7 @@ impl MigrationTrait for Migration {
       .alter_table(
         Table::alter()
           .table(MedicalAppointments::Table)
-          .add_column(
-            ColumnDef::new(MedicalAppointments::PriceInCents)
-              .integer()
-              .null(),
-          )
+          .add_column(ColumnDef::new(MedicalAppointments::PriceInCents).integer().null())
           .to_owned(),
       )
       .await?;
@@ -40,11 +36,7 @@ impl MigrationTrait for Migration {
       .alter_table(
         Table::alter()
           .table(MedicalAppointments::Table)
-          .modify_column(
-            ColumnDef::new(MedicalAppointments::PriceInCents)
-              .integer()
-              .not_null(),
-          )
+          .modify_column(ColumnDef::new(MedicalAppointments::PriceInCents).integer().not_null())
           .to_owned(),
       )
       .await

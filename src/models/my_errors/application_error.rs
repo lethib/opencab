@@ -27,9 +27,7 @@ impl ApplicationError {
   }
 
   pub fn not_found() -> Self {
-    ApplicationError {
-      kind: Kind::NotFound,
-    }
+    ApplicationError { kind: Kind::NotFound }
   }
 }
 

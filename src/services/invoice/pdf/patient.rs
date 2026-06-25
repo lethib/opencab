@@ -110,10 +110,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .text()
       .set_font(Font::Helvetica, 10.0)
       .at(self.margin, self.y_position)
-      .write(&format!(
-        "N°SIRET : {}",
-        self.args.business_info.siret_number
-      ))
+      .write(&format!("N°SIRET : {}", self.args.business_info.siret_number))
       .map_err(UnexpectedError::new)?;
     self.y_position -= mm(12.0);
 
@@ -163,10 +160,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
   }
 
   fn build_patient_information(&mut self) -> Result<(), MyErrors> {
-    let patient_full_name = format!(
-      "{} {}",
-      self.args.patient.last_name, self.args.patient.first_name
-    );
+    let patient_full_name = format!("{} {}", self.args.patient.last_name, self.args.patient.first_name);
     let full_text = format!("Reçu de : {}", patient_full_name);
 
     self
@@ -222,9 +216,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
     let addr_y = self.y_position;
     let address_text = format!(
       "Adresse : {} – {} {}",
-      self.args.patient.address_line_1,
-      self.args.patient.address_zip_code,
-      self.args.patient.address_city
+      self.args.patient.address_line_1, self.args.patient.address_zip_code, self.args.patient.address_city
     );
     self
       .page
@@ -279,10 +271,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
 
   fn build_footer(&mut self) -> Result<(), MyErrors> {
     let invoice_date_str = self.args.date.format("%d/%m/%Y").to_string();
-    let date_location = format!(
-      "Fait à {}, le {}",
-      self.args.office.address_city, invoice_date_str
-    );
+    let date_location = format!("Fait à {}, le {}", self.args.office.address_city, invoice_date_str);
 
     // Right align date
     let date_x = mm(230.0) - self.margin - mm(85.0);
@@ -301,10 +290,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
           tracing::info!("Successfully embedded signature image");
         }
         Err(e) => {
-          tracing::warn!(
-            "Failed to embed signature image: {}. Using text fallback.",
-            e
-          );
+          tracing::warn!("Failed to embed signature image: {}. Using text fallback.", e);
         }
       }
     }
@@ -339,10 +325,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
   #[allow(clippy::wrong_self_convention)]
   pub(in crate::services::invoice) fn to_bytes(mut self) -> Result<Vec<u8>, MyErrors> {
     self.doc.add_page(self.page);
-    self
-      .doc
-      .to_bytes()
-      .map_err(|e| UnexpectedError::new(e).into())
+    self.doc.to_bytes().map_err(|e| UnexpectedError::new(e).into())
   }
 
   fn setup_document() -> (Document, Page, f64, f64) {

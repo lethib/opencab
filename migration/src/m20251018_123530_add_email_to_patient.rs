@@ -29,12 +29,7 @@ impl MigrationTrait for Migration {
 
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
     manager
-      .alter_table(
-        Table::alter()
-          .table(Patients::Table)
-          .drop_column(Patients::Email)
-          .to_owned(),
-      )
+      .alter_table(Table::alter().table(Patients::Table).drop_column(Patients::Email).to_owned())
       .await
   }
 }

@@ -26,9 +26,7 @@ impl MigrationTrait for Migration {
       .await?;
     manager
       .get_connection()
-      .execute_unprepared(
-        "UPDATE patients SET hashed_ssn = 'empty_hashed_ssn' WHERE hashed_ssn IS NULL",
-      )
+      .execute_unprepared("UPDATE patients SET hashed_ssn = 'empty_hashed_ssn' WHERE hashed_ssn IS NULL")
       .await?;
 
     manager

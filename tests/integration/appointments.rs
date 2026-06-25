@@ -8,8 +8,7 @@ use sea_orm::{EntityTrait, IntoActiveModel};
 
 use crate::common::setup_tx;
 use crate::factories::{
-  medical_appointment::AppointmentFactory, office::OfficeFactory, patient::PatientFactory,
-  user::UserFactory,
+  medical_appointment::AppointmentFactory, office::OfficeFactory, patient::PatientFactory, user::UserFactory,
 };
 
 struct Background {
@@ -57,10 +56,7 @@ mod create_an_appointment {
       .await;
 
     // Then
-    assert_eq!(
-      appointment.date,
-      NaiveDate::parse_from_str("2026-03-15", "%Y-%m-%d").unwrap()
-    );
+    assert_eq!(appointment.date, NaiveDate::parse_from_str("2026-03-15", "%Y-%m-%d").unwrap());
 
     bg.db.rollback().await.unwrap();
   }
@@ -264,14 +260,8 @@ mod extract_appointments_with_multiple_offices {
 
     // Then
     assert_eq!(results.len(), 2);
-    let central = results
-      .iter()
-      .find(|r| r.office.name == "Cabinet Central")
-      .unwrap();
-    let sud = results
-      .iter()
-      .find(|r| r.office.name == "Cabinet Sud")
-      .unwrap();
+    let central = results.iter().find(|r| r.office.name == "Cabinet Central").unwrap();
+    let sud = results.iter().find(|r| r.office.name == "Cabinet Sud").unwrap();
     assert_eq!(central.revenue_share_percentage, 70.0);
     assert_eq!(sud.revenue_share_percentage, 50.0);
 

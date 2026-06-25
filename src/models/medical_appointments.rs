@@ -45,10 +45,7 @@ impl ActiveModelBehavior for ActiveModel {
 
 // implement your read-oriented logic here
 impl Model {
-  pub async fn practitioner_office<C: ConnectionTrait>(
-    &self,
-    db: &C,
-  ) -> Result<practitioner_offices::Model, MyErrors> {
+  pub async fn practitioner_office<C: ConnectionTrait>(&self, db: &C) -> Result<practitioner_offices::Model, MyErrors> {
     self
       .find_related(practitioner_offices::Entity)
       .one(db)
@@ -59,11 +56,7 @@ impl Model {
 
 // implement your write-oriented logic here
 impl ActiveModel {
-  pub async fn update<T: ConnectionTrait>(
-    mut self,
-    db: &T,
-    params: &UpdateMedicalAppointmentParams,
-  ) -> Result<(), MyErrors> {
+  pub async fn update<T: ConnectionTrait>(mut self, db: &T, params: &UpdateMedicalAppointmentParams) -> Result<(), MyErrors> {
     self.date = ActiveValue::Set(params.date);
     self.practitioner_office_id = ActiveValue::Set(params.practitioner_office_id);
     self.price_in_cents = ActiveValue::Set(params.price_in_cents);
@@ -74,10 +67,7 @@ impl ActiveModel {
     Ok(())
   }
 
-  pub async fn create<T: ConnectionTrait>(
-    db: &T,
-    params: &CreateMedicalAppointmentParams,
-  ) -> Result<Model, MyErrors> {
+  pub async fn create<T: ConnectionTrait>(db: &T, params: &CreateMedicalAppointmentParams) -> Result<Model, MyErrors> {
     let created_medical_appointment = ActiveModel {
       user_id: ActiveValue::Set(params.user_id),
       patient_id: ActiveValue::Set(params.patient_id),

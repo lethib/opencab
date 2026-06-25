@@ -38,8 +38,7 @@ pub(super) fn embed_signature_image(
   use image::ImageEncoder;
   use oxidize_pdf::graphics::Image;
 
-  let img =
-    image::load_from_memory(&image_bytes).map_err(|e| format!("Failed to decode image: {}", e))?;
+  let img = image::load_from_memory(&image_bytes).map_err(|e| format!("Failed to decode image: {}", e))?;
 
   let rgb = img.to_rgb8();
   let (pixel_width, pixel_height) = rgb.dimensions();
@@ -55,16 +54,10 @@ pub(super) fn embed_signature_image(
 
   let mut jpg_data: Vec<u8> = Vec::new();
   JpegEncoder::new_with_quality(&mut jpg_data, 95)
-    .write_image(
-      rgb.as_raw(),
-      pixel_width,
-      pixel_height,
-      image::ExtendedColorType::Rgb8,
-    )
+    .write_image(rgb.as_raw(), pixel_width, pixel_height, image::ExtendedColorType::Rgb8)
     .map_err(|e| format!("Failed to encode as JPEG: {}", e))?;
 
-  let image_obj = Image::from_jpeg_data(jpg_data)
-    .map_err(|e| format!("Failed to load signature image: {}", e))?;
+  let image_obj = Image::from_jpeg_data(jpg_data).map_err(|e| format!("Failed to load signature image: {}", e))?;
 
   page.add_image("signature", image_obj);
   page

@@ -47,11 +47,7 @@ impl MonthToString for u32 {
   }
 }
 
-fn write_headers(
-  worksheet: &mut Worksheet,
-  headers: &[(&str, u16)],
-  format: &Format,
-) -> Result<(), MyErrors> {
+fn write_headers(worksheet: &mut Worksheet, headers: &[(&str, u16)], format: &Format) -> Result<(), MyErrors> {
   for (col, (label, width)) in headers.iter().enumerate() {
     worksheet.write_with_format(0, col as u16, *label, format)?;
     worksheet.set_column_width(col as u16, *width)?;
@@ -81,8 +77,7 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
 
     for detail in self {
       let price_cents = detail.appointment.price_in_cents as i64;
-      let hand_back_cents =
-        (price_cents as f64 * detail.revenue_share_percentage / 100.0).round() as i64;
+      let hand_back_cents = (price_cents as f64 * detail.revenue_share_percentage / 100.0).round() as i64;
       annual_revenue_cents += price_cents;
       annual_hand_back_cents += hand_back_cents;
     }
@@ -98,20 +93,13 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
       .set_background_color(Color::Green)
       .set_font_color(Color::White);
     let date_format = Format::new().set_num_format("dd/mm/yyyy");
-    let section_label_format = Format::new()
-      .set_bold()
-      .set_background_color(Color::RGB(0xBDD7EE));
-    let subtotal_label_format = Format::new()
-      .set_italic()
-      .set_background_color(Color::RGB(0xDDEBF7));
+    let section_label_format = Format::new().set_bold().set_background_color(Color::RGB(0xBDD7EE));
+    let subtotal_label_format = Format::new().set_italic().set_background_color(Color::RGB(0xDDEBF7));
     let subtotal_value_format = Format::new()
       .set_italic()
       .set_background_color(Color::RGB(0xDDEBF7))
       .set_num_format("0.00");
-    let total_format = Format::new()
-      .set_bold()
-      .set_background_color(Color::Gray)
-      .set_font_size(12);
+    let total_format = Format::new().set_bold().set_background_color(Color::Gray).set_font_size(12);
 
     // Dashboard sheet (first)
     let dashboard = workbook.add_worksheet().set_name("Récapitulatif")?;
@@ -153,10 +141,7 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
       // Group appointments by office
       let mut by_office: HashMap<String, Vec<&MedicalAppointmentDetail>> = HashMap::new();
       for detail in monthly_appointments.iter() {
-        by_office
-          .entry(detail.office.name.clone())
-          .or_default()
-          .push(*detail);
+        by_office.entry(detail.office.name.clone()).or_default().push(*detail);
       }
 
       let mut sorted_offices: Vec<_> = by_office.iter().collect();
@@ -169,14 +154,7 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
 
       for (office_name, office_appointments) in sorted_offices {
         // Section header row for the cabinet
-        worksheet.merge_range(
-          current_row,
-          0,
-          current_row,
-          7,
-          office_name.as_str(),
-          &section_label_format,
-        )?;
+        worksheet.merge_range(current_row, 0, current_row, 7, office_name.as_str(), &section_label_format)?;
         current_row += 1;
 
         let mut office_revenue: f64 = 0.0;
@@ -202,11 +180,7 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
           worksheet.write(
             current_row,
             3,
-            detail
-              .appointment
-              .payment_method
-              .as_ref()
-              .map(|p| p.to_french()),
+            detail.appointment.payment_method.as_ref().map(|p| p.to_french()),
           )?;
           worksheet.write(current_row, 4, detail.office.name.clone())?;
           worksheet.write_with_format(current_row, 5, price, &revenue_format)?;
@@ -245,8 +219,7 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
   }
 
   fn export_appointments(&self) -> Result<Workbook, MyErrors> {
-    let mut appointments_by_office: HashMap<String, Vec<&MedicalAppointmentDetail>> =
-      HashMap::new();
+    let mut appointments_by_office: HashMap<String, Vec<&MedicalAppointmentDetail>> = HashMap::new();
 
     for detail in self {
       appointments_by_office
@@ -293,15 +266,7 @@ impl ToExcel for Vec<MedicalAppointmentDetail> {
         worksheet.write_with_format(row, 0, &excel_date, &date_format)?;
         worksheet.write(row, 1, &detail.patient.last_name)?;
         worksheet.write(row, 2, &detail.patient.first_name)?;
-        worksheet.write(
-          row,
-          3,
-          detail
-            .appointment
-            .payment_method
-            .as_ref()
-            .map(|p| p.to_french()),
-        )?;
+        worksheet.write(row, 3, detail.appointment.payment_method.as_ref().map(|p| p.to_french()))?;
         worksheet.write(row, 4, price)?;
         worksheet.write_with_format(row, 5, price - hand_back, &revenue_format)?;
         worksheet.write_with_format(row, 6, hand_back, &revenue_format)?;
@@ -352,12 +317,9 @@ impl<'user> MedicalAppointmentExtractor<'user> {
       .into_iter()
       .map(|(appointment, patient, office)| -> Result<_, MyErrors> {
         let office = office.ok_or(UnexpectedError::new("office_should_be_defined"))?;
-        let revenue_share_percentage =
-          *revenue_share_by_office
-            .get(&office.id)
-            .ok_or(UnexpectedError::new(
-              "revenue_share_percentage_should_be_defined",
-            ))?;
+        let revenue_share_percentage = *revenue_share_by_office
+          .get(&office.id)
+          .ok_or(UnexpectedError::new("revenue_share_percentage_should_be_defined"))?;
         Ok(MedicalAppointmentDetail {
           appointment,
           patient: patient.ok_or(UnexpectedError::new("patient_should_be_defined"))?,

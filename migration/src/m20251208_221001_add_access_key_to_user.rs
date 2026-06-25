@@ -18,12 +18,7 @@ impl MigrationTrait for Migration {
         Table::alter()
           .table(Users::Table)
           .add_column(ColumnDef::new(Users::AccessKey).string())
-          .add_column(
-            ColumnDef::new(Users::IsAccessKeyVerified)
-              .boolean()
-              .not_null()
-              .default(false),
-          )
+          .add_column(ColumnDef::new(Users::IsAccessKeyVerified).boolean().not_null().default(false))
           .to_owned(),
       )
       .await

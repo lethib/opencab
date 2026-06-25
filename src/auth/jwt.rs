@@ -67,9 +67,7 @@ mod tests {
 
   #[test]
   fn validate_token_can_be_decoded() {
-    let token = JWT_SERVICE
-      .generate_token("user-pid-123", TOKEN_TYPE_AUTH, 500)
-      .unwrap();
+    let token = JWT_SERVICE.generate_token("user-pid-123", TOKEN_TYPE_AUTH, 500).unwrap();
     let claims = JWT_SERVICE.validate_token(&token).unwrap();
     assert_eq!(claims.pid, "user-pid-123");
     assert_eq!(claims.token_type, TOKEN_TYPE_AUTH);
@@ -77,9 +75,7 @@ mod tests {
 
   #[test]
   fn modify_token_is_rejected() {
-    let mut token = JWT_SERVICE
-      .generate_token("user-pid-123", TOKEN_TYPE_AUTH, 500)
-      .unwrap();
+    let mut token = JWT_SERVICE.generate_token("user-pid-123", TOKEN_TYPE_AUTH, 500).unwrap();
 
     token.push_str("foo");
     assert!(JWT_SERVICE.validate_token(&token).is_err());
@@ -87,9 +83,7 @@ mod tests {
 
   #[test]
   fn expired_token_is_rejected() {
-    let token = JWT_SERVICE
-      .generate_token("user-pid-123", TOKEN_TYPE_AUTH, 1)
-      .unwrap();
+    let token = JWT_SERVICE.generate_token("user-pid-123", TOKEN_TYPE_AUTH, 1).unwrap();
     sleep(Duration::from_secs(2));
     assert!(JWT_SERVICE.validate_token(&token).is_err())
   }

@@ -69,12 +69,7 @@ impl MigrationTrait for Migration {
 
   async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
     manager
-      .drop_index(
-        Index::drop()
-          .name("idx_patients_user_id")
-          .table(Patients::Table)
-          .to_owned(),
-      )
+      .drop_index(Index::drop().name("idx_patients_user_id").table(Patients::Table).to_owned())
       .await?;
 
     manager
@@ -87,12 +82,7 @@ impl MigrationTrait for Migration {
       .await?;
 
     manager
-      .alter_table(
-        Table::alter()
-          .table(Patients::Table)
-          .drop_column(Patients::UserId)
-          .to_owned(),
-      )
+      .alter_table(Table::alter().table(Patients::Table).drop_column(Patients::UserId).to_owned())
       .await?;
 
     Ok(())

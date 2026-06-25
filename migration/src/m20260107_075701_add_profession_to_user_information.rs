@@ -174,7 +174,7 @@ impl MigrationTrait for Migration {
     // Set default value for existing records
     let db = manager.get_connection();
     db.execute_unprepared(
-      "UPDATE user_business_informations SET profession = 'general_practitioner'::profession WHERE profession IS NULL"
+      "UPDATE user_business_informations SET profession = 'general_practitioner'::profession WHERE profession IS NULL",
     )
     .await?;
 
@@ -239,8 +239,6 @@ impl MigrationTrait for Migration {
       .await?;
 
     // Drop the profession enum type
-    manager
-      .drop_type(Type::drop().name(ProfessionEnum::Enum).to_owned())
-      .await
+    manager.drop_type(Type::drop().name(ProfessionEnum::Enum).to_owned()).await
   }
 }

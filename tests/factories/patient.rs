@@ -1,6 +1,4 @@
-use opencab::models::patients::{
-  ActiveModel as PatientActiveModel, CreatePatientParams, Model as PatientModel,
-};
+use opencab::models::patients::{ActiveModel as PatientActiveModel, CreatePatientParams, Model as PatientModel};
 use sea_orm::ConnectionTrait;
 
 pub struct PatientFactory {

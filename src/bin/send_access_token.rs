@@ -18,10 +18,7 @@ async fn main() -> Result<(), MyErrors> {
   let config = Arc::new(Config::load(&environment)?);
 
   let args: Vec<String> = env::args().collect();
-  let user_id: i32 = args
-    .get(1)
-    .ok_or(UnexpectedError::new("user_id must be provided"))?
-    .parse()?;
+  let user_id: i32 = args.get(1).ok_or(UnexpectedError::new("user_id must be provided"))?.parse()?;
 
   let db = Database::connect(&config.database.url).await?;
 

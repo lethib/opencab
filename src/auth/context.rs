@@ -6,9 +6,7 @@ use crate::{
     statement::AuthStatement,
   },
   models::{
-    my_errors::{
-      authentication_error::AuthenticationError, unexpected_error::UnexpectedError, MyErrors,
-    },
+    my_errors::{authentication_error::AuthenticationError, unexpected_error::UnexpectedError, MyErrors},
     users,
   },
 };
@@ -131,9 +129,7 @@ mod tests {
   });
 
   fn a_token(pid: &str, token_type: &str) -> String {
-    JwtService::new(TEST_SECRET)
-      .generate_token(pid, token_type, 3600)
-      .unwrap()
+    JwtService::new(TEST_SECRET).generate_token(pid, token_type, 3600).unwrap()
   }
 
   fn a_fresh_context() -> AuthContext<'static> {
@@ -181,10 +177,7 @@ mod tests {
         let result = ctx.authorized();
 
         // Then
-        assert_eq!(
-          result.unwrap_err(),
-          UnexpectedError::should_not_happen().into()
-        );
+        assert_eq!(result.unwrap_err(), UnexpectedError::should_not_happen().into());
       }
     }
   }
@@ -207,10 +200,7 @@ mod tests {
 
         // Then
         assert!(result.is_ok());
-        assert_eq!(
-          ctx.error.unwrap(),
-          AuthenticationError::AccessDenied(None).into()
-        );
+        assert_eq!(ctx.error.unwrap(), AuthenticationError::AccessDenied(None).into());
       }
     }
 
@@ -247,10 +237,7 @@ mod tests {
         let result = ctx.not_authorized(None);
 
         // Then
-        assert_eq!(
-          result.unwrap_err(),
-          UnexpectedError::should_not_happen().into()
-        );
+        assert_eq!(result.unwrap_err(), UnexpectedError::should_not_happen().into());
       }
     }
   }
@@ -294,10 +281,7 @@ mod tests {
         let result = ctx.complete();
 
         // Then
-        assert_eq!(
-          result.unwrap_err(),
-          AuthenticationError::InvalidToken.into()
-        );
+        assert_eq!(result.unwrap_err(), AuthenticationError::InvalidToken.into());
       }
     }
 
@@ -313,10 +297,7 @@ mod tests {
         let result = ctx.complete();
 
         // Then
-        assert_eq!(
-          result.unwrap_err(),
-          AuthenticationError::AccessDenied(None).into()
-        );
+        assert_eq!(result.unwrap_err(), AuthenticationError::AccessDenied(None).into());
       }
     }
 
@@ -332,10 +313,7 @@ mod tests {
         let result = ctx.complete();
 
         // Then
-        assert_eq!(
-          result.unwrap_err(),
-          UnexpectedError::should_not_happen().into()
-        );
+        assert_eq!(result.unwrap_err(), UnexpectedError::should_not_happen().into());
       }
     }
   }
@@ -434,15 +412,11 @@ mod tests {
         let header = format!("Bearer {token}");
 
         // When
-        let (returned_user, error) =
-          AuthContext::validate_auth_header(&header, &db, TEST_SECRET).await;
+        let (returned_user, error) = AuthContext::validate_auth_header(&header, &db, TEST_SECRET).await;
 
         // Then
         assert!(returned_user.is_none());
-        assert!(matches!(
-          error,
-          Some(AuthenticationError::AccessKeyNotVerified)
-        ));
+        assert!(matches!(error, Some(AuthenticationError::AccessKeyNotVerified)));
       }
     }
 
@@ -458,8 +432,7 @@ mod tests {
         let header = format!("Bearer {token}");
 
         // When
-        let (returned_user, error) =
-          AuthContext::validate_auth_header(&header, &db, TEST_SECRET).await;
+        let (returned_user, error) = AuthContext::validate_auth_header(&header, &db, TEST_SECRET).await;
 
         // Then
         assert!(error.is_none());

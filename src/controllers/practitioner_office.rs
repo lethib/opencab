@@ -26,19 +26,10 @@ fn validate_revenue_share(revenue_share: &Decimal) -> Result<(), MyErrors> {
   Ok(())
 }
 
-pub async fn create(
-  ctx: Ctx,
-  Json(params): Json<OfficeParams>,
-) -> Result<Json<serde_json::Value>, MyErrors> {
+pub async fn create(ctx: Ctx, Json(params): Json<OfficeParams>) -> Result<Json<serde_json::Value>, MyErrors> {
   validate_revenue_share(&params.revenue_share_percentage)?;
 
-  services::practitioner_office::create(
-    &params.office,
-    &ctx.current_user,
-    params.revenue_share_percentage,
-    &ctx.db,
-  )
-  .await?;
+  services::practitioner_office::create(&params.office, &ctx.current_user, params.revenue_share_percentage, &ctx.db).await?;
 
   Ok(Json(serde_json::json!({ "success": true })))
 }
@@ -53,11 +44,7 @@ pub async fn update(
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&office)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&office).await.run_complete()?;
 
   validate_revenue_share(&params.revenue_share_percentage)?;
 
@@ -73,20 +60,13 @@ pub async fn update(
   Ok(Json(serde_json::json!({ "success": true })))
 }
 
-pub async fn destroy(
-  ctx: Ctx,
-  Path(office_id): Path<i32>,
-) -> Result<Json<serde_json::Value>, MyErrors> {
+pub async fn destroy(ctx: Ctx, Path(office_id): Path<i32>) -> Result<Json<serde_json::Value>, MyErrors> {
   let office = practitioner_offices::Entity::find_by_id(office_id)
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;
 
-  ctx
-    .authorize()
-    .user_owning_resource(&office)
-    .await
-    .run_complete()?;
+  ctx.authorize().user_owning_resource(&office).await.run_complete()?;
 
   office.clone().delete(&ctx.db).await?;
 

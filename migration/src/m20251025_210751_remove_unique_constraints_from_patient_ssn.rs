@@ -27,12 +27,9 @@ impl MigrationTrait for Migration {
 
     // Restore unique constraint on hashed_ssn
     m.get_connection()
-      .execute_unprepared(
-        "ALTER TABLE patients ADD CONSTRAINT patients_hashed_ssn_key UNIQUE (hashed_ssn)",
-      )
+      .execute_unprepared("ALTER TABLE patients ADD CONSTRAINT patients_hashed_ssn_key UNIQUE (hashed_ssn)")
       .await?;
 
     Ok(())
   }
 }
-

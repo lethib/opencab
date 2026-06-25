@@ -1,9 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-  models::_entities::{
-    medical_appointments, practitioner_offices, sea_orm_active_enums::PaymentMethod,
-  },
+  models::_entities::{medical_appointments, practitioner_offices, sea_orm_active_enums::PaymentMethod},
   views::practitioner_office::PractitionerOffice,
 };
 
@@ -17,10 +15,7 @@ pub struct MedicalAppointmentResponse {
 }
 
 impl MedicalAppointmentResponse {
-  pub fn new(
-    medical_appointment: &medical_appointments::Model,
-    office: &practitioner_offices::Model,
-  ) -> Self {
+  pub fn new(medical_appointment: &medical_appointments::Model, office: &practitioner_offices::Model) -> Self {
     Self {
       id: medical_appointment.id,
       date: medical_appointment.date.format("%Y-%m-%d").to_string(),

@@ -17,11 +17,7 @@ impl BusinessInformation {
     Self {
       rpps_number: business_information.rpps_number.clone(),
       siret_number: business_information.siret_number.clone(),
-      adeli_number: business_information
-        .adeli_number
-        .as_ref()
-        .filter(|s| !s.is_empty())
-        .cloned(),
+      adeli_number: business_information.adeli_number.as_ref().filter(|s| !s.is_empty()).cloned(),
       signature_filename: business_information.signature_file_name.clone(),
       profession: business_information.profession.to_value(),
     }

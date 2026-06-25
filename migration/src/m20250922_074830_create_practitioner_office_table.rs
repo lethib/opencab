@@ -80,7 +80,11 @@ impl MigrationTrait for Migration {
               .primary_key(),
           )
           .col(ColumnDef::new(UserPractitionerOffices::UserId).integer().not_null())
-          .col(ColumnDef::new(UserPractitionerOffices::PractitionerOfficeId).integer().not_null())
+          .col(
+            ColumnDef::new(UserPractitionerOffices::PractitionerOfficeId)
+              .integer()
+              .not_null(),
+          )
           .foreign_key(
             ForeignKey::create()
               .name("fk-user_practitioner_offices-user_id")
@@ -103,12 +107,7 @@ impl MigrationTrait for Migration {
 
     // Remove office column from patients
     manager
-      .alter_table(
-        Table::alter()
-          .table(Patients::Table)
-          .drop_column(Patients::Office)
-          .to_owned(),
-      )
+      .alter_table(Table::alter().table(Patients::Table).drop_column(Patients::Office).to_owned())
       .await?;
 
     // Drop the office enum type using raw SQL
