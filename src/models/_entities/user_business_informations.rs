@@ -18,6 +18,9 @@ pub struct Model {
   pub user_id: i32,
   pub signature_file_name: Option<String>,
   pub profession: Profession,
+  pub beneficiary_name: Option<String>,
+  pub iban: Option<String>,
+  pub bic: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

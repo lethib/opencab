@@ -12,6 +12,12 @@ type SaveBusinessInformation = {
   profession: Profession;
 };
 
+type BankingInfoParams = {
+  beneficiary_name: string;
+  iban: string;
+  bic: string;
+};
+
 export const userSchema = {
   saveBusinessInformation: mutationEndpoint<
     SaveBusinessInformation,
@@ -19,6 +25,10 @@ export const userSchema = {
   >({
     type: "POST",
     path: "/user/_save_business_information",
+  }),
+  saveBakingInfo: mutationEndpoint<BankingInfoParams, null>({
+    type: "POST",
+    path: "/user/_save_banking_info",
   }),
   getMyOffices: queryEndpoint<null, PractitionerOffice[]>({
     type: "GET",

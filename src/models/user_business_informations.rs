@@ -13,6 +13,13 @@ pub struct CreateBusinessInformation {
   pub profession: String,
 }
 
+#[derive(Deserialize)]
+pub struct BankingInformationParams {
+  pub beneficiary_name: String,
+  pub iban: String,
+  pub bic: String,
+}
+
 impl CreateBusinessInformation {
   pub fn profession_enum(&self) -> Result<Profession, DbErr> {
     Profession::try_from_value(&self.profession)
@@ -70,6 +77,20 @@ impl ActiveModel {
     }
     .insert(db)
     .await
+  }
+
+  pub async fn save_banking_information<T: ConnectionTrait>(
+    mut self,
+    db: &T,
+    params: BankingInformationParams,
+  ) -> Result<(), DbErr> {
+    self.beneficiary_name = ActiveValue::Set(Some(params.beneficiary_name));
+    self.iban = ActiveValue::Set(Some(params.iban));
+    self.bic = ActiveValue::Set(Some(params.bic));
+
+    self.save(db).await?;
+
+    Ok(())
   }
 }
 
