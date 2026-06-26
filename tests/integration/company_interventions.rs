@@ -128,7 +128,9 @@ mod delete_an_intervention {
       let user = UserFactory::new().create(&app.db).await;
       let company = CompanyFactory::new().create_for_user(&app.db, user.id).await;
       let other_company = CompanyFactory::new().create_for_user(&app.db, user.id).await;
-      let intervention = CompanyInterventionFactory::new().create(&app.db, user.id, other_company.id).await;
+      let intervention = CompanyInterventionFactory::new()
+        .create(&app.db, user.id, other_company.id)
+        .await;
       let token = token_for(&user, &app.config);
 
       // When
