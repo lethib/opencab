@@ -1,8 +1,5 @@
 use chrono::NaiveDate;
-use opencab::models::{
-  _entities::company_interventions,
-  company_interventions::InterventionParams,
-};
+use opencab::models::{_entities::company_interventions, company_interventions::InterventionParams};
 use rust_decimal::Decimal;
 use sea_orm::ConnectionTrait;
 
@@ -31,12 +28,7 @@ impl CompanyInterventionFactory {
     Self::default()
   }
 
-  pub async fn create(
-    self,
-    db: &impl ConnectionTrait,
-    practitioner_id: i32,
-    company_id: i32,
-  ) -> company_interventions::Model {
+  pub async fn create(self, db: &impl ConnectionTrait, practitioner_id: i32, company_id: i32) -> company_interventions::Model {
     company_interventions::ActiveModel::create(
       db,
       practitioner_id,

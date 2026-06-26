@@ -30,7 +30,6 @@ export const InterventionRow = ({ intervention, index }: Props) => {
 
   return (
     <TableRow
-      key={intervention.id}
       className={`transition-colors hover:bg-muted/30 ${
         index % 2 === 0 ? "bg-background" : "bg-muted/10"
       }`}
