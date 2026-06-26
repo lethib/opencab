@@ -86,7 +86,11 @@ pub fn create_router(state: AppState) -> Router {
     )
     .route(
       "/api/companies/{company_id}/interventions",
-      get(controllers::practitioner_companies::list_interventions),
+      get(controllers::company_interventions::list_interventions),
+    )
+    .route(
+      "/api/companies/{company_id}/interventions/{intervention_id}",
+      delete(controllers::company_interventions::delete),
     )
     .route(
       "/api/companies/{company_id}/_generate_invoice",
