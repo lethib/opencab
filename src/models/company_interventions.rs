@@ -2,9 +2,12 @@ use chrono::NaiveDate;
 use rust_decimal::{prelude::ToPrimitive, Decimal};
 use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection, ModelTrait};
 
-use crate::models::{
-  _entities::{company_interventions, practitioner_companies, prelude},
-  my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
+use crate::{
+  auth::resource::Resource,
+  models::{
+    _entities::{company_interventions, practitioner_companies, prelude},
+    my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
+  },
 };
 
 pub struct InterventionParams {
@@ -74,6 +77,16 @@ impl company_interventions::ActiveModel {
     self.save(db).await?;
 
     Ok(())
+  }
+}
+
+impl Resource for company_interventions::Model {
+  async fn is_owned_by_user(&self, user_id: i32, _db: &DatabaseConnection) -> bool {
+    self.practitioner_id == user_id
+  }
+
+  fn resource_name(&self) -> String {
+    "company_intervention".to_string()
   }
 }
 

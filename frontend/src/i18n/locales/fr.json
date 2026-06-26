@@ -497,7 +497,8 @@
       "unitPrice": "Prix unitaire HT",
       "vat": "TVA",
       "amount": "Montant HT",
-      "empty": "Aucune intervention enregistrée"
+      "empty": "Aucune intervention enregistrée",
+      "interventionDeleted": "L'intervention a bien été supprimée."
     }
   },
   "errors": {

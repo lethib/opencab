@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { H2 } from "@/components/ui/typography/h2";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { InterventionRow } from "./InterventionRow";
 
 interface Props {
   company: Company;
@@ -21,8 +21,8 @@ interface Props {
 export const CompanyInterventionsSection = ({ company }: Props) => {
   const { t } = useTranslation();
 
-  const interventionsQuery = APIHooks.company
-    .listInterventions(company.id)
+  const interventionsQuery = APIHooks.company.interventions
+    .list(company.id)
     .useQuery(null);
   const interventions = interventionsQuery.data ?? [];
 
@@ -83,6 +83,7 @@ export const CompanyInterventionsSection = ({ company }: Props) => {
                     {t("companies.interventions.amount")}
                   </div>
                 </TableHead>
+                <TableHead className="h-12 px-4" />
               </TableRow>
             </TableHeader>
 
@@ -90,7 +91,7 @@ export const CompanyInterventionsSection = ({ company }: Props) => {
               {interventions.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="h-32 text-center text-muted-foreground text-sm"
                   >
                     {t("companies.interventions.empty")}
@@ -98,38 +99,11 @@ export const CompanyInterventionsSection = ({ company }: Props) => {
                 </TableRow>
               ) : (
                 interventions.map((intervention, index) => (
-                  <TableRow
+                  <InterventionRow
                     key={intervention.id}
-                    className={`transition-colors hover:bg-muted/30 ${
-                      index % 2 === 0 ? "bg-background" : "bg-muted/10"
-                    }`}
-                  >
-                    <TableCell className="px-6 py-4">
-                      <span className="font-medium">
-                        {formatDate(intervention.issue_date)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="px-4 py-4 text-muted-foreground">
-                      {intervention.object}
-                    </TableCell>
-                    <TableCell className="px-4 py-4 text-muted-foreground text-center">
-                      {intervention.quantity}
-                    </TableCell>
-                    <TableCell className="px-4 py-4 text-muted-foreground font-mono text-center">
-                      {formatPrice(intervention.unit_price_in_cents)}
-                    </TableCell>
-                    <TableCell className="px-4 py-4 text-muted-foreground text-center">
-                      {intervention.vat_rate_in_percent} %
-                    </TableCell>
-                    <TableCell className="px-4 py-4 text-center">
-                      <span className="font-mono font-medium">
-                        {formatPrice(
-                          intervention.quantity *
-                            intervention.unit_price_in_cents,
-                        )}
-                      </span>
-                    </TableCell>
-                  </TableRow>
+                    intervention={intervention}
+                    index={index}
+                  />
                 ))
               )}
             </TableBody>

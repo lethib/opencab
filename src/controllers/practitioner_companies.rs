@@ -1,7 +1,7 @@
 use axum::{extract::Path, http::status, Json};
 use base64::Engine;
 use rust_decimal::Decimal;
-use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder};
+use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
 use serde::Deserialize;
 use std::str::FromStr;
 
@@ -67,26 +67,6 @@ pub async fn update(
   company.into_active_model().update(&ctx.db, &params).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
-}
-
-pub async fn list_interventions(
-  ctx: Ctx,
-  Path(company_id): Path<i32>,
-) -> Result<Json<Vec<company_interventions::Model>>, MyErrors> {
-  let company = practitioner_companies::Entity::find_by_id(company_id)
-    .one(&ctx.db)
-    .await?
-    .ok_or(ApplicationError::not_found())?;
-
-  ctx.authorize().user_owning_resource(&company).await.run_complete()?;
-
-  let interventions = company_interventions::Entity::find()
-    .filter(company_interventions::Column::CompanyId.eq(company_id))
-    .order_by_desc(company_interventions::Column::IssueDate)
-    .all(&ctx.db)
-    .await?;
-
-  Ok(Json(interventions))
 }
 
 pub async fn generate_invoice(
