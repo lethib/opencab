@@ -231,6 +231,7 @@
   "myInformation": {
     "title": "Mon profil",
     "subtitle": "Gérez vos informations professionnelles, bancaires et votre signature",
+    "shouldCompleteBuinessInfoFirst": "Vous devez compléter vos informations professionnelles en premier.",
     "tabs": {
       "pro": "Professionnel",
       "bank": "Coordonnées bancaires",
@@ -246,7 +247,6 @@
     "ibanPlaceholder": "Saisissez votre IBAN",
     "bic": "BIC",
     "bicPlaceholder": "Saisissez votre BIC",
-    "encryptionNote": "Vos coordonnées bancaires sont stockées de façon chiffrée",
     "save": "Enregistrer les coordonnées bancaires",
     "successMessage": "Coordonnées bancaires enregistrées avec succès !"
   },

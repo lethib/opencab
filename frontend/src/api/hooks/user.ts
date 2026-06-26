@@ -26,7 +26,7 @@ export const userSchema = {
     type: "POST",
     path: "/user/_save_business_information",
   }),
-  saveBakingInfo: mutationEndpoint<BankingInfoParams, null>({
+  saveBankingInfo: mutationEndpoint<BankingInfoParams, null>({
     type: "POST",
     path: "/user/_save_banking_info",
   }),

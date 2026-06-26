@@ -32,10 +32,9 @@ export const SignatureCard = ({ currentUser }: Props) => {
   const uploadSignatureMutation = APIHooks.user.signature.upload.useMutation();
 
   if (!currentUser.business_information) {
-    toast.error(
-      "Vous devez compléter vos informations professionnelles en premier.",
-      { id: "signature-redirect" },
-    );
+    toast.error(t("myInformation.shouldCompleteBuinessInfoFirst"), {
+      id: "signature-redirect",
+    });
     return <Navigate to="/my_information" search={{ tab: "pro" }} />;
   }
 

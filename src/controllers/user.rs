@@ -38,7 +38,12 @@ pub async fn save_banking_info(
   ctx: Ctx,
   Json(banking_info): Json<BankingInformationParams>,
 ) -> Result<status::StatusCode, MyErrors> {
-  let business_info = ctx.current_user.business_information(&ctx.db).await?.into_active_model();
+  let business_info = ctx
+    .current_user
+    .business_information(&ctx.db)
+    .await
+    .map_err(ApplicationError::unprocessable_entity)?
+    .into_active_model();
 
   business_info.save_banking_information(&ctx.db, banking_info).await?;
 

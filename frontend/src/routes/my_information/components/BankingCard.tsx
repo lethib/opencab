@@ -67,13 +67,12 @@ export const BankingCard = ({ currentUser }: Props) => {
     }
   }, [currentUser]);
 
-  const saveBankingInfoMutation = APIHooks.user.saveBakingInfo.useMutation();
+  const saveBankingInfoMutation = APIHooks.user.saveBankingInfo.useMutation();
 
   if (!currentUser.business_information) {
-    toast.error(
-      "Vous devez compléter vos informations professionnelles en premier.",
-      { id: "signature-redirect" },
-    );
+    toast.error(t("myInformation.shouldCompleteBuinessInfoFirst"), {
+      id: "signature-redirect",
+    });
     return <Navigate to="/my_information" search={{ tab: "pro" }} />;
   }
 
