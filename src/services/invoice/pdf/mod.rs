@@ -3,6 +3,8 @@ use oxidize_pdf::Page;
 pub(in crate::services::invoice) mod company;
 pub(in crate::services::invoice) mod patient;
 
+pub(super) const GREEN_HEX_CODE: &str = "1B5E38";
+
 /// Conversion constant: millimeters to points
 /// PDF uses points (72 per inch), we use mm for convenience
 pub(super) const MM_TO_POINTS: f64 = 2.834645669; // 72 / 25.4

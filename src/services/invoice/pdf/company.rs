@@ -5,10 +5,10 @@ use rust_decimal::prelude::ToPrimitive;
 use crate::{
   models::{
     _entities::{company_interventions, practitioner_companies, practitioner_offices, user_business_informations},
-    my_errors::{unexpected_error::UnexpectedError, MyErrors},
+    my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
     users::users,
   },
-  services::invoice::pdf::{embed_signature_image, format_french_phone_number, mm},
+  services::invoice::pdf::{embed_signature_image, format_french_phone_number, mm, GREEN_HEX_CODE},
 };
 
 pub(in crate::services::invoice) struct CompanyPdfArgs {
@@ -32,6 +32,17 @@ pub(in crate::services::invoice) struct CompanyInvoiceGenerator {
 
 fn format_euro(amount: f64) -> String {
   format!("€ {:.2}", amount).replace('.', ",")
+}
+
+fn format_iban(iban: &str) -> String {
+  iban
+    .chars()
+    .filter(|c| !c.is_whitespace())
+    .collect::<Vec<_>>()
+    .chunks(4)
+    .map(|c| c.iter().collect::<String>())
+    .collect::<Vec<_>>()
+    .join(" ")
 }
 
 fn format_siret(siret: &str) -> String {
@@ -71,6 +82,7 @@ impl CompanyInvoiceGenerator {
 
     self.build_totals()?;
 
+    self.build_banking_info()?;
     self.build_footer()?;
     Ok(self)
   }
@@ -93,12 +105,11 @@ impl CompanyInvoiceGenerator {
       .draw_image("favicon", self.margin_l, self.y_position - mm(2.0), mm(7.0), mm(7.0))
       .map_err(UnexpectedError::new)?;
 
-    let green = Color::hex("1B5E38");
     self
       .page
       .text()
       .set_font(Font::HelveticaBold, 18.0)
-      .set_fill_color(green)
+      .set_fill_color(Color::hex(GREEN_HEX_CODE))
       .at(self.margin_l + mm(9.5), self.y_position)
       .write(&self.args.user.full_name())
       .map_err(UnexpectedError::new)?;
@@ -580,10 +591,55 @@ impl CompanyInvoiceGenerator {
     Ok(())
   }
 
+  fn build_banking_info(&mut self) -> Result<(), MyErrors> {
+    let business_info = &self.args.business_info;
+    let (beneficiary_name, iban, bic) = match (&business_info.beneficiary_name, &business_info.iban, &business_info.bic) {
+      (None, None, None) => return Ok(()),
+      (Some(name), Some(iban), Some(bic)) => (name, iban, bic),
+      _ => return Err(ApplicationError::unprocessable_entity("incomplete_banking_info").into()),
+    };
+
+    let y_label = mm(48.0);
+    let y_beneficiary = mm(43.0);
+    let y_iban = mm(38.5);
+
+    self
+      .page
+      .text()
+      .set_font(Font::HelveticaBold, 11.0)
+      .set_fill_color(Color::hex(GREEN_HEX_CODE))
+      .at(self.margin_l, y_label)
+      .write("COORDONNÉES BANCAIRES")
+      .map_err(UnexpectedError::new)?;
+
+    self
+      .page
+      .text()
+      .set_font(Font::Helvetica, 10.0)
+      .set_fill_color(Color::gray(0.35))
+      .at(self.margin_l, y_beneficiary)
+      .write(&format!("Bénéficiaire : {}", beneficiary_name))
+      .map_err(UnexpectedError::new)?;
+
+    let mut iban_parts = vec![format!("IBAN : {}", format_iban(&iban))];
+    iban_parts.push(format!("BIC : {}", bic));
+
+    self
+      .page
+      .text()
+      .set_font(Font::Helvetica, 10.0)
+      .set_fill_color(Color::gray(0.35))
+      .at(self.margin_l, y_iban)
+      .write(&iban_parts.join("     "))
+      .map_err(UnexpectedError::new)?;
+
+    Ok(())
+  }
+
   fn build_footer(&mut self) -> Result<(), MyErrors> {
     let border_gray = Color::gray(0.80);
 
-    let y_footer = mm(25.0);
+    let y_footer = mm(33.0);
     self
       .page
       .graphics()
