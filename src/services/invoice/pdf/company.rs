@@ -621,8 +621,7 @@ impl CompanyInvoiceGenerator {
       .write(&format!("Bénéficiaire : {}", beneficiary_name))
       .map_err(UnexpectedError::new)?;
 
-    let mut iban_parts = vec![format!("IBAN : {}", format_iban(&iban))];
-    iban_parts.push(format!("BIC : {}", bic));
+    let iban_bic_line = format!("IBAN : {}     BIC : {}", format_iban(iban), bic);
 
     self
       .page
@@ -630,7 +629,7 @@ impl CompanyInvoiceGenerator {
       .set_font(Font::Helvetica, 10.0)
       .set_fill_color(Color::gray(0.35))
       .at(self.margin_l, y_iban)
-      .write(&iban_parts.join("     "))
+      .write(&iban_bic_line)
       .map_err(UnexpectedError::new)?;
 
     Ok(())
