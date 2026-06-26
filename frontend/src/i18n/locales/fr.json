@@ -230,11 +230,25 @@
   },
   "myInformation": {
     "title": "Mon profil",
-    "subtitle": "Gérez vos informations professionnelles et votre signature",
+    "subtitle": "Gérez vos informations professionnelles, bancaires et votre signature",
+    "shouldCompleteBuinessInfoFirst": "Vous devez compléter vos informations professionnelles en premier.",
     "tabs": {
       "pro": "Professionnel",
+      "bank": "Coordonnées bancaires",
       "signature": "Signature"
     }
+  },
+  "bankingInfo": {
+    "title": "Coordonnées bancaires",
+    "subtitle": "Renseignez le compte qui figurera sur vos factures",
+    "beneficiary": "Bénéficiaire",
+    "beneficiaryPlaceholder": "Saisissez le nom du bénéficiaire",
+    "iban": "IBAN",
+    "ibanPlaceholder": "Saisissez votre IBAN",
+    "bic": "BIC",
+    "bicPlaceholder": "Saisissez votre BIC",
+    "save": "Enregistrer les coordonnées bancaires",
+    "successMessage": "Coordonnées bancaires enregistrées avec succès !"
   },
   "businessInfo": {
     "title": "Informations professionnelles",

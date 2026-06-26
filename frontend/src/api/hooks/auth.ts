@@ -31,6 +31,9 @@ export type MeResponse = {
     adeli_number: string | null;
     signature_filename: string | null;
     profession: Profession;
+    beneficiary_name: string | null;
+    iban: string | null;
+    bic: string | null;
   } | null;
 };
 

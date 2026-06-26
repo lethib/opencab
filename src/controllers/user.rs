@@ -2,7 +2,7 @@ use crate::{
   middleware::context::Ctx,
   models::{
     my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
-    user_business_informations::CreateBusinessInformation,
+    user_business_informations::{BankingInformationParams, CreateBusinessInformation},
   },
   services::{self, storage::StorageService},
   views::practitioner_office::PractitionerOffice,
@@ -32,6 +32,22 @@ pub async fn save_business_info(
   services::user::save_business_information(&business_information, &ctx.current_user, &ctx.db).await?;
 
   Ok(Json(serde_json::json!({ "success": true })))
+}
+
+pub async fn save_banking_info(
+  ctx: Ctx,
+  Json(banking_info): Json<BankingInformationParams>,
+) -> Result<status::StatusCode, MyErrors> {
+  let business_info = ctx
+    .current_user
+    .business_information(&ctx.db)
+    .await
+    .map_err(ApplicationError::unprocessable_entity)?
+    .into_active_model();
+
+  business_info.save_banking_information(&ctx.db, banking_info).await?;
+
+  Ok(status::StatusCode::NO_CONTENT)
 }
 
 pub async fn my_offices(ctx: Ctx) -> Result<Json<Vec<PractitionerOffice>>, MyErrors> {

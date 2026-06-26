@@ -9,6 +9,9 @@ pub struct BusinessInformation {
   pub adeli_number: Option<String>,
   pub signature_filename: Option<String>,
   pub profession: String,
+  pub beneficiary_name: Option<String>,
+  pub iban: Option<String>,
+  pub bic: Option<String>,
 }
 
 impl BusinessInformation {
@@ -20,6 +23,9 @@ impl BusinessInformation {
       adeli_number: business_information.adeli_number.as_ref().filter(|s| !s.is_empty()).cloned(),
       signature_filename: business_information.signature_file_name.clone(),
       profession: business_information.profession.to_value(),
+      beneficiary_name: business_information.beneficiary_name.clone(),
+      iban: business_information.iban.clone(),
+      bic: business_information.bic.clone(),
     }
   }
 }

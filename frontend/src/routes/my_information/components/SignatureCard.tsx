@@ -1,9 +1,11 @@
+import { Navigate } from "@tanstack/react-router";
 import { PenTool, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { queryClient } from "@/api/api";
 import { APIHooks } from "@/api/hooks";
+import type { MeResponse } from "@/api/hooks/auth";
 import {
   Button,
   Card,
@@ -13,11 +15,13 @@ import {
   CardTitle,
   Label,
 } from "@/components/ui";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 
-export const SignatureCard = () => {
+interface Props {
+  currentUser: MeResponse;
+}
+
+export const SignatureCard = ({ currentUser }: Props) => {
   const { t } = useTranslation();
-  const { currentUser } = useCurrentUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<
@@ -26,6 +30,13 @@ export const SignatureCard = () => {
 
   const getSignatureURLMutation = APIHooks.user.signature.getURL.useMutation();
   const uploadSignatureMutation = APIHooks.user.signature.upload.useMutation();
+
+  if (!currentUser.business_information) {
+    toast.error(t("myInformation.shouldCompleteBuinessInfoFirst"), {
+      id: "signature-redirect",
+    });
+    return <Navigate to="/my_information" search={{ tab: "pro" }} />;
+  }
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

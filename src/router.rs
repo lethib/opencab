@@ -50,6 +50,7 @@ pub fn create_router(state: AppState) -> Router {
       "/api/user/_save_business_information",
       post(controllers::user::save_business_info),
     )
+    .route("/api/user/_save_banking_info", post(controllers::user::save_banking_info))
     .route(
       "/api/user/_extract_medical_appointments",
       post(controllers::user::extract_medical_appointments),

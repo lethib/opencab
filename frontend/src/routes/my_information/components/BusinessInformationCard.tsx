@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import z from "zod";
 import { queryClient } from "@/api/api";
 import { APIHooks } from "@/api/hooks";
+import type { MeResponse } from "@/api/hooks/auth";
 import { PROFESSIONS } from "@/api/types/profession";
 import { FormInput } from "@/components/form/FormInput";
 import { FormProvider } from "@/components/form/FormProvider";
@@ -20,11 +21,13 @@ import {
   CardTitle,
   Label,
 } from "@/components/ui";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 
-export const BusinessInformationCard = () => {
+interface Props {
+  currentUser: MeResponse;
+}
+
+export const BusinessInformationCard = ({ currentUser }: Props) => {
   const { t } = useTranslation();
-  const { currentUser } = useCurrentUser();
 
   const saveBusinessInformationMutation =
     APIHooks.user.saveBusinessInformation.useMutation();
