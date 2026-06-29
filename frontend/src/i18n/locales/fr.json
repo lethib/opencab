@@ -487,6 +487,11 @@
       "empty": "Aucune ligne configurée",
       "emptyDescription": "Configurez votre modèle de facturation pour pré-remplir vos futures factures."
     },
+    "delete": {
+      "title": "Supprimer cette entreprise ?",
+      "description": "Cette action est définitive. Toutes les interventions associées à cette entreprise seront également supprimées.",
+      "success": "L'entreprise a bien été supprimée."
+    },
     "interventions": {
       "title": "Interventions en entreprise",
       "subtitle": "Séances réalisées et planifiées chez {{name}}",

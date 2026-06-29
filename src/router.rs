@@ -82,7 +82,9 @@ pub fn create_router(state: AppState) -> Router {
     )
     .route(
       "/api/companies/{company_id}",
-      put(controllers::practitioner_companies::update).get(controllers::practitioner_companies::get),
+      put(controllers::practitioner_companies::update)
+        .get(controllers::practitioner_companies::get)
+        .delete(controllers::practitioner_companies::delete),
     )
     .route(
       "/api/companies/{company_id}/interventions",

@@ -54,6 +54,11 @@ export const companySchema = {
       type: "PUT",
       path: `/companies/${companyId}`,
     }),
+  delete: (companyId: number) =>
+    mutationEndpoint<null, null>({
+      type: "DELETE",
+      path: `/companies/${companyId}`,
+    }),
   generateInvoice: (companyId: number) => ({
     useMutation: () =>
       useMutation({
