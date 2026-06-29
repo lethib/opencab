@@ -26,7 +26,9 @@ export const DeleteCompanyDialog = ({
 }: DeleteCompanyDialogProps) => {
   const { t } = useTranslation();
 
-  const deleteCompanyMutation = APIHooks.company.delete(company.id).useMutation();
+  const deleteCompanyMutation = APIHooks.company
+    .delete(company.id)
+    .useMutation();
 
   const handleDelete = () =>
     deleteCompanyMutation.mutateAsync(null).then(() => {

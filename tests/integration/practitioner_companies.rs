@@ -519,7 +519,10 @@ mod delete_a_company {
         .one(&app.db)
         .await
         .unwrap();
-      assert!(intervention_deleted.is_none(), "company interventions should have been cascade deleted");
+      assert!(
+        intervention_deleted.is_none(),
+        "company interventions should have been cascade deleted"
+      );
     }
   }
 }
