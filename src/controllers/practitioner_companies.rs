@@ -1,14 +1,14 @@
 use axum::{extract::Path, http::status, Json};
 use base64::Engine;
 use rust_decimal::Decimal;
-use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
 use serde::Deserialize;
 use std::str::FromStr;
 
 use crate::{
   middleware::context::Ctx,
   models::{
-    _entities::{company_interventions, practitioner_companies, practitioner_offices},
+    _entities::{company_interventions, practitioner_companies, practitioner_offices, prelude},
     company_interventions::InterventionParams,
     my_errors::{application_error::ApplicationError, MyErrors},
     practitioner_companies::CompanyParams,
@@ -65,6 +65,19 @@ pub async fn update(
   ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
   company.into_active_model().update(&ctx.db, &params).await?;
+
+  Ok(status::StatusCode::NO_CONTENT)
+}
+
+pub async fn delete(ctx: Ctx, Path(company_id): Path<i32>) -> Result<status::StatusCode, MyErrors> {
+  let company = prelude::PractitionerCompanies::find_by_id(company_id)
+    .one(&ctx.db)
+    .await?
+    .ok_or(ApplicationError::not_found())?;
+
+  ctx.authorize().user_owning_resource(&company).await.run_complete()?;
+
+  company.into_active_model().delete(&ctx.db).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
