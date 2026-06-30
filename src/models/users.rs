@@ -91,7 +91,7 @@ impl Model {
   ///
   /// When could not find user by the given token or DB query error
   pub async fn find_by_email(db: &DatabaseConnection, email: &str) -> ModelResult<Self> {
-    let user = users::Entity::find().filter(users::COLUMN.email.eq(email)).one(db).await?;
+    let user = users::Entity::find_by_email(email).one(db).await?;
     user.ok_or_else(|| ModelError::EntityNotFound)
   }
 
@@ -102,7 +102,7 @@ impl Model {
   /// When could not find user  or DB query error
   pub async fn find_by_pid(db: &impl ConnectionTrait, pid: &str) -> ModelResult<Self> {
     let parse_uuid = Uuid::parse_str(pid).map_err(|e| ModelError::Any(e.into()))?;
-    let user = users::Entity::find().filter(users::COLUMN.pid.eq(parse_uuid)).one(db).await?;
+    let user = users::Entity::find_by_pid(parse_uuid).one(db).await?;
     user.ok_or_else(|| ModelError::EntityNotFound)
   }
 
@@ -128,12 +128,7 @@ impl Model {
   ) -> ModelResult<Self> {
     let txn = db.begin().await?;
 
-    if users::Entity::find()
-      .filter(users::COLUMN.email.eq(&params.email))
-      .one(&txn)
-      .await?
-      .is_some()
-    {
+    if users::Entity::find_by_email(&params.email).one(&txn).await?.is_some() {
       return Err(ModelError::EntityAlreadyExists {});
     }
 
