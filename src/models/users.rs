@@ -73,13 +73,14 @@ impl Model {
     &self,
     db: &DatabaseConnection,
   ) -> ModelResult<Vec<(practitioner_offices::Model, user_practitioner_offices::Model)>> {
+    // FK `practitioner_office_id` is NOT NULL → `find_both_related` returns the office without `Option`.
     let offices = user_practitioner_offices::Entity::find()
       .filter(user_practitioner_offices::COLUMN.user_id.eq(self.id))
-      .find_also_related(practitioner_offices::Entity)
+      .find_both_related(practitioner_offices::Entity)
       .all(db)
       .await?
       .into_iter()
-      .filter_map(|(upo, office)| office.map(|o| (o, upo)))
+      .map(|(upo, office)| (office, upo))
       .collect();
 
     Ok(offices)
