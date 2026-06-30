@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 use rust_decimal::{prelude::ToPrimitive, Decimal};
-use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection, ModelTrait};
+use sea_orm::{ActiveModelBehavior, ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection, DbErr, ModelTrait};
 
 use crate::{
   auth::resource::Resource,
@@ -27,6 +27,22 @@ impl company_interventions::Model {
       .one(db)
       .await?
       .ok_or(ApplicationError::not_found().into())
+  }
+}
+
+#[async_trait::async_trait]
+impl ActiveModelBehavior for company_interventions::ActiveModel {
+  async fn before_save<C>(self, _db: &C, insert: bool) -> std::result::Result<Self, DbErr>
+  where
+    C: ConnectionTrait,
+  {
+    if !insert && self.updated_at.is_unchanged() {
+      let mut this = self;
+      this.updated_at = ActiveValue::Set(chrono::Utc::now().into());
+      Ok(this)
+    } else {
+      Ok(self)
+    }
   }
 }
 
@@ -60,7 +76,7 @@ impl company_interventions::ActiveModel {
     )
   }
 
-  pub async fn update<T: ConnectionTrait>(mut self, db: &T, params: &InterventionParams) -> Result<(), MyErrors> {
+  pub async fn update_from_params<T: ConnectionTrait>(mut self, db: &T, params: &InterventionParams) -> Result<(), MyErrors> {
     validate_vat_values(&params.vat_rate)?;
 
     let unit_price_in_cents = (params.unit_price * 100.0)

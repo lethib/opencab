@@ -115,7 +115,7 @@ pub async fn update(
 
   medical_appointment
     .into_active_model()
-    .update(&ctx.db, &medical_appointments_params)
+    .update_from_params(&ctx.db, &medical_appointments_params)
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)

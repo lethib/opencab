@@ -1,4 +1,4 @@
-use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection};
+use sea_orm::{ActiveModelBehavior, ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection, DbErr};
 use serde::Deserialize;
 use validator::Validate;
 
@@ -21,6 +21,22 @@ pub struct CompanyParams {
   pub address_line_1: Option<String>,
   pub address_zip_code: Option<String>,
   pub address_city: Option<String>,
+}
+
+#[async_trait::async_trait]
+impl ActiveModelBehavior for practitioner_companies::ActiveModel {
+  async fn before_save<C>(self, _db: &C, insert: bool) -> std::result::Result<Self, DbErr>
+  where
+    C: ConnectionTrait,
+  {
+    if !insert && self.updated_at.is_unchanged() {
+      let mut this = self;
+      this.updated_at = ActiveValue::Set(chrono::Utc::now().into());
+      Ok(this)
+    } else {
+      Ok(self)
+    }
+  }
 }
 
 impl practitioner_companies::ActiveModel {
@@ -52,7 +68,7 @@ impl practitioner_companies::ActiveModel {
     )
   }
 
-  pub async fn update<T: ConnectionTrait>(mut self, db: &T, params: &CompanyParams) -> Result<(), MyErrors> {
+  pub async fn update_from_params<T: ConnectionTrait>(mut self, db: &T, params: &CompanyParams) -> Result<(), MyErrors> {
     params.validate()?;
     validate_address_params(params)?;
     let is_address_provided = params.address_line_1.is_some();

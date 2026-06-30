@@ -56,7 +56,7 @@ impl Model {
 
 // implement your write-oriented logic here
 impl ActiveModel {
-  pub async fn update<T: ConnectionTrait>(mut self, db: &T, params: &UpdateMedicalAppointmentParams) -> Result<(), MyErrors> {
+  pub async fn update_from_params<T: ConnectionTrait>(mut self, db: &T, params: &UpdateMedicalAppointmentParams) -> Result<(), MyErrors> {
     self.date = ActiveValue::Set(params.date);
     self.practitioner_office_id = ActiveValue::Set(params.practitioner_office_id);
     self.price_in_cents = ActiveValue::Set(params.price_in_cents);

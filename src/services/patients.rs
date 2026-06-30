@@ -22,7 +22,7 @@ pub async fn update(
   patient_params: &CreatePatientParams,
   db: &DatabaseConnection,
 ) -> Result<(), MyErrors> {
-  patients::ActiveModel::update(db, patient.id, patient_params).await?;
+  patients::ActiveModel::update_from_params(db, patient.id, patient_params).await?;
 
   Ok(())
 }

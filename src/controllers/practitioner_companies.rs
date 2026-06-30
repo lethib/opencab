@@ -64,7 +64,7 @@ pub async fn update(
 
   ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
-  company.into_active_model().update(&ctx.db, &params).await?;
+  company.into_active_model().update_from_params(&ctx.db, &params).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
