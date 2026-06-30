@@ -83,7 +83,7 @@ pub async fn search(ctx: Ctx, Query(params): Query<SearchParams>) -> Result<Json
 
   let (patients, total_pages) = services::patients::search_paginated(query, page, &ctx.current_user, &ctx.db).await?;
 
-  let patient_responses: Vec<PatientResponse> = patients.iter().map(PatientResponse::from_model).collect();
+  let patient_responses: Vec<PatientResponse> = patients.iter().map(PatientResponse::new).collect();
 
   Ok(Json(serde_json::json!({
     "paginated_data": patient_responses,
