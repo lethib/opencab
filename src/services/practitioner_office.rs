@@ -1,6 +1,6 @@
 use sea_orm::{
-  prelude::Decimal, ActiveModelTrait, ActiveValue::Set, ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel,
-  QueryFilter, TransactionTrait,
+  prelude::Decimal, ActiveModelTrait, ActiveValue::Set, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter,
+  TransactionTrait,
 };
 
 use crate::models::{
@@ -21,8 +21,8 @@ pub async fn update(
   let office_id = office.id.clone().take().ok_or(UnexpectedError::should_not_happen())?;
 
   let mut user_practitioner_office = user_practitioner_offices::Entity::find()
-    .filter(user_practitioner_offices::Column::PractitionerOfficeId.eq(office_id))
-    .filter(user_practitioner_offices::Column::UserId.eq(linked_practitioner.id))
+    .filter(user_practitioner_offices::COLUMN.practitioner_office_id.eq(office_id))
+    .filter(user_practitioner_offices::COLUMN.user_id.eq(linked_practitioner.id))
     .one(db)
     .await?
     .ok_or(ApplicationError::not_found())?

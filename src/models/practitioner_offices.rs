@@ -65,8 +65,8 @@ impl Entity {}
 impl Resource for Model {
   async fn is_owned_by_user(&self, user_id: i32, db: &DatabaseConnection) -> bool {
     let result = user_practitioner_offices::Entity::find()
-      .filter(user_practitioner_offices::Column::PractitionerOfficeId.eq(self.id))
-      .filter(user_practitioner_offices::Column::UserId.eq(user_id))
+      .filter(user_practitioner_offices::COLUMN.practitioner_office_id.eq(self.id))
+      .filter(user_practitioner_offices::COLUMN.user_id.eq(user_id))
       .one(db)
       .await;
 

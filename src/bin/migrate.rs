@@ -68,6 +68,12 @@ fn generate_entities(database_url: &str) -> Result<(), Box<dyn Error>> {
       database_url,
       "--with-serde",
       "both",
+      // SeaORM 2.0 "dense" format: `#[sea_orm::model]`, inline relations, strongly-typed `COLUMN`.
+      "--entity-format",
+      "dense",
+      // ActiveModelBehavior impls are provided by our model wrappers (and 2 entities), so don't
+      // generate empty ones that would conflict.
+      "--impl-active-model-behavior=false",
       "-o",
       "./src/models/_entities/",
     ])

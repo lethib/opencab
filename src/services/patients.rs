@@ -4,7 +4,7 @@ use crate::models::{
   patients::{CreatePatientParams, Model as PatientModel},
   users,
 };
-use sea_orm::{ColumnTrait, Condition, DatabaseConnection, QueryFilter};
+use sea_orm::{Condition, DatabaseConnection, QueryFilter};
 use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder};
 
 pub async fn create(
@@ -46,9 +46,9 @@ pub async fn search_paginated(
 
   // Query patients that belong to the current user and match the search
   let paginator = patients::Entity::find()
-    .filter(patients::Column::UserId.eq(user.id))
+    .filter(patients::COLUMN.user_id.eq(user.id))
     .filter(search_condition)
-    .order_by_desc(patients::Column::UpdatedAt)
+    .order_by_desc(patients::COLUMN.updated_at)
     .paginate(db, 10);
 
   let total_pages = paginator.num_pages().await?;

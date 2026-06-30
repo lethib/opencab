@@ -74,7 +74,7 @@ impl Model {
     db: &DatabaseConnection,
   ) -> ModelResult<Vec<(practitioner_offices::Model, user_practitioner_offices::Model)>> {
     let offices = user_practitioner_offices::Entity::find()
-      .filter(user_practitioner_offices::Column::UserId.eq(self.id))
+      .filter(user_practitioner_offices::COLUMN.user_id.eq(self.id))
       .find_also_related(practitioner_offices::Entity)
       .all(db)
       .await?
@@ -91,7 +91,7 @@ impl Model {
   ///
   /// When could not find user by the given token or DB query error
   pub async fn find_by_email(db: &DatabaseConnection, email: &str) -> ModelResult<Self> {
-    let user = users::Entity::find().filter(users::Column::Email.eq(email)).one(db).await?;
+    let user = users::Entity::find().filter(users::COLUMN.email.eq(email)).one(db).await?;
     user.ok_or_else(|| ModelError::EntityNotFound)
   }
 
@@ -102,10 +102,7 @@ impl Model {
   /// When could not find user  or DB query error
   pub async fn find_by_pid(db: &impl ConnectionTrait, pid: &str) -> ModelResult<Self> {
     let parse_uuid = Uuid::parse_str(pid).map_err(|e| ModelError::Any(e.into()))?;
-    let user = users::Entity::find()
-      .filter(users::Column::Pid.eq(parse_uuid))
-      .one(db)
-      .await?;
+    let user = users::Entity::find().filter(users::COLUMN.pid.eq(parse_uuid)).one(db).await?;
     user.ok_or_else(|| ModelError::EntityNotFound)
   }
 
@@ -132,7 +129,7 @@ impl Model {
     let txn = db.begin().await?;
 
     if users::Entity::find()
-      .filter(users::Column::Email.eq(&params.email))
+      .filter(users::COLUMN.email.eq(&params.email))
       .one(&txn)
       .await?
       .is_some()

@@ -5,7 +5,7 @@ use axum::{
 };
 use base64::Engine;
 use chrono::NaiveDate;
-use sea_orm::{ColumnTrait, EntityTrait, ModelTrait, QueryFilter, QueryOrder};
+use sea_orm::{EntityTrait, ModelTrait, QueryFilter, QueryOrder};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -109,7 +109,7 @@ pub async fn generate_invoice(
   Json(params): Json<InvoiceGenerationParams>,
 ) -> Result<Json<serde_json::Value>, MyErrors> {
   let patient = patients::Entity::find_by_id(patient_id)
-    .filter(patients::Column::UserId.eq(ctx.current_user.id))
+    .filter(patients::COLUMN.user_id.eq(ctx.current_user.id))
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;
@@ -160,9 +160,9 @@ pub async fn get_medical_appointments(
   Path(patient_id): Path<i32>,
 ) -> Result<Json<Vec<MedicalAppointmentResponse>>, MyErrors> {
   let medical_appointments = medical_appointments::Entity::find()
-    .filter(medical_appointments::Column::PatientId.eq(patient_id))
-    .filter(medical_appointments::Column::UserId.eq(ctx.current_user.id))
-    .order_by_desc(medical_appointments::Column::Date)
+    .filter(medical_appointments::COLUMN.patient_id.eq(patient_id))
+    .filter(medical_appointments::COLUMN.user_id.eq(ctx.current_user.id))
+    .order_by_desc(medical_appointments::COLUMN.date)
     .find_also_related(practitioner_offices::Entity)
     .all(&ctx.db)
     .await?
