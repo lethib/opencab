@@ -47,7 +47,7 @@ RUN bun run build && \
 # STAGE 3: Rust Dependencies Chef Setup
 # ------------------------------------------------------------------------------
 # Using specific Rust version with slim variant for faster downloads
-FROM lukemathwalker/cargo-chef:latest-rust-1.88.0-slim AS chef
+FROM lukemathwalker/cargo-chef:latest-rust-1.96-slim AS chef
 LABEL stage=chef
 WORKDIR /app
 

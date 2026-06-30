@@ -28,7 +28,7 @@ impl MigrationTrait for Migration {
     ];
 
     for sql in stmts {
-      conn.execute(Statement::from_string(db, sql)).await?;
+      conn.execute_raw(Statement::from_string(db, sql)).await?;
     }
 
     Ok(())
@@ -49,7 +49,7 @@ impl MigrationTrait for Migration {
     ];
 
     for sql in stmts {
-      conn.execute(Statement::from_string(db, sql)).await?;
+      conn.execute_raw(Statement::from_string(db, sql)).await?;
     }
 
     Ok(())

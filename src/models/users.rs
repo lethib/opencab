@@ -1,4 +1,6 @@
-use sea_orm::{prelude::*, ActiveValue, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter, TransactionTrait};
+use sea_orm::{
+  prelude::*, ActiveValue, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter, TransactionSession, TransactionTrait,
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;

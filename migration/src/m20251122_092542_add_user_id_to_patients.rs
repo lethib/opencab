@@ -42,7 +42,7 @@ impl MigrationTrait for Migration {
       WHERE pu.patient_id = p.id
     "#;
     let stmt = Statement::from_string(manager.get_database_backend(), populate_sql);
-    manager.get_connection().execute(stmt).await?;
+    manager.get_connection().execute_raw(stmt).await?;
 
     // Make user_id NOT NULL now that it's populated
     manager

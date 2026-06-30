@@ -288,13 +288,15 @@ impl<'user> MedicalAppointmentExtractor<'user> {
     start_date: NaiveDate,
     end_date: NaiveDate,
   ) -> Result<Vec<MedicalAppointmentDetail>, MyErrors> {
+    // SeaORM 2.0: `select_also` ne se chaîne plus sur `SelectTwo`. On utilise deux
+    // `find_also_related` (topologie en étoile : patients et practitioner_offices sont tous deux
+    // liés à medical_appointments). La jointure est gérée par SeaORM (LEFT JOIN) ; les FK étant
+    // NOT NULL, le résultat est identique et les `Option` sont déballées plus bas via `ok_or`.
     let appointments = medical_appointments::Entity::find()
       .filter(medical_appointments::Column::UserId.eq(self.user.id))
       .filter(medical_appointments::Column::Date.between(start_date, end_date))
-      .inner_join(patients::Entity)
-      .inner_join(practitioner_offices::Entity)
-      .select_also(patients::Entity)
-      .select_also(practitioner_offices::Entity)
+      .find_also_related(patients::Entity)
+      .find_also_related(practitioner_offices::Entity)
       .order_by_asc(medical_appointments::Column::Date)
       .order_by_asc(patients::Column::LastName)
       .all(db)

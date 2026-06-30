@@ -113,7 +113,7 @@ impl MigrationTrait for Migration {
     // Drop the office enum type using raw SQL
     let drop_enum_sql = "DROP TYPE IF EXISTS office";
     let stmt = Statement::from_string(manager.get_database_backend(), drop_enum_sql);
-    manager.get_connection().execute(stmt).await?;
+    manager.get_connection().execute_raw(stmt).await?;
 
     // Add reference from patient_user to practitioner_offices.
     // Uses a DO/EXCEPTION block because the table may have been created as
@@ -127,7 +127,7 @@ impl MigrationTrait for Migration {
       END $$;
     "#;
     let stmt = Statement::from_string(manager.get_database_backend(), sql.to_string());
-    manager.get_connection().execute(stmt).await?;
+    manager.get_connection().execute_raw(stmt).await?;
 
     Ok(())
   }
