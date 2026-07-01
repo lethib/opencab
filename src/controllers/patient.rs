@@ -5,7 +5,7 @@ use axum::{
 };
 use base64::Engine;
 use chrono::NaiveDate;
-use sea_orm::{EntityTrait, ModelTrait, QueryFilter, QueryOrder};
+use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait, ModelTrait, QueryFilter, QueryOrder};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -18,7 +18,7 @@ use crate::{
   middleware::context::Ctx,
   models::{
     _entities::{medical_appointments, patients, practitioner_offices, sea_orm_active_enums::PaymentMethod},
-    medical_appointments::{ActiveModel as MedicalAppointments, CreateMedicalAppointmentParams},
+    medical_appointments::ActiveModel as MedicalAppointments,
     my_errors::{application_error::ApplicationError, MyErrors},
     patients::CreatePatientParams,
   },
@@ -138,16 +138,17 @@ pub async fn generate_invoice(
     }
   }
 
-  let medical_appointment_params = CreateMedicalAppointmentParams {
-    user_id: ctx.current_user.id,
-    patient_id,
-    practitioner_office_id: params.invoice_params.office_id,
-    payment_method: params.payment_method.clone(),
-    date: NaiveDate::parse_from_str(&params.invoice_params.date, "%Y-%m-%d")?,
-    price_in_cents: (params.invoice_params.amount * 100.0).round() as i32,
-  };
-
-  MedicalAppointments::create(&ctx.db, &medical_appointment_params).await?;
+  MedicalAppointments {
+    date: ActiveValue::Set(NaiveDate::parse_from_str(&params.invoice_params.date, "%Y-%m-%d")?),
+    practitioner_office_id: ActiveValue::Set(params.invoice_params.office_id),
+    price_in_cents: ActiveValue::Set((params.invoice_params.amount * 100.0).round() as i32),
+    user_id: ActiveValue::Set(ctx.current_user.id),
+    patient_id: ActiveValue::Set(patient_id),
+    payment_method: ActiveValue::Set(params.payment_method),
+    ..Default::default()
+  }
+  .insert(&ctx.db)
+  .await?;
 
   Ok(Json(serde_json::json!({
     "pdf_data": base64::prelude::BASE64_STANDARD.encode(&generated_invoice.data),

@@ -1,14 +1,13 @@
 use axum::{extract::Path, http::status, Json};
 use chrono::NaiveDate;
 use reqwest::StatusCode;
-use sea_orm::{EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};
 use serde::Deserialize;
 
 use crate::{
   middleware::context::Ctx,
   models::{
     _entities::{medical_appointments, patients, sea_orm_active_enums::PaymentMethod},
-    medical_appointments::{CreateMedicalAppointmentParams, UpdateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, MyErrors},
   },
   services::{self, invoice::patient_invoice::GenerateInvoiceParams},
@@ -106,17 +105,14 @@ pub async fn update(
   // Parse date string in YYYY-MM-DD format
   let appointment_date = NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
-  let medical_appointments_params = UpdateMedicalAppointmentParams {
-    date: appointment_date,
-    practitioner_office_id: params.practitioner_office_id,
-    price_in_cents: params.price_in_cents,
-    payment_method: params.payment_method,
-  };
+  let mut medical_appointment = medical_appointment.into_active_model();
 
-  medical_appointment
-    .into_active_model()
-    .update_from_params(&ctx.db, &medical_appointments_params)
-    .await?;
+  medical_appointment.date = ActiveValue::Set(appointment_date);
+  medical_appointment.practitioner_office_id = ActiveValue::Set(params.practitioner_office_id);
+  medical_appointment.price_in_cents = ActiveValue::Set(params.price_in_cents);
+  medical_appointment.payment_method = ActiveValue::Set(params.payment_method.clone());
+
+  medical_appointment.update(&ctx.db).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
@@ -129,16 +125,17 @@ pub async fn create(
   // Parse date string in YYYY-MM-DD format
   let appointment_date = NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
-  let medical_appointments_params = CreateMedicalAppointmentParams {
-    date: appointment_date,
-    practitioner_office_id: params.practitioner_office_id,
-    price_in_cents: params.price_in_cents,
-    user_id: ctx.current_user.id,
-    patient_id,
-    payment_method: params.payment_method,
-  };
-
-  medical_appointments::ActiveModel::create(&ctx.db, &medical_appointments_params).await?;
+  medical_appointments::ActiveModel {
+    date: ActiveValue::Set(appointment_date),
+    practitioner_office_id: ActiveValue::Set(params.practitioner_office_id),
+    price_in_cents: ActiveValue::Set(params.price_in_cents),
+    user_id: ActiveValue::Set(ctx.current_user.id),
+    patient_id: ActiveValue::Set(patient_id),
+    payment_method: ActiveValue::Set(params.payment_method),
+    ..Default::default()
+  }
+  .insert(&ctx.db)
+  .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
