@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "user_business_informations")]
 pub struct Model {
+  pub created_at: DateTimeWithTimeZone,
+  pub updated_at: DateTimeWithTimeZone,
   #[sea_orm(primary_key)]
   pub id: i32,
   pub adeli_number: Option<String>,
@@ -17,8 +19,6 @@ pub struct Model {
   pub user_id: i32,
   pub signature_file_name: Option<String>,
   pub profession: Profession,
-  pub created_at: DateTimeWithTimeZone,
-  pub updated_at: DateTimeWithTimeZone,
   pub beneficiary_name: Option<String>,
   pub iban: Option<String>,
   pub bic: Option<String>,

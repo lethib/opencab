@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "patients")]
 pub struct Model {
+  pub created_at: DateTimeWithTimeZone,
+  pub updated_at: DateTimeWithTimeZone,
   #[sea_orm(primary_key)]
   pub id: i32,
   pub ssn: Option<String>,
@@ -21,8 +23,6 @@ pub struct Model {
   pub address_country: String,
   pub email: Option<String>,
   pub user_id: i32,
-  pub created_at: DateTimeWithTimeZone,
-  pub updated_at: DateTimeWithTimeZone,
   #[sea_orm(has_many)]
   pub medical_appointments: HasMany<super::medical_appointments::Entity>,
   #[sea_orm(belongs_to, from = "user_id", to = "id", on_update = "Cascade", on_delete = "Cascade")]
