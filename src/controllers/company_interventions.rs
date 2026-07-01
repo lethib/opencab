@@ -1,5 +1,5 @@
 use axum::{extract::Path, http::status, Json};
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder};
+use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel, QueryFilter, QueryOrder};
 
 use crate::{
   middleware::context::Ctx,
@@ -21,8 +21,8 @@ pub async fn list_interventions(
   ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
   let interventions = company_interventions::Entity::find()
-    .filter(company_interventions::Column::CompanyId.eq(company_id))
-    .order_by_desc(company_interventions::Column::IssueDate)
+    .filter(company_interventions::COLUMN.company_id.eq(company_id))
+    .order_by_desc(company_interventions::COLUMN.issue_date)
     .all(&ctx.db)
     .await?;
 
@@ -36,8 +36,8 @@ pub async fn delete(ctx: Ctx, Path((company_id, intervention_id)): Path<(i32, i3
     .ok_or(ApplicationError::not_found())?;
 
   let intervention = company_interventions::Entity::find()
-    .filter(company_interventions::Column::Id.eq(intervention_id))
-    .filter(company_interventions::Column::CompanyId.eq(company.id))
+    .filter(company_interventions::COLUMN.id.eq(intervention_id))
+    .filter(company_interventions::COLUMN.company_id.eq(company.id))
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;

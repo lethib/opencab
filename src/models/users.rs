@@ -1,4 +1,6 @@
-use sea_orm::{prelude::*, ActiveValue, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter, TransactionTrait};
+use sea_orm::{
+  prelude::*, ActiveValue, ConnectionTrait, DatabaseConnection, EntityTrait, QueryFilter, TransactionSession, TransactionTrait,
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use validator::Validate;
@@ -71,13 +73,14 @@ impl Model {
     &self,
     db: &DatabaseConnection,
   ) -> ModelResult<Vec<(practitioner_offices::Model, user_practitioner_offices::Model)>> {
+    // FK `practitioner_office_id` is NOT NULL → `find_both_related` returns the office without `Option`.
     let offices = user_practitioner_offices::Entity::find()
-      .filter(user_practitioner_offices::Column::UserId.eq(self.id))
-      .find_also_related(practitioner_offices::Entity)
+      .filter(user_practitioner_offices::COLUMN.user_id.eq(self.id))
+      .find_both_related(practitioner_offices::Entity)
       .all(db)
       .await?
       .into_iter()
-      .filter_map(|(upo, office)| office.map(|o| (o, upo)))
+      .map(|(upo, office)| (office, upo))
       .collect();
 
     Ok(offices)
@@ -89,7 +92,7 @@ impl Model {
   ///
   /// When could not find user by the given token or DB query error
   pub async fn find_by_email(db: &DatabaseConnection, email: &str) -> ModelResult<Self> {
-    let user = users::Entity::find().filter(users::Column::Email.eq(email)).one(db).await?;
+    let user = users::Entity::find_by_email(email).one(db).await?;
     user.ok_or_else(|| ModelError::EntityNotFound)
   }
 
@@ -100,10 +103,7 @@ impl Model {
   /// When could not find user  or DB query error
   pub async fn find_by_pid(db: &impl ConnectionTrait, pid: &str) -> ModelResult<Self> {
     let parse_uuid = Uuid::parse_str(pid).map_err(|e| ModelError::Any(e.into()))?;
-    let user = users::Entity::find()
-      .filter(users::Column::Pid.eq(parse_uuid))
-      .one(db)
-      .await?;
+    let user = users::Entity::find_by_pid(parse_uuid).one(db).await?;
     user.ok_or_else(|| ModelError::EntityNotFound)
   }
 
@@ -129,12 +129,7 @@ impl Model {
   ) -> ModelResult<Self> {
     let txn = db.begin().await?;
 
-    if users::Entity::find()
-      .filter(users::Column::Email.eq(&params.email))
-      .one(&txn)
-      .await?
-      .is_some()
-    {
+    if users::Entity::find_by_email(&params.email).one(&txn).await?.is_some() {
       return Err(ModelError::EntityAlreadyExists {});
     }
 

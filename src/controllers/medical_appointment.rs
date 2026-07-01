@@ -1,7 +1,7 @@
 use axum::{extract::Path, http::status, Json};
 use chrono::NaiveDate;
 use reqwest::StatusCode;
-use sea_orm::{ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};
+use sea_orm::{EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};
 use serde::Deserialize;
 
 use crate::{
@@ -24,7 +24,7 @@ pub struct MedicalAppointmentPayload {
 
 pub async fn delete(ctx: Ctx, Path((patient_id, appointment_id)): Path<(i32, i32)>) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
-    .filter(medical_appointments::Column::PatientId.eq(patient_id))
+    .filter(medical_appointments::COLUMN.patient_id.eq(patient_id))
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;
@@ -45,13 +45,13 @@ pub async fn generate_invoice(
   Path((patient_id, appointment_id)): Path<(i32, i32)>,
 ) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
-    .filter(medical_appointments::Column::PatientId.eq(patient_id))
+    .filter(medical_appointments::COLUMN.patient_id.eq(patient_id))
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;
 
   let patient = patients::Entity::find_by_id(patient_id)
-    .filter(patients::Column::UserId.eq(ctx.current_user.id))
+    .filter(patients::COLUMN.user_id.eq(ctx.current_user.id))
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;
@@ -92,7 +92,7 @@ pub async fn update(
   Json(params): Json<MedicalAppointmentPayload>,
 ) -> Result<status::StatusCode, MyErrors> {
   let medical_appointment = medical_appointments::Entity::find_by_id(appointment_id)
-    .filter(medical_appointments::Column::PatientId.eq(patient_id))
+    .filter(medical_appointments::COLUMN.patient_id.eq(patient_id))
     .one(&ctx.db)
     .await?
     .ok_or(ApplicationError::not_found())?;
@@ -115,7 +115,7 @@ pub async fn update(
 
   medical_appointment
     .into_active_model()
-    .update(&ctx.db, &medical_appointments_params)
+    .update_from_params(&ctx.db, &medical_appointments_params)
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)

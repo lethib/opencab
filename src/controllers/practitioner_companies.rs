@@ -1,7 +1,7 @@
 use axum::{extract::Path, http::status, Json};
 use base64::Engine;
 use rust_decimal::Decimal;
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
+use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel, QueryFilter};
 use serde::Deserialize;
 use std::str::FromStr;
 
@@ -28,7 +28,7 @@ pub struct GenerateCompanyInvoiceParams {
 
 pub async fn index(ctx: Ctx) -> Result<Json<Vec<practitioner_companies::Model>>, MyErrors> {
   let companies = practitioner_companies::Entity::find()
-    .filter(practitioner_companies::Column::UserId.eq(ctx.current_user.id))
+    .filter(practitioner_companies::COLUMN.user_id.eq(ctx.current_user.id))
     .all(&ctx.db)
     .await?;
 
@@ -64,7 +64,7 @@ pub async fn update(
 
   ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
-  company.into_active_model().update(&ctx.db, &params).await?;
+  company.into_active_model().update_from_params(&ctx.db, &params).await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }

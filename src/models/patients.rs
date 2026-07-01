@@ -91,7 +91,11 @@ impl ActiveModel {
     );
   }
 
-  pub async fn update<T: ConnectionTrait>(db: &T, patient_id: i32, params: &CreatePatientParams) -> Result<(), MyErrors> {
+  pub async fn update_from_params<T: ConnectionTrait>(
+    db: &T,
+    patient_id: i32,
+    params: &CreatePatientParams,
+  ) -> Result<(), MyErrors> {
     let mut patient = Entity::find_by_id(patient_id)
       .one(db)
       .await?

@@ -60,7 +60,7 @@ impl MigrationTrait for Migration {
       END $$;
     "#;
     let stmt = Statement::from_string(manager.get_database_backend(), copy_data_sql);
-    manager.get_connection().execute(stmt).await?;
+    manager.get_connection().execute_raw(stmt).await?;
 
     // Make all columns NOT NULL after data is populated
     manager

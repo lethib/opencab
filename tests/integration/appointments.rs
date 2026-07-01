@@ -107,7 +107,7 @@ mod update_an_appointment_date {
     let new_date = NaiveDate::parse_from_str("2026-04-20", "%Y-%m-%d").unwrap();
     appointment
       .into_active_model()
-      .update(
+      .update_from_params(
         &bg.db,
         &UpdateMedicalAppointmentParams {
           date: new_date,

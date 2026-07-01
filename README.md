@@ -83,7 +83,7 @@ This is a personal project built to explore modern web technologies including Ru
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Rust 1.88+ ([Install](https://rustup.rs/))
+- Rust 1.96 ([Install](https://rustup.rs/))
 - Bun ([Install](https://bun.sh/docs/installation))
 - PostgreSQL 15+ or SQLite for development
 - Docker (optional, for containerized deployment)

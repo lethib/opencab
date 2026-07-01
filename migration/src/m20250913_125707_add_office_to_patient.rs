@@ -12,7 +12,7 @@ impl MigrationTrait for Migration {
     // Create the office enum type using raw SQL
     let create_enum_sql = "CREATE TYPE office AS ENUM ('Vitry-sur-Seine', 'Rueil-Malmaison')";
     let stmt = Statement::from_string(manager.get_database_backend(), create_enum_sql);
-    manager.get_connection().execute(stmt).await?;
+    manager.get_connection().execute_raw(stmt).await?;
 
     // Add the office column to the patients table
     manager
@@ -38,7 +38,7 @@ impl MigrationTrait for Migration {
     // Drop the office enum type using raw SQL
     let drop_enum_sql = "DROP TYPE IF EXISTS office";
     let stmt = Statement::from_string(manager.get_database_backend(), drop_enum_sql);
-    manager.get_connection().execute(stmt).await?;
+    manager.get_connection().execute_raw(stmt).await?;
 
     Ok(())
   }
