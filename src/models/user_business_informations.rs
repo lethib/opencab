@@ -22,8 +22,11 @@ pub struct BankingInformationParams {
 
 impl CreateBusinessInformation {
   pub fn profession_enum(&self) -> Result<Profession, DbErr> {
-    Profession::try_from_value(&self.profession)
-      .map_err(|_| DbErr::Custom(format!("Invalid profession value: {}", self.profession)))
+    let value = sea_orm::sea_query::Enum {
+      type_name: Profession::name().inner().into(),
+      value: self.profession.clone().into(),
+    };
+    Profession::try_from_value(&value).map_err(|_| DbErr::Custom(format!("Invalid profession value: {}", self.profession)))
   }
 }
 

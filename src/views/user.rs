@@ -22,7 +22,7 @@ impl BusinessInformation {
       siret_number: business_information.siret_number.clone(),
       adeli_number: business_information.adeli_number.as_ref().filter(|s| !s.is_empty()).cloned(),
       signature_filename: business_information.signature_file_name.clone(),
-      profession: business_information.profession.to_value(),
+      profession: business_information.profession.to_value().value.into(),
       beneficiary_name: business_information.beneficiary_name.clone(),
       iban: business_information.iban.clone(),
       bic: business_information.bic.clone(),
