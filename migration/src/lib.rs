@@ -34,6 +34,7 @@ mod m20260412_074522_make_patient_ssn_nullable;
 mod m20260508_155536_create_companies_table;
 mod m20260526_185055_create_company_interventions_table;
 mod m20260625_145842_add_banking_information_to_business_info;
+mod m20260701_123812_add_unique_constraint_to_user_pid;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -72,6 +73,7 @@ impl MigratorTrait for Migrator {
       Box::new(m20260508_155536_create_companies_table::Migration),
       Box::new(m20260526_185055_create_company_interventions_table::Migration),
       Box::new(m20260625_145842_add_banking_information_to_business_info::Migration),
+      Box::new(m20260701_123812_add_unique_constraint_to_user_pid::Migration),
     ]
   }
 }

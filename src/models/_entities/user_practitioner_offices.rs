@@ -7,12 +7,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "user_practitioner_offices")]
 pub struct Model {
-  #[sea_orm(primary_key)]
-  pub id: i32,
-  pub user_id: i32,
-  pub practitioner_office_id: i32,
   pub created_at: DateTimeWithTimeZone,
   pub updated_at: DateTimeWithTimeZone,
+  #[sea_orm(primary_key, auto_increment = false)]
+  pub user_id: i32,
+  #[sea_orm(primary_key, auto_increment = false)]
+  pub practitioner_office_id: i32,
   #[sea_orm(column_type = "Decimal(Some((5, 2)))")]
   pub revenue_share_percentage: Decimal,
   #[sea_orm(
