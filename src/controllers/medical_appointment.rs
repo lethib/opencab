@@ -1,7 +1,7 @@
 use axum::{extract::Path, http::status, Json};
 use chrono::NaiveDate;
 use reqwest::StatusCode;
-use sea_orm::{ActiveModelTrait, ActiveValue, EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};
+use sea_orm::{EntityTrait, IntoActiveModel, ModelTrait, QueryFilter};
 use serde::Deserialize;
 
 use crate::{
@@ -105,14 +105,15 @@ pub async fn update(
   // Parse date string in YYYY-MM-DD format
   let appointment_date = NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
-  let mut medical_appointment = medical_appointment.into_active_model();
+  let medical_appointment = medical_appointment.into_active_model().into_ex();
 
-  medical_appointment.date = ActiveValue::Set(appointment_date);
-  medical_appointment.practitioner_office_id = ActiveValue::Set(params.practitioner_office_id);
-  medical_appointment.price_in_cents = ActiveValue::Set(params.price_in_cents);
-  medical_appointment.payment_method = ActiveValue::Set(params.payment_method.clone());
-
-  medical_appointment.update(&ctx.db).await?;
+  medical_appointment
+    .set_date(appointment_date)
+    .set_practitioner_office_id(params.practitioner_office_id)
+    .set_price_in_cents(params.price_in_cents)
+    .set_payment_method(params.payment_method)
+    .update(&ctx.db)
+    .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
@@ -125,17 +126,15 @@ pub async fn create(
   // Parse date string in YYYY-MM-DD format
   let appointment_date = NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
-  medical_appointments::ActiveModel {
-    date: ActiveValue::Set(appointment_date),
-    practitioner_office_id: ActiveValue::Set(params.practitioner_office_id),
-    price_in_cents: ActiveValue::Set(params.price_in_cents),
-    user_id: ActiveValue::Set(ctx.current_user.id),
-    patient_id: ActiveValue::Set(patient_id),
-    payment_method: ActiveValue::Set(params.payment_method),
-    ..Default::default()
-  }
-  .insert(&ctx.db)
-  .await?;
+  medical_appointments::ActiveModel::builder()
+    .set_date(appointment_date)
+    .set_practitioner_office_id(params.practitioner_office_id)
+    .set_price_in_cents(params.price_in_cents)
+    .set_payment_method(params.payment_method)
+    .set_patient_id(patient_id)
+    .set_user_id(ctx.current_user.id)
+    .insert(&ctx.db)
+    .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }

@@ -1,9 +1,9 @@
 use chrono::NaiveDate;
 use opencab::models::{
-  _entities::sea_orm_active_enums::PaymentMethod,
-  medical_appointments::{ActiveModel as AppointmentActiveModel, Model as AppointmentModel},
+  _entities::{medical_appointments, sea_orm_active_enums::PaymentMethod},
+  medical_appointments::Model as AppointmentModel,
 };
-use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait};
+use sea_orm::TransactionTrait;
 
 pub struct AppointmentFactory {
   date: NaiveDate,
@@ -41,18 +41,17 @@ impl AppointmentFactory {
     self
   }
 
-  pub async fn create(self, db: &impl ConnectionTrait, user_id: i32, patient_id: i32, office_id: i32) -> AppointmentModel {
-    AppointmentActiveModel {
-      user_id: ActiveValue::Set(user_id),
-      patient_id: ActiveValue::Set(patient_id),
-      practitioner_office_id: ActiveValue::Set(office_id),
-      date: ActiveValue::Set(self.date),
-      price_in_cents: ActiveValue::Set(self.price_in_cents),
-      payment_method: ActiveValue::Set(self.payment_method),
-      ..Default::default()
-    }
-    .insert(db)
-    .await
-    .unwrap()
+  pub async fn create(self, db: &impl TransactionTrait, user_id: i32, patient_id: i32, office_id: i32) -> AppointmentModel {
+    medical_appointments::ActiveModel::builder()
+      .set_date(self.date)
+      .set_practitioner_office_id(office_id)
+      .set_price_in_cents(self.price_in_cents)
+      .set_payment_method(self.payment_method)
+      .set_patient_id(patient_id)
+      .set_user_id(user_id)
+      .insert(db)
+      .await
+      .unwrap()
+      .into()
   }
 }

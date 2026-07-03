@@ -87,8 +87,6 @@ mod create_an_appointment_with_a_payment_method {
 // ============================================================
 
 mod update_an_appointment_date {
-  use sea_orm::{ActiveModelTrait, ActiveValue};
-
   use super::*;
 
   #[tokio::test]
@@ -104,9 +102,8 @@ mod update_an_appointment_date {
 
     // When
     let new_date = NaiveDate::parse_from_str("2026-04-20", "%Y-%m-%d").unwrap();
-    let mut appointment = appointment.into_active_model();
-    appointment.date = ActiveValue::Set(new_date);
-    appointment.update(&bg.db).await.unwrap();
+    let appointment = appointment.into_active_model().into_ex();
+    appointment.set_date(new_date).update(&bg.db).await.unwrap();
 
     // Then
     let updated = medical_appointments::Entity::find_by_id(appointment_id)
