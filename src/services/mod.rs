@@ -1,4 +1,5 @@
 pub mod appointments;
+pub mod company_interventions;
 pub mod crypto;
 pub mod invoice;
 pub mod patients;

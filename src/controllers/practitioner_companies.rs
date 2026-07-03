@@ -8,12 +8,12 @@ use std::str::FromStr;
 use crate::{
   middleware::context::Ctx,
   models::{
-    _entities::{company_interventions, practitioner_companies, practitioner_offices, prelude},
-    company_interventions::InterventionParams,
+    _entities::{practitioner_companies, practitioner_offices, prelude},
     my_errors::{application_error::ApplicationError, MyErrors},
   },
   services::{
     self,
+    company_interventions::{CompanyInterventionsService, InterventionParams},
     practitioner_companies::{CompanyParams, PractitionerCompaniesService},
   },
 };
@@ -113,8 +113,11 @@ pub async fn generate_invoice(
     object: params.description,
   };
 
-  let intervention =
-    company_interventions::ActiveModel::create(&ctx.db, ctx.current_user.id, company_id, &intervention_params).await?;
+  let intervention = CompanyInterventionsService::create(intervention_params)?
+    .for_company(company_id)
+    .for_practitioner(ctx.current_user.id)
+    .build(&ctx.db)
+    .await?;
 
   let practitioner_office = practitioner_offices::Entity::find_by_id(params.practitioner_office_id)
     .one(&ctx.db)
