@@ -18,7 +18,6 @@ use crate::{
   middleware::context::Ctx,
   models::{
     _entities::{medical_appointments, patients, practitioner_offices, sea_orm_active_enums::PaymentMethod},
-    medical_appointments::{ActiveModel as MedicalAppointments, CreateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, MyErrors},
     patients::CreatePatientParams,
   },
@@ -138,16 +137,15 @@ pub async fn generate_invoice(
     }
   }
 
-  let medical_appointment_params = CreateMedicalAppointmentParams {
-    user_id: ctx.current_user.id,
-    patient_id,
-    practitioner_office_id: params.invoice_params.office_id,
-    payment_method: params.payment_method.clone(),
-    date: NaiveDate::parse_from_str(&params.invoice_params.date, "%Y-%m-%d")?,
-    price_in_cents: (params.invoice_params.amount * 100.0).round() as i32,
-  };
-
-  MedicalAppointments::create(&ctx.db, &medical_appointment_params).await?;
+  medical_appointments::ActiveModel::builder()
+    .set_date(NaiveDate::parse_from_str(&params.invoice_params.date, "%Y-%m-%d")?)
+    .set_practitioner_office_id(params.invoice_params.office_id)
+    .set_price_in_cents((params.invoice_params.amount * 100.0).round() as i32)
+    .set_user_id(ctx.current_user.id)
+    .set_patient_id(patient_id)
+    .set_payment_method(params.payment_method)
+    .insert(&ctx.db)
+    .await?;
 
   Ok(Json(serde_json::json!({
     "pdf_data": base64::prelude::BASE64_STANDARD.encode(&generated_invoice.data),

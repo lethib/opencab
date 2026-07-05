@@ -8,12 +8,14 @@ use std::str::FromStr;
 use crate::{
   middleware::context::Ctx,
   models::{
-    _entities::{company_interventions, practitioner_companies, practitioner_offices, prelude},
-    company_interventions::InterventionParams,
+    _entities::{practitioner_companies, practitioner_offices, prelude},
     my_errors::{application_error::ApplicationError, MyErrors},
-    practitioner_companies::CompanyParams,
   },
-  services,
+  services::{
+    self,
+    company_interventions::{CompanyInterventionsService, InterventionParams},
+    practitioner_companies::{CompanyParams, PractitionerCompaniesService},
+  },
 };
 
 #[derive(Deserialize)]
@@ -47,7 +49,10 @@ pub async fn get(ctx: Ctx, Path(company_id): Path<i32>) -> Result<Json<practitio
 }
 
 pub async fn create(ctx: Ctx, Json(params): Json<CompanyParams>) -> Result<status::StatusCode, MyErrors> {
-  practitioner_companies::ActiveModel::create(&ctx.db, ctx.current_user.id, &params).await?;
+  PractitionerCompaniesService::create(params)?
+    .for_user(ctx.current_user.id)
+    .build(&ctx.db)
+    .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
@@ -64,7 +69,10 @@ pub async fn update(
 
   ctx.authorize().user_owning_resource(&company).await.run_complete()?;
 
-  company.into_active_model().update_from_params(&ctx.db, &params).await?;
+  PractitionerCompaniesService::for_company(company)
+    .update(params)?
+    .build(&ctx.db)
+    .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
@@ -105,8 +113,11 @@ pub async fn generate_invoice(
     object: params.description,
   };
 
-  let intervention =
-    company_interventions::ActiveModel::create(&ctx.db, ctx.current_user.id, company_id, &intervention_params).await?;
+  let intervention = CompanyInterventionsService::create(intervention_params)?
+    .for_company(company_id)
+    .for_practitioner(ctx.current_user.id)
+    .build(&ctx.db)
+    .await?;
 
   let practitioner_office = practitioner_offices::Entity::find_by_id(params.practitioner_office_id)
     .one(&ctx.db)

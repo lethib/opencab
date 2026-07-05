@@ -1,8 +1,5 @@
 use chrono::NaiveDate;
-use opencab::models::{
-  _entities::{medical_appointments, sea_orm_active_enums::PaymentMethod},
-  medical_appointments::UpdateMedicalAppointmentParams,
-};
+use opencab::models::_entities::{medical_appointments, sea_orm_active_enums::PaymentMethod};
 use opencab::services::appointments::MedicalAppointmentExtractor;
 use sea_orm::{EntityTrait, IntoActiveModel};
 
@@ -105,19 +102,8 @@ mod update_an_appointment_date {
 
     // When
     let new_date = NaiveDate::parse_from_str("2026-04-20", "%Y-%m-%d").unwrap();
-    appointment
-      .into_active_model()
-      .update_from_params(
-        &bg.db,
-        &UpdateMedicalAppointmentParams {
-          date: new_date,
-          price_in_cents: 5000,
-          practitioner_office_id: bg.office.id,
-          payment_method: None,
-        },
-      )
-      .await
-      .unwrap();
+    let appointment = appointment.into_active_model().into_ex();
+    appointment.set_date(new_date).update(&bg.db).await.unwrap();
 
     // Then
     let updated = medical_appointments::Entity::find_by_id(appointment_id)

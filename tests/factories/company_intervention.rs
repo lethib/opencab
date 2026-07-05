@@ -1,7 +1,10 @@
 use chrono::NaiveDate;
-use opencab::models::{_entities::company_interventions, company_interventions::InterventionParams};
+use opencab::{
+  models::_entities::company_interventions,
+  services::company_interventions::{CompanyInterventionsService, InterventionParams},
+};
 use rust_decimal::Decimal;
-use sea_orm::ConnectionTrait;
+use sea_orm::TransactionTrait;
 
 pub struct CompanyInterventionFactory {
   quantity: i32,
@@ -28,19 +31,18 @@ impl CompanyInterventionFactory {
     Self::default()
   }
 
-  pub async fn create(self, db: &impl ConnectionTrait, practitioner_id: i32, company_id: i32) -> company_interventions::Model {
-    company_interventions::ActiveModel::create(
-      db,
-      practitioner_id,
-      company_id,
-      &InterventionParams {
-        quantity: self.quantity,
-        unit_price: self.unit_price,
-        vat_rate: self.vat_rate,
-        issue_date: self.issue_date,
-        object: self.object,
-      },
-    )
+  pub async fn create(self, db: &impl TransactionTrait, practitioner_id: i32, company_id: i32) -> company_interventions::Model {
+    CompanyInterventionsService::create(InterventionParams {
+      quantity: self.quantity,
+      unit_price: self.unit_price,
+      vat_rate: self.vat_rate,
+      issue_date: self.issue_date,
+      object: self.object,
+    })
+    .unwrap()
+    .for_company(company_id)
+    .for_practitioner(practitioner_id)
+    .build(db)
     .await
     .unwrap()
   }

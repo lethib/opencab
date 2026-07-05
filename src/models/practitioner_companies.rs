@@ -1,30 +1,12 @@
-use sea_orm::{ActiveModelBehavior, ActiveModelTrait, ActiveValue, ConnectionTrait, DatabaseConnection, DbErr};
-use serde::Deserialize;
-use validator::Validate;
+use sea_orm::{ActiveModelBehavior, ActiveValue, ConnectionTrait, DatabaseConnection, DbErr};
 
 use crate::{
   auth::resource::Resource,
-  models::{
-    _entities::practitioner_companies,
-    my_errors::{application_error::ApplicationError, MyErrors},
-  },
-  validators::address::is_address_valid,
+  models::_entities::practitioner_companies::{Model as PractitionerCompany, *},
 };
 
-#[derive(Debug, Deserialize, Validate)]
-pub struct CompanyParams {
-  pub name: String,
-  pub contact_name: String,
-  #[validate(email(message = "invalid_email"))]
-  pub contact_email: String,
-  pub siret: Option<String>,
-  pub address_line_1: Option<String>,
-  pub address_zip_code: Option<String>,
-  pub address_city: Option<String>,
-}
-
 #[async_trait::async_trait]
-impl ActiveModelBehavior for practitioner_companies::ActiveModel {
+impl ActiveModelBehavior for ActiveModel {
   async fn before_save<C>(self, _db: &C, insert: bool) -> std::result::Result<Self, DbErr>
   where
     C: ConnectionTrait,
@@ -39,66 +21,7 @@ impl ActiveModelBehavior for practitioner_companies::ActiveModel {
   }
 }
 
-impl practitioner_companies::ActiveModel {
-  pub async fn create<T: ConnectionTrait>(
-    db: &T,
-    owner_id: i32,
-    params: &CompanyParams,
-  ) -> Result<practitioner_companies::Model, MyErrors> {
-    params.validate()?;
-    validate_address_params(params)?;
-
-    let is_address_provided = params.address_line_1.is_some();
-
-    Ok(
-      Self {
-        name: ActiveValue::Set(params.name.trim().to_string()),
-        user_id: ActiveValue::Set(owner_id),
-        contact_name: ActiveValue::Set(params.contact_name.trim().to_string()),
-        contact_email: ActiveValue::Set(params.contact_email.trim().to_string()),
-        siret: ActiveValue::Set(params.siret.as_ref().map(|siret| siret.trim().to_string())),
-        address_line_1: ActiveValue::Set(params.address_line_1.as_ref().map(|al1| al1.trim().to_string())),
-        address_zip_code: ActiveValue::Set(params.address_zip_code.as_ref().map(|zip_code| zip_code.trim().to_string())),
-        address_city: ActiveValue::Set(params.address_city.as_ref().map(|city| city.trim().to_string())),
-        address_country: ActiveValue::Set(is_address_provided.then_some("FRANCE".to_string())),
-        ..Default::default()
-      }
-      .insert(db)
-      .await?,
-    )
-  }
-
-  pub async fn update_from_params<T: ConnectionTrait>(mut self, db: &T, params: &CompanyParams) -> Result<(), MyErrors> {
-    params.validate()?;
-    validate_address_params(params)?;
-    let is_address_provided = params.address_line_1.is_some();
-
-    self.name = ActiveValue::Set(params.name.trim().to_string());
-    self.contact_name = ActiveValue::Set(params.contact_name.trim().to_string());
-    self.contact_email = ActiveValue::Set(params.contact_email.trim().to_string());
-    self.siret = ActiveValue::Set(params.siret.as_ref().map(|siret| siret.trim().to_string()));
-    self.address_line_1 = ActiveValue::Set(params.address_line_1.as_ref().map(|al1| al1.trim().to_string()));
-    self.address_zip_code = ActiveValue::Set(params.address_zip_code.as_ref().map(|zip_code| zip_code.trim().to_string()));
-    self.address_city = ActiveValue::Set(params.address_city.as_ref().map(|city| city.trim().to_string()));
-    self.address_country = ActiveValue::Set(is_address_provided.then_some("FRANCE".to_string()));
-
-    self.save(db).await?;
-
-    Ok(())
-  }
-}
-
-fn validate_address_params(params: &CompanyParams) -> Result<(), MyErrors> {
-  if let (Some(address_line_1), Some(zip_code)) = (params.address_line_1.as_ref(), params.address_zip_code.as_ref()) {
-    if !is_address_valid(address_line_1, zip_code) {
-      return Err(ApplicationError::unprocessable_entity("invalid_address").into());
-    }
-  }
-
-  Ok(())
-}
-
-impl Resource for practitioner_companies::Model {
+impl Resource for PractitionerCompany {
   async fn is_owned_by_user(&self, user_id: i32, _db: &DatabaseConnection) -> bool {
     self.user_id == user_id
   }

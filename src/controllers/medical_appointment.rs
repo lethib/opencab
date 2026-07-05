@@ -8,7 +8,6 @@ use crate::{
   middleware::context::Ctx,
   models::{
     _entities::{medical_appointments, patients, sea_orm_active_enums::PaymentMethod},
-    medical_appointments::{CreateMedicalAppointmentParams, UpdateMedicalAppointmentParams},
     my_errors::{application_error::ApplicationError, MyErrors},
   },
   services::{self, invoice::patient_invoice::GenerateInvoiceParams},
@@ -106,16 +105,14 @@ pub async fn update(
   // Parse date string in YYYY-MM-DD format
   let appointment_date = NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
-  let medical_appointments_params = UpdateMedicalAppointmentParams {
-    date: appointment_date,
-    practitioner_office_id: params.practitioner_office_id,
-    price_in_cents: params.price_in_cents,
-    payment_method: params.payment_method,
-  };
+  let medical_appointment = medical_appointment.into_active_model().into_ex();
 
   medical_appointment
-    .into_active_model()
-    .update_from_params(&ctx.db, &medical_appointments_params)
+    .set_date(appointment_date)
+    .set_practitioner_office_id(params.practitioner_office_id)
+    .set_price_in_cents(params.price_in_cents)
+    .set_payment_method(params.payment_method)
+    .update(&ctx.db)
     .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
@@ -129,16 +126,15 @@ pub async fn create(
   // Parse date string in YYYY-MM-DD format
   let appointment_date = NaiveDate::parse_from_str(&params.date, "%Y-%m-%d")?;
 
-  let medical_appointments_params = CreateMedicalAppointmentParams {
-    date: appointment_date,
-    practitioner_office_id: params.practitioner_office_id,
-    price_in_cents: params.price_in_cents,
-    user_id: ctx.current_user.id,
-    patient_id,
-    payment_method: params.payment_method,
-  };
-
-  medical_appointments::ActiveModel::create(&ctx.db, &medical_appointments_params).await?;
+  medical_appointments::ActiveModel::builder()
+    .set_date(appointment_date)
+    .set_practitioner_office_id(params.practitioner_office_id)
+    .set_price_in_cents(params.price_in_cents)
+    .set_payment_method(params.payment_method)
+    .set_patient_id(patient_id)
+    .set_user_id(ctx.current_user.id)
+    .insert(&ctx.db)
+    .await?;
 
   Ok(status::StatusCode::NO_CONTENT)
 }
