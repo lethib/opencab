@@ -45,9 +45,9 @@ export const PatientsTable = ({ searchQuery }: Props) => {
   return (
     <div className="space-y-4">
       <div className="rounded-lg border bg-card overflow-hidden">
-        <Table>
+        <Table maxHeight="calc(100dvh - 9.5rem)">
           <TableHeader>
-            <TableRow className="border-b bg-muted/50">
+            <TableRow className="border-b">
               <TableHead className="h-12 px-6 font-semibold text-foreground">
                 {t("patients.table.name")}
               </TableHead>
@@ -76,7 +76,10 @@ export const PatientsTable = ({ searchQuery }: Props) => {
 
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={8}>
+              <TableCell
+                colSpan={8}
+                className="sticky bottom-0 z-10 border-t bg-card"
+              >
                 {paginationData && (
                   <TablePagination
                     currentPage={page}

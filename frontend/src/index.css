@@ -176,6 +176,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /*
+   * Fluid base scale: all font sizes and spacing derive from rem, so shrinking
+   * the root font-size proportionally de-densifies the whole UI ("less zoomed").
+   * ~14.7px around 1440px, easing up to 16px on very large screens.
+   */
+  html {
+    font-size: clamp(14px, 13px + 0.12vw, 16px);
+  }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);

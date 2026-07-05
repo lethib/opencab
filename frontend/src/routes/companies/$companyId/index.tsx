@@ -49,7 +49,7 @@ function CompanyPage() {
 
   if (!company) {
     return (
-      <div className="container mx-auto py-8">
+      <div className="mx-auto w-full max-w-[1800px] py-8">
         <Button
           variant="link"
           onClick={handleBackNavigation}
@@ -69,8 +69,8 @@ function CompanyPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto space-y-6">
+      <div className="min-h-[calc(100dvh-4rem)] bg-linear-to-br from-background via-background to-muted/20">
+        <div className="mx-auto w-full max-w-[1800px] space-y-6">
           <Button
             variant="link"
             onClick={handleBackNavigation}

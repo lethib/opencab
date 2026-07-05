@@ -56,7 +56,7 @@ export const AppointmentsTable = ({ patientId }: Props) => {
       <div className="rounded-lg border bg-card overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-b bg-muted/50">
+            <TableRow className="border-b">
               <TableHead className="h-12 px-6 font-semibold text-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />

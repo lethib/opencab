@@ -17,8 +17,8 @@ function RouteComponent() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto">
+      <div className="min-h-[calc(100dvh-4rem)] bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="mx-auto w-full max-w-[1800px]">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 px-2">
             <div>
               <H2 className="text-3xl font-bold mb-2 flex items-center gap-2">
