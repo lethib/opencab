@@ -11,11 +11,16 @@ import {
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+function Table({
+  className,
+  maxHeight,
+  ...props
+}: React.ComponentProps<"table"> & { maxHeight?: string }) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className="relative w-full overflow-auto"
+      style={maxHeight ? { maxHeight } : undefined}
     >
       <table
         data-slot="table"
@@ -80,7 +85,9 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        // Sticky header with an opaque background so body rows don't bleed
+        // through when the table body scrolls (see the `maxHeight` prop on Table).
+        "text-foreground bg-muted sticky top-0 z-10 h-10 border-b px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className,
       )}
       {...props}

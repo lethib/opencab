@@ -51,8 +51,8 @@ function Patients() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="container mx-auto">
+      <div className="min-h-[calc(100dvh-4rem)] bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="mx-auto w-full max-w-[1800px]">
           <div className="flex gap-4 mb-8">
             {/* Search Bar */}
             <div className="flex-1 relative">

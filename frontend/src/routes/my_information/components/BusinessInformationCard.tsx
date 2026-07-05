@@ -81,68 +81,70 @@ export const BusinessInformationCard = ({ currentUser }: Props) => {
           onSubmit={onSubmit}
           className="space-y-6"
         >
-          <div className="space-y-2">
-            <Label htmlFor="rpps_number" className="text-sm font-medium">
-              {t("businessInfo.rppsNumber")} *
-            </Label>
-            <FormInput
-              id="rpps_number"
-              name="rpps_number"
-              type="text"
-              placeholder={t("businessInfo.rppsPlaceholder")}
-              className="pl-10 h-11"
-              icon={
-                <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              }
-            />
-          </div>
+          <div className="grid gap-x-4 gap-y-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="rpps_number" className="text-sm font-medium">
+                {t("businessInfo.rppsNumber")} *
+              </Label>
+              <FormInput
+                id="rpps_number"
+                name="rpps_number"
+                type="text"
+                placeholder={t("businessInfo.rppsPlaceholder")}
+                className="pl-10 h-11"
+                icon={
+                  <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                }
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="siret_number" className="text-sm font-medium">
-              {t("businessInfo.siretNumber")} *
-            </Label>
-            <FormInput
-              id="siret_number"
-              name="siret_number"
-              type="text"
-              placeholder={t("businessInfo.siretPlaceholder")}
-              className="pl-10 h-11"
-              icon={
-                <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              }
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="siret_number" className="text-sm font-medium">
+                {t("businessInfo.siretNumber")} *
+              </Label>
+              <FormInput
+                id="siret_number"
+                name="siret_number"
+                type="text"
+                placeholder={t("businessInfo.siretPlaceholder")}
+                className="pl-10 h-11"
+                icon={
+                  <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                }
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="adeli_number" className="text-sm font-medium">
-              {t("businessInfo.adeliNumber")}
-            </Label>
-            <FormInput
-              id="adeli_number"
-              name="adeli_number"
-              type="text"
-              placeholder={t("businessInfo.adeliPlaceholder")}
-              className="pl-10 h-11"
-              icon={
-                <FileText className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              }
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="adeli_number" className="text-sm font-medium">
+                {t("businessInfo.adeliNumber")}
+              </Label>
+              <FormInput
+                id="adeli_number"
+                name="adeli_number"
+                type="text"
+                placeholder={t("businessInfo.adeliPlaceholder")}
+                className="pl-10 h-11"
+                icon={
+                  <FileText className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                }
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="profession" className="text-sm font-medium">
-              {t("businessInfo.profession")}
-            </Label>
-            <FormSelect
-              name="profession"
-              placeholder={t("businessInfo.professionPlaceholder")}
-              options={
-                PROFESSIONS.map((profession) => ({
-                  value: profession,
-                  label: t(`businessInfo.professionOptions.${profession}`),
-                })) || []
-              }
-            />
+            <div className="space-y-2">
+              <Label htmlFor="profession" className="text-sm font-medium">
+                {t("businessInfo.profession")}
+              </Label>
+              <FormSelect
+                name="profession"
+                placeholder={t("businessInfo.professionPlaceholder")}
+                options={
+                  PROFESSIONS.map((profession) => ({
+                    value: profession,
+                    label: t(`businessInfo.professionOptions.${profession}`),
+                  })) || []
+                }
+              />
+            </div>
           </div>
 
           <Button type="submit" className="w-full">
