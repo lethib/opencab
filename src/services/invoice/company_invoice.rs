@@ -54,7 +54,7 @@ pub async fn generate(
     intervention: company_intervention.clone(),
     user: current_user.clone(),
     business_info,
-    company,
+    company: &company,
     emission_date: company_intervention.issue_date,
     practitioner_office,
     signature_data,
@@ -66,6 +66,6 @@ pub async fn generate(
     data,
     filename,
     date: company_intervention.issue_date,
-    kind: InvoiceKind::Company,
+    kind: InvoiceKind::Company(Box::new(company)),
   })
 }

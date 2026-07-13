@@ -11,18 +11,18 @@ use crate::{
   services::invoice::pdf::{embed_signature_image, format_french_phone_number, mm, GREEN_HEX_CODE},
 };
 
-pub(in crate::services::invoice) struct CompanyPdfArgs {
+pub(in crate::services::invoice) struct CompanyPdfArgs<'comp> {
   pub intervention: company_interventions::Model,
   pub user: users::Model,
   pub business_info: user_business_informations::Model,
-  pub company: practitioner_companies::Model,
+  pub company: &'comp practitioner_companies::Model,
   pub emission_date: NaiveDate,
   pub practitioner_office: practitioner_offices::Model,
   pub signature_data: Option<Vec<u8>>,
 }
 
-pub(in crate::services::invoice) struct CompanyInvoiceGenerator {
-  pub args: CompanyPdfArgs,
+pub(in crate::services::invoice) struct CompanyInvoiceGenerator<'args> {
+  pub args: CompanyPdfArgs<'args>,
   doc: Document,
   page: Page,
   y_position: f64,
@@ -54,8 +54,8 @@ fn format_siret(siret: &str) -> String {
   }
 }
 
-impl CompanyInvoiceGenerator {
-  pub(in crate::services::invoice) fn new(args: CompanyPdfArgs) -> Self {
+impl<'args> CompanyInvoiceGenerator<'args> {
+  pub(in crate::services::invoice) fn new(args: CompanyPdfArgs<'args>) -> Self {
     let (doc, page, margin_l, margin_r, y_position) = Self::setup_document();
     Self {
       args,
