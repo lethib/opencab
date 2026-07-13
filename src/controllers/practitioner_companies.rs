@@ -128,9 +128,9 @@ pub async fn generate_invoice(
   let invoice =
     services::invoice::company_invoice::generate(&intervention, &ctx.current_user, practitioner_office, &ctx.db).await?;
 
-  let current_user_profession = ctx.current_user.business_information(&ctx.db).await?.profession;
-
   if params.should_be_sent {
+    let current_user_profession = ctx.current_user.business_information(&ctx.db).await?.profession;
+
     invoice
       .send_to(&company.contact_email, &ctx.current_user, &current_user_profession)
       .await?;
