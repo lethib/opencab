@@ -26,6 +26,7 @@ pub struct GenerateCompanyInvoiceParams {
   pub unit_price_ht: f32,
   pub vat_rate: String,
   pub practitioner_office_id: i32,
+  pub should_be_sent: bool,
 }
 
 pub async fn index(ctx: Ctx) -> Result<Json<Vec<practitioner_companies::Model>>, MyErrors> {
@@ -126,6 +127,14 @@ pub async fn generate_invoice(
 
   let invoice =
     services::invoice::company_invoice::generate(&intervention, &ctx.current_user, practitioner_office, &ctx.db).await?;
+
+  if params.should_be_sent {
+    let current_user_profession = ctx.current_user.business_information(&ctx.db).await?.profession;
+
+    invoice
+      .send_to(&company.contact_email, &ctx.current_user, &current_user_profession)
+      .await?;
+  }
 
   Ok(Json(serde_json::json!({
     "pdf_data": base64::prelude::BASE64_STANDARD.encode(invoice.data),

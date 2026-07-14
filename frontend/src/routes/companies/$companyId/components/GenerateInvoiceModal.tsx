@@ -14,6 +14,7 @@ import { FormDatePicker } from "@/components/form/FormDatePicker";
 import { FormInput } from "@/components/form/FormInput";
 import { FormProvider } from "@/components/form/FormProvider";
 import { FormSelect } from "@/components/form/FormSelect";
+import { FormSwitch } from "@/components/form/FormSwitch";
 import {
   Button,
   Dialog,
@@ -43,6 +44,7 @@ const schema = z.object({
   practitioner_office_id: z
     .string()
     .min(1, t("invoice.errors.officeMustBeSelected")),
+  should_be_sent: z.boolean(),
 });
 
 export type GenerateInvoiceFormValues = z.infer<typeof schema>;
@@ -53,6 +55,7 @@ const defaultValues = {
   quantity: 1,
   unit_price_ht: 0,
   vat_rate: "0" as const,
+  should_be_sent: false,
 };
 
 interface Props {
@@ -118,6 +121,7 @@ export const GenerateInvoiceModal = ({ open, setIsOpen, company }: Props) => {
         unit_price_ht: values.unit_price_ht,
         vat_rate: values.vat_rate,
         practitioner_office_id: +values.practitioner_office_id,
+        should_be_sent: values.should_be_sent,
       },
       {
         onSuccess: (blob) => {
@@ -125,7 +129,12 @@ export const GenerateInvoiceModal = ({ open, setIsOpen, company }: Props) => {
           queryClient.invalidateQueries({
             queryKey: [`/companies/${company.id}/interventions`],
           });
-          toast.success(t("companies.invoice.success"));
+          toast.success(
+            values.should_be_sent
+              ? t("invoice.modal.emailSentConfirmation")
+              : t("companies.invoice.success"),
+            { duration: 6000 },
+          );
           handleClose();
         },
         onError: (error) => {
@@ -230,6 +239,16 @@ export const GenerateInvoiceModal = ({ open, setIsOpen, company }: Props) => {
               <span>{t("companies.invoice.totalTtc")}</span>
               <span>€ {fmt(totalTtc)}</span>
             </div>
+          </div>
+
+          <div className="py-2 space-y-2">
+            <FormSwitch
+              id="should_be_sent"
+              name="should_be_sent"
+              label={t("invoice.modal.sendInvoiceByEmail")}
+              size="lg"
+              className="cursor-pointer"
+            />
           </div>
 
           <DialogFooter>

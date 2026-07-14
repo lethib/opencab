@@ -145,9 +145,9 @@ pub async fn upload_signature(ctx: Ctx, mut multipart: Multipart) -> Result<stat
 
   let filename = format!(
     "{}_{}_{}",
-    &ctx.current_user.first_name.to_lowercase(),
-    &ctx.current_user.last_name.to_lowercase(),
-    &ctx.current_user.id.to_string()
+    ctx.current_user.first_name.to_lowercase(),
+    ctx.current_user.last_name.to_lowercase(),
+    ctx.current_user.id
   );
 
   let storage_service = services::storage::StorageService::new()?;

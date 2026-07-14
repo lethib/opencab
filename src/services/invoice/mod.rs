@@ -1,7 +1,11 @@
 use chrono::NaiveDate;
 
 use crate::{
-  models::{_entities::sea_orm_active_enums::Profession, my_errors::MyErrors, users::users},
+  models::{
+    _entities::{practitioner_companies, sea_orm_active_enums::Profession},
+    my_errors::MyErrors,
+    users::users,
+  },
   services::invoice::email::{send_company_invoice, send_patient_invoice},
 };
 
@@ -12,7 +16,7 @@ mod pdf;
 
 pub enum InvoiceKind {
   Patient,
-  Company,
+  Company(Box<practitioner_companies::Model>),
 }
 
 pub struct Invoice {
@@ -24,9 +28,9 @@ pub struct Invoice {
 
 impl Invoice {
   pub async fn send_to(&self, email: &str, from: &users::Model, profession: &Profession) -> Result<(), MyErrors> {
-    match self.kind {
+    match &self.kind {
       InvoiceKind::Patient => send_patient_invoice(email, self, from, profession).await,
-      InvoiceKind::Company => send_company_invoice().await,
+      InvoiceKind::Company(company) => send_company_invoice(email, self, from, profession, company).await,
     }
   }
 }

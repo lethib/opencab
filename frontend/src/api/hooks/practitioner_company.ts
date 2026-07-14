@@ -23,6 +23,7 @@ type GenerateCompanyInvoiceBody = {
   unit_price_ht: number;
   vat_rate: string;
   practitioner_office_id: number;
+  should_be_sent: boolean;
 };
 
 type CompanyParams = {

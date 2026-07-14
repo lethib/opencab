@@ -72,8 +72,8 @@ impl<'args> PatientInvoiceGenerator<'args> {
   fn build_header(&mut self) -> Result<(), MyErrors> {
     let full_name = format!(
       "{} – {}",
-      &self.args.user.full_name(),
-      &self.args.business_info.profession.to_french()
+      self.args.user.full_name(),
+      self.args.business_info.profession.to_french()
     );
     self
       .page
@@ -142,10 +142,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .text()
       .set_font(Font::Helvetica, 10.0)
       .at(self.margin, self.y_position)
-      .write(&format!(
-        "Tel : {}",
-        &format_french_phone_number(&self.args.user.phone_number)
-      ))
+      .write(&format!("Tel : {}", format_french_phone_number(&self.args.user.phone_number)))
       .map_err(UnexpectedError::new)?;
     self.y_position -= mm(8.0);
 
