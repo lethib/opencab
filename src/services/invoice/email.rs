@@ -27,7 +27,7 @@ pub(super) async fn send_company_invoice(
 
   let args = EmailArgs::new_text(
     to.to_string(),
-    format!("Facture {} {}", profession.to_french(), &company.name),
+    format!("Facture {} {}", profession.to_french(), company.name),
     format!(
       "Bonjour,\n\nVous trouverez ci-joint la facture pour l'intervention du {}.\n\n Cordialement,\n{} {}\n{}\n{}",
       invoice_date,

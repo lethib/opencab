@@ -66,7 +66,7 @@ impl ActiveModelBehavior for super::_entities::users::ActiveModel {
 
 impl Model {
   pub fn full_name(&self) -> String {
-    format!("{} {}", &self.first_name, &self.last_name)
+    format!("{} {}", self.first_name, self.last_name)
   }
 
   pub async fn get_my_offices(

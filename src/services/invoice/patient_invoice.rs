@@ -34,8 +34,8 @@ pub async fn generate(
     "{} {} Note d'honoraires - {} {} {}.pdf",
     current_user.first_name,
     current_user.last_name.to_uppercase(),
-    &patient.last_name,
-    &patient.first_name,
+    patient.last_name,
+    patient.first_name,
     invoice_date.format("%d_%m_%Y")
   );
 

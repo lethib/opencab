@@ -311,7 +311,7 @@ impl<'args> CompanyInvoiceGenerator<'args> {
       .set_font(Font::Helvetica, 10.0)
       .set_fill_color(Color::black())
       .at(self.margin_l, self.y_position)
-      .write(&format!("RPPS : {}", &self.args.business_info.rpps_number))
+      .write(&format!("RPPS : {}", self.args.business_info.rpps_number))
       .map_err(UnexpectedError::new)?;
 
     if let Some(adeli_number) = &self.args.business_info.adeli_number {
