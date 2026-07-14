@@ -142,10 +142,7 @@ impl<'args> PatientInvoiceGenerator<'args> {
       .text()
       .set_font(Font::Helvetica, 10.0)
       .at(self.margin, self.y_position)
-      .write(&format!(
-        "Tel : {}",
-        format_french_phone_number(&self.args.user.phone_number)
-      ))
+      .write(&format!("Tel : {}", format_french_phone_number(&self.args.user.phone_number)))
       .map_err(UnexpectedError::new)?;
     self.y_position -= mm(8.0);
 
