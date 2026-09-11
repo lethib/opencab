@@ -1,5 +1,5 @@
-use axum::{extract::Path, Json};
-use sea_orm::{prelude::Decimal, EntityTrait, IntoActiveModel, ModelTrait};
+use axum::{extract::Path, http::status, Json};
+use sea_orm::{prelude::Decimal, EntityTrait, IntoActiveModel};
 use serde::Deserialize;
 
 use crate::{
@@ -60,7 +60,16 @@ pub async fn update(
   Ok(Json(serde_json::json!({ "success": true })))
 }
 
-pub async fn destroy(ctx: Ctx, Path(office_id): Path<i32>) -> Result<Json<serde_json::Value>, MyErrors> {
+#[derive(Deserialize)]
+pub struct DeleteOfficeParams {
+  pub also_delete_patients: bool,
+}
+
+pub async fn destroy(
+  ctx: Ctx,
+  Path(office_id): Path<i32>,
+  Json(params): Json<DeleteOfficeParams>,
+) -> Result<status::StatusCode, MyErrors> {
   let office = practitioner_offices::Entity::find_by_id(office_id)
     .one(&ctx.db)
     .await?
@@ -68,7 +77,7 @@ pub async fn destroy(ctx: Ctx, Path(office_id): Path<i32>) -> Result<Json<serde_
 
   ctx.authorize().user_owning_resource(&office).await.run_complete()?;
 
-  office.clone().delete(&ctx.db).await?;
+  services::practitioner_office::delete(office, params.also_delete_patients, &ctx.db).await?;
 
-  Ok(Json(serde_json::json!({ "success": true })))
+  Ok(status::StatusCode::NO_CONTENT)
 }
