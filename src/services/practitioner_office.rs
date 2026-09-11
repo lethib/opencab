@@ -1,10 +1,10 @@
 use sea_orm::{
-  prelude::Decimal, ActiveModelTrait, ActiveValue::Set, DatabaseConnection, EntityTrait, IntoActiveModel, QueryFilter,
-  TransactionTrait,
+  prelude::Decimal, sea_query::Query, ActiveModelTrait, ActiveValue::Set, DatabaseConnection, EntityTrait, IntoActiveModel,
+  ModelTrait, QueryFilter, QuerySelect, TransactionTrait,
 };
 
 use crate::models::{
-  _entities::{practitioner_offices, user_practitioner_offices},
+  _entities::{medical_appointments, patients, practitioner_offices, user_practitioner_offices},
   my_errors::{application_error::ApplicationError, unexpected_error::UnexpectedError, MyErrors},
   practitioner_offices::PractitionerOfficeParams,
   user_practitioner_offices::CreateLinkParams,
@@ -66,6 +66,50 @@ pub async fn create(
   .await?;
 
   db_transaction.commit().await?;
+
+  Ok(())
+}
+
+pub async fn delete(
+  office: practitioner_offices::Model,
+  also_delete_patients: bool,
+  db: &DatabaseConnection,
+) -> Result<(), MyErrors> {
+  if !also_delete_patients {
+    office.delete(db).await?;
+    return Ok(());
+  }
+
+  let patient_ids_in_another_office = Query::select()
+    .column(medical_appointments::COLUMN.patient_id)
+    .from(medical_appointments::Entity)
+    .and_where(medical_appointments::COLUMN.practitioner_office_id.ne(office.id))
+    .to_owned();
+
+  let patient_ids_to_delete = office
+    .patients()
+    .select_only()
+    .column(patients::Column::Id)
+    .filter(
+      medical_appointments::COLUMN
+        .patient_id
+        .not_in_subquery(patient_ids_in_another_office),
+    )
+    .distinct()
+    .into_tuple::<i32>()
+    .all(db)
+    .await?;
+
+  let txn = db.begin().await?;
+
+  patients::Entity::delete_many()
+    .filter(patients::COLUMN.id.is_in(patient_ids_to_delete))
+    .exec(&txn)
+    .await?;
+
+  office.delete(&txn).await?;
+
+  txn.commit().await?;
 
   Ok(())
 }

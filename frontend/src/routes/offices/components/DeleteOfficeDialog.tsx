@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { APIClient, queryClient } from "@/api/api";
 import type { PractitionerOffice } from "@/api/hooks/practitioner_office";
@@ -9,7 +10,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Label,
 } from "@/components/ui";
+import { Switch } from "@/components/ui/switch";
 
 interface DeleteOfficeDialogProps {
   open: boolean;
@@ -23,16 +26,19 @@ export const DeleteOfficeDialog = ({
   office,
 }: DeleteOfficeDialogProps) => {
   const { t } = useTranslation();
+  const [alsoDeletePatients, setAlsoDeletePatients] = useState(false);
 
   const deleteOfficeMutation = APIClient.hooks.office.deleteOffice.useMutation({
     office_id: office.id,
   });
 
   const handleDelete = () =>
-    deleteOfficeMutation.mutateAsync(null).then(() => {
-      queryClient.invalidateQueries({ queryKey: ["/user/my_offices"] });
-      setIsOpen(false);
-    });
+    deleteOfficeMutation
+      .mutateAsync({ also_delete_patients: alsoDeletePatients })
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["/user/my_offices"] });
+        setIsOpen(false);
+      });
 
   return (
     <Dialog open={open} onOpenChange={setIsOpen}>
@@ -44,6 +50,16 @@ export const DeleteOfficeDialog = ({
             {t("offices.delete.description")}
           </DialogDescription>
         </DialogHeader>
+        <div className="flex items-center space-x-3">
+          <Switch
+            checked={alsoDeletePatients}
+            onCheckedChange={setAlsoDeletePatients}
+          />
+          <Label className="cursor-pointer">
+            {"Aussi supprimer tous les patients liés à ce cabinet ?"}
+          </Label>
+        </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={() => setIsOpen(false)}>
             {t("common.cancel")}

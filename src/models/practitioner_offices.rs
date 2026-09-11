@@ -2,7 +2,7 @@ pub use super::_entities::practitioner_offices::{ActiveModel, Entity, Model};
 use crate::{
   auth::resource::Resource,
   models::{
-    _entities::{practitioner_offices, user_practitioner_offices},
+    _entities::{medical_appointments, patients, practitioner_offices, user_practitioner_offices},
     my_errors::{application_error::ApplicationError, MyErrors},
   },
   validators::address::is_address_valid,
@@ -35,7 +35,13 @@ pub struct PractitionerOfficeParams {
 }
 
 // implement your read-oriented logic here
-impl Model {}
+impl Model {
+  pub fn patients(&self) -> Select<patients::Entity> {
+    patients::Entity::find()
+      .inner_join(medical_appointments::Entity)
+      .filter(medical_appointments::COLUMN.practitioner_office_id.eq(self.id))
+  }
+}
 
 // implement your write-oriented logic here
 impl ActiveModel {

@@ -19,6 +19,10 @@ export type PractitionerOfficeParams = {
   revenue_share_percentage: number;
 };
 
+type DeleteOfficeParams = {
+  also_delete_patients: boolean;
+};
+
 export const practitionerOfficeSchema = {
   createOffice: mutationEndpoint<
     PractitionerOfficeParams,
@@ -34,7 +38,7 @@ export const practitionerOfficeSchema = {
     type: "PUT",
     path: "/practitioner_office/{office_id}",
   }),
-  deleteOffice: mutationEndpoint<null, { success: true }>({
+  deleteOffice: mutationEndpoint<DeleteOfficeParams, { success: true }>({
     type: "DELETE",
     path: "/practitioner_office/{office_id}",
   }),

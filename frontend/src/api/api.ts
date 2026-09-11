@@ -97,8 +97,14 @@ class MyPatientsAPI {
     return this.client.put<R>(path, data, config).then((res) => res.data);
   };
 
-  delete = async <R>(path: string, config?: AxiosRequestConfig): Promise<R> => {
-    return this.client.delete<R>(path, config).then((res) => res.data);
+  delete = async <P, R>(
+    path: string,
+    data?: P,
+    config?: AxiosRequestConfig,
+  ): Promise<R> => {
+    return this.client
+      .delete<R>(path, { ...config, data })
+      .then((res) => res.data);
   };
 }
 
