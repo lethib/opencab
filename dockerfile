@@ -137,7 +137,7 @@ RUN cargo build --release --target x86_64-unknown-linux-gnu && \
 # ------------------------------------------------------------------------------
 # Using distroless cc-debian12 for minimal attack surface and small size
 # Includes glibc and other C libraries needed for Rust binaries
-FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
+FROM gcr.io/distroless/cc-debian13:nonroot AS runtime
 LABEL stage=runtime
 LABEL maintainer="DevOps Team"
 LABEL version="1.0"
